@@ -63,11 +63,15 @@ class memlog
 
 	private static function init_dir()
 	{
-		self::$dumps_dir = realpath( self::$dumps_dir );
-		assert( self::$dumps_dir != false );
 		if( !file_exists( self::$dumps_dir ) ) {
-			mkdir( self::$dumps_dir );
+			mkdir( self::$dumps_dir, 0777, true );
 		}
+		$path = realpath( self::$dumps_dir );
+		if( !$path ) {
+			error( 'Invalid reports_dir: '.self::$dumps_dir );
+			return;
+		}
+		self::$dumps_dir = $path;
 	}
 
 	static function msg( $cols )
