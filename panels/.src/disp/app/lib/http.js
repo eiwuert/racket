@@ -1,4 +1,4 @@
-"use strict";
+export default http;
 
 var http = (function()
 {

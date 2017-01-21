@@ -1,3 +1,5 @@
 #!/bin/sh
 
-jscat lib src > disp-core.js
+dest="../../../www/res/dispatcher/core.js"
+
+rollup -f iife src/disp.js > "$dest"

@@ -1,4 +1,6 @@
-function AddressGroupSection( $container, type )
+import obj from '../../lib/obj.js';
+
+export default function AddressGroupSection( $container, type )
 {
 	var $c = $( '<div></div>' );
 	$container.append( $c );

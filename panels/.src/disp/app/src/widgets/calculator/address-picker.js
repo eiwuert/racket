@@ -1,4 +1,4 @@
-function CalcAddressPicker( disp, $container )
+export default function CalcAddressPicker( disp, $container )
 {
 	var $c = $( '<div class="address-picker"></div>' );
 	var s = '<div><label>Город</label><input class="city"></div>\

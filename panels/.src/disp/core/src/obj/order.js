@@ -1,4 +1,6 @@
-function Order( data )
+import {fmt} from '../../lib/fmt.js';
+
+export default function Order( data )
 {
 	if( !data ) data = {};
 

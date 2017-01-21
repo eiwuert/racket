@@ -1,8 +1,13 @@
+import ImitationsWidget from './imitations.js';
+import DriversFilterWidget from './drivers-filter.js';
+import QueuesWidget from './queues/queues-widget.js';
+import AnnounceDialog from '../../chat/announce-dialog.js';
+
 /*
  * "Monitor" is the widgets combo on the first tab: imitations button,
  * drivers filter and queues table.
  */
-function initMonitorWidget( disp, tabs )
+export default function initMonitorWidget( disp, tabs )
 {
 	var $p = $( '<div></div>' );
 	if( disp.imitationsEnabled() ) {

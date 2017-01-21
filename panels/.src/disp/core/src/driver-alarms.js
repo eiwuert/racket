@@ -1,4 +1,4 @@
-function initDriverAlarms( conn, listeners, data )
+export default function initDriverAlarms( conn, listeners, data )
 {
 	var alarms = {};
 

@@ -1,4 +1,4 @@
-function toast( text )
+export default function toast( text )
 {
 	var $t = $( '<div class="w-toast">' + text + '</div>' );
 	$t.css({

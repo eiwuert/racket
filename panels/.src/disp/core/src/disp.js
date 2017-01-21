@@ -1,3 +1,19 @@
+import Listeners from '../lib/listeners.js';
+import Connection from './connection.js';
+import time from './time.js';
+
+import initSettings from './settings.js';
+import initChat from './chat.js';
+import initDrivers from './drivers.js';
+import initDriverAlarms from './driver-alarms.js';
+import initOrders from './orders.js';
+import initLocations from './locations.js';
+import initQueues from './queues.js';
+import initSessions from './sessions.js';
+import initImitations from './imitations.js';
+
+import Fare from './obj/fare.js';
+import Address from './obj/address.js';
 
 function DispatcherClient()
 {

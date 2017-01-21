@@ -1,4 +1,9 @@
-function initDrivers( conn, listeners, data )
+import Car from './obj/car.js';
+import Driver from './obj/driver.js';
+import obj from '../lib/obj.js';
+import {natcmp} from '../lib/natcmp.js';
+
+export default function initDrivers( conn, listeners, data )
 {
 	var drivers = {};
 	var cars = {};

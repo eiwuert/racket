@@ -1,4 +1,6 @@
-function Fare( data )
+import {assertObj} from '../../lib/assert.js';
+
+export default function Fare( data )
 {
 	var spec = {
 		"name": "str",

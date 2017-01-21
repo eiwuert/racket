@@ -1,4 +1,6 @@
-function Car( data )
+import {assertObj} from '../../lib/assert.js';
+
+export default function Car( data )
 {
 	var spec = {
 		car_id: "int",
@@ -37,3 +39,15 @@ Car.prototype.format = function()
 	].filter( hasValue );
 	return parts.join( ', ' );
 };
+
+/*
+ * Tells whether the given value is non-empty.
+ */
+function hasValue( val )
+{
+	if( !val ) return false;
+	while( val.length && val.charAt(0) == ' ' ){
+		val = val.substr(1);
+	}
+	return val != '';
+}

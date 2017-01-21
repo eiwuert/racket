@@ -1,4 +1,4 @@
-function initImitations( conn, listeners, data )
+export default function initImitations( conn, listeners, data )
 {
 	this.setDriverOnline = function( driver_id, online ) {
 		return conn.send( 'set-imitation-online', {

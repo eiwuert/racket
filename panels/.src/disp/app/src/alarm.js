@@ -1,4 +1,6 @@
-function initAlerts( disp, tabs, mapWidget )
+import Dialog from '../lib/dialog.js';
+
+export default function initAlerts( disp, tabs, mapWidget )
 {
 	/*
 	 * Display alarms that are currently on.

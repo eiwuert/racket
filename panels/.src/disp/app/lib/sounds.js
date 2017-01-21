@@ -1,4 +1,6 @@
-window.sounds = (function()
+export default sounds;
+
+var sounds = (function()
 {
 	var sounds = {};
 

@@ -1,4 +1,7 @@
-function PostponeSection( $container )
+import {fmt} from '../../lib/fmt.js';
+import html from '../../lib/html.js';
+
+export default function PostponeSection( $container )
 {
 	var $top = $( html.checkbox( "Отложить заказ" ) );
 	var $sub = $( '<div></div>' );

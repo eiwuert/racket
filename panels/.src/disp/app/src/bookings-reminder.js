@@ -1,4 +1,9 @@
-function initReminderScript( disp )
+import orderForms from './order-form/forms.js';
+import sounds from '../lib/sounds.js';
+import {formatTime} from '../lib/format.js';
+import Dialog from '../lib/dialog.js';
+
+export default function initReminderScript( disp )
 {
 	var dialog = null;
 	var sound = sounds.track( "/res/dispatcher/phone.ogg" );

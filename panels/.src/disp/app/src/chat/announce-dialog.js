@@ -1,3 +1,10 @@
+export default AnnounceDialog;
+
+import {formatTime} from '../../lib/format.js';
+import {fmt} from '../../lib/fmt.js';
+import html from '../../lib/html.js';
+import Dialog from '../../lib/dialog.js';
+
 var AnnounceDialog = ( function() {
 
 function AnnounceDialog( disp, drivers )

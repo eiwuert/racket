@@ -1,4 +1,4 @@
-function StatusBarWidget( disp )
+export default function StatusBarWidget( disp )
 {
 	var $c = $( '<div id="status-bar">\
 		<div class="indicators">\

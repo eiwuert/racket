@@ -1,4 +1,4 @@
-function Listeners( events, statefulEvents )
+export default function Listeners( events, statefulEvents )
 {
 	if( typeof statefulEvents == "undefined" ) {
 		statefulEvents = [];

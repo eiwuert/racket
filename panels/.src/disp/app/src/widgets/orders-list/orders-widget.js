@@ -1,4 +1,9 @@
-function OrdersWidget( disp, options )
+import {formatTime, formatPhone} from '../../../lib/format.js';
+import {fmt} from '../../../lib/fmt.js';
+import Listeners from '../../../lib/listeners.js';
+import html from '../../../lib/html.js';
+
+export default function OrdersWidget( disp, options )
 {
 	options = options || {};
 	var $container = createList();

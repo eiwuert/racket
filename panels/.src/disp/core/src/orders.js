@@ -1,4 +1,9 @@
-function initOrders( conn, listeners, data )
+import Order from './obj/order.js';
+import obj from '../lib/obj.js';
+import time from './time.js';
+import {assertObj} from '../lib/assert.js';
+
+export default function initOrders( conn, listeners, data )
 {
 	var _this = this;
 	var orders = {};

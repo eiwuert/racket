@@ -13,6 +13,7 @@ require_stylesheet( 'res/lib/admin.css' );
 
 require_stylesheet( 'res/dispatcher/main.css' );
 require_stylesheet( 'res/dispatcher/order.css' );
+require_script( 'res/dispatcher/core.js' );
 require_script( 'res/dispatcher/order.js' );
 ?>
 </head>

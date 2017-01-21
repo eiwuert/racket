@@ -1,4 +1,9 @@
-function initQueueClicking( disp, table, listeners )
+import toast from '../../../../lib/toast.js';
+import {fmt} from '../../../../lib/fmt.js';
+import Dialog from '../../../../lib/dialog.js';
+import orderForms from '../../../order-form/forms.js';
+
+export default function initQueueClicking( disp, table, listeners )
 {
 	/*
 	 * Split the click events into explicit left-click and right-click

@@ -1,3 +1,5 @@
+export default geo;
+
 var geo = ( function() {
 
 	/*

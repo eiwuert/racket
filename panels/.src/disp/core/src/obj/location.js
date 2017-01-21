@@ -1,4 +1,4 @@
-function Location( data )
+export default function Location( data )
 {
 	var spec = {
 		"loc_id": "int",

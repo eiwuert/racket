@@ -1,4 +1,6 @@
-function initSessions( conn, listeners, data )
+import Session from './obj/session.js';
+
+export default function initSessions( conn, listeners, data )
 {
 	var sessions = {};
 	var disp = this;

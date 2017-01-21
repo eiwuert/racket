@@ -1,4 +1,6 @@
-function MapWidget( disp )
+import Map from '../../lib/map.js';
+
+export default function MapWidget( disp )
 {
 	var $container = $( '<div id="map-widget"></div>' );
 	this.root = function() {
@@ -120,7 +122,9 @@ function MapWidget( disp )
 
 		return {
 			onClick: function( f ) {
-				assert( !callback, "only one onClick allowed" );
+				if(callback) {
+					throw "only one onClick allowed";
+				}
 				callback = f;
 			}
 		};

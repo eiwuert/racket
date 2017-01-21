@@ -1,3 +1,5 @@
+export default Layers;
+
 var Layers = (function() {
 	var Layers = {};
 

@@ -1,4 +1,6 @@
-function ChatMsg( data )
+import {assertObj} from '../../lib/assert.js';
+
+export default function ChatMsg( data )
 {
 	var spec = {
 		"id": "int",

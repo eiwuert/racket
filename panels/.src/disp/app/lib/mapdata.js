@@ -1,3 +1,4 @@
+import http from './http.js';
 /*
  * A set of calls for mapdata JSON.
  */

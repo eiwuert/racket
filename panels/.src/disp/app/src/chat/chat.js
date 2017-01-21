@@ -1,4 +1,7 @@
-function initChat( disp, qw )
+import ChatDialog from './chat-dialog.js';
+import sounds from '../../lib/sounds.js';
+
+export default function initChat( disp, qw )
 {
 	var sound = sounds.track( "/res/dispatcher/chat.ogg" );
 	var dialogs = {};

@@ -1,3 +1,7 @@
+export default Connection;
+
+import DX from './dx.js';
+
 function Connection()
 {
 	var messageFunctions = {};

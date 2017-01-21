@@ -1,3 +1,14 @@
+export default OrderForm;
+
+import AddressGroupSection from './address.js';
+import CustomerSection from './customer.js';
+import DriverSection from './drivers.js';
+import OptionsSection from './options.js';
+import PostponeSection from './postpone.js';
+import Listeners from '../../lib/listeners.js';
+import html from '../../lib/html.js';
+import obj from '../../lib/obj.js';
+
 var OrderForm = ( function() {
 
 function OrderForm( order )

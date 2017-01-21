@@ -1,3 +1,7 @@
+export {formatPhone, formatTime, formatDateTime, formatNumber, formatSeconds};
+
+import {fmt} from './fmt.js';
+
 /*
  * Takes raw phone number string and formats it nicely.
  * The format is "+375 <code> <3d>-<2d>-<2d>".

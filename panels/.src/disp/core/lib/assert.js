@@ -1,3 +1,8 @@
+export {
+	assert,
+	assertObj
+};
+
 function assert( val, msg, obj )
 {
 	if( val ) return;

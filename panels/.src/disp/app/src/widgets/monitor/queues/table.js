@@ -1,4 +1,8 @@
-function QueuesWidgetTable( disp, items )
+import romanNumeral from '../../../../lib/roman.js';
+import initDrag from './initDrag.js';
+import Listeners from '../../../../lib/listeners.js';
+
+export default function QueuesWidgetTable( disp, items )
 {
 	/*
 	 * Construct the table
@@ -262,4 +266,12 @@ function QueuesWidgetTable( disp, items )
 		}
 		$table.append( row );
 	}
+}
+
+function toInt( val )
+{
+	if( typeof val == "string" ) {
+		return parseInt( val, 10 );
+	}
+	return val;
 }

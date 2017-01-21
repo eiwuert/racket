@@ -1,4 +1,6 @@
-function ServiceLogWidget( disp )
+import html from '../../lib/html.js';
+
+export default function ServiceLogWidget( disp )
 {
 	var $container = $( '<div id="events-log"></div>' );
 
@@ -9,7 +11,7 @@ function ServiceLogWidget( disp )
 	var MAX_LENGTH = 30;
 	var length = 0;
 
-	dx.get( 'service-log', {n: MAX_LENGTH} )
+	disp.dx.get( 'service-log', {n: MAX_LENGTH} )
 	.then( function( src )
 	{
 		var n = src.length;
@@ -36,7 +38,7 @@ function ServiceLogWidget( disp )
 
 	function update( done )
 	{
-		dx.get( 'service-log-update', {id: lastMessageId} )
+		disp.dx.get( 'service-log-update', {id: lastMessageId} )
 		.then( done ).then( pushMessages )
 	}
 

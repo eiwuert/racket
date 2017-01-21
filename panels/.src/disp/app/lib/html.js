@@ -1,3 +1,5 @@
+export default html;
+
 var html = (function(){
 
 	var html = {};

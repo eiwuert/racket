@@ -1,4 +1,4 @@
-function Table( keys, names, className )
+export default function Table( keys, names, className )
 {
 	if( !className ) className = 'items';
 	if( !names ) names = {};

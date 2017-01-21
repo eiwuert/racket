@@ -1,3 +1,5 @@
+export default same;
+
 var same = (function() {
 
 	function same( v1, v2 )

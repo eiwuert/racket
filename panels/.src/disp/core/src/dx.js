@@ -1,4 +1,6 @@
-function DX( baseUrl )
+import http from '../lib/http.js';
+
+export default function DX( baseUrl )
 {
 	/*
 	 * RTT estimation and time of the last request.

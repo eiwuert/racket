@@ -2,7 +2,7 @@
  * Tabbed widget constructor. 'container' is a reference to the DOM
  * element which will be converted to the widget.
  */
-function Tabs( container )
+export default function Tabs( container )
 {
 	var _this = this;
 

@@ -1,4 +1,4 @@
-function DriversFilterWidget( disp )
+export default function DriversFilterWidget( disp )
 {
 	var s = '<div id="cars-selector">\
 		<b>Выбор водителей:</b>\

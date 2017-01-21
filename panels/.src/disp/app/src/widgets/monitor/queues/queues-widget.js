@@ -1,4 +1,10 @@
-function QueuesWidget( disp, options )
+import QueuesWidgetItems from './items.js';
+import QueuesWidgetTable from './table.js';
+import initQueueClicking from './clicking.js';
+import initQueueDragging from './dragging.js';
+import Listeners from '../../../../lib/listeners.js';
+
+export default function QueuesWidget( disp, options )
 {
 	options = options || {};
 	var items = new QueuesWidgetItems( disp );

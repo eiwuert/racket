@@ -1,3 +1,5 @@
+export default obj;
+
 /*
  * Some operations on objects.
  */

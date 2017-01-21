@@ -1,4 +1,4 @@
-function initDrag( container, settings )
+export default function initDrag( container, settings )
 {
 	var $container = $( container );
 	var defaults = {

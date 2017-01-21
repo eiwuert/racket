@@ -1,4 +1,8 @@
-function initSessions( disp, tabs )
+import SessionsWidget from './widgets/sessions.js';
+import sounds from '../lib/sounds.js';
+import Dialog from '../lib/dialog.js';
+
+export default function initSessions( disp, tabs )
 {
 	var sessions = new SessionsWidget( disp );
 	tabs.addTab( "Смены", sessions.root() );

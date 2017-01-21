@@ -1,4 +1,6 @@
-function TabsWidget()
+import Tabs from '../../lib/tabs.js';
+
+export default function TabsWidget()
 {
 	var p = document.createElement( 'div' );
 	var tabs = new Tabs( p );

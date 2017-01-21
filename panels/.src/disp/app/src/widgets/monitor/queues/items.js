@@ -1,4 +1,7 @@
-function QueuesWidgetItems( disp )
+import geo from '../../../../lib/geo.js';
+import obj from '../../../../lib/obj.js';
+
+export default function QueuesWidgetItems( disp )
 {
 	var items = {};
 	var selections = {};
@@ -256,4 +259,16 @@ function QueuesWidgetItems( disp )
 		parts = parts.filter( hasValue );
 		return parts.join( ', ' );
 	}
+}
+
+/*
+ * Tells whether the given value is non-empty.
+ */
+function hasValue( val )
+{
+	if( !val ) return false;
+	while( val.length && val.charAt(0) == ' ' ){
+		val = val.substr(1);
+	}
+	return val != '';
 }

@@ -1,7 +1,9 @@
+import Layers from './layers.js';
+
 /*
  * A wrapper around Layers to create dialogs with content and buttons.
  */
-function Dialog( content )
+export default function Dialog( content )
 {
 	/*
 	 * A Layers object.

@@ -1,4 +1,6 @@
-function initChat( conn, listeners, data )
+import ChatMsg from './obj/chatmsg.js';
+
+export default function initChat( conn, listeners, data )
 {
 	var ack = {};
 	var last = {};

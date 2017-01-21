@@ -1,4 +1,7 @@
-function ImitationsWidget( disp )
+import toast from '../../../lib/toast.js';
+import Dialog from '../../../lib/dialog.js';
+
+export default function ImitationsWidget( disp )
 {
 	var $button = $( '<button type="button">Добавить имитацию</button>' );
 	$button.on( "click", openAddDialog );

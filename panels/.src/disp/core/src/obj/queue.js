@@ -1,4 +1,6 @@
-function Queue( data )
+import {assertObj} from '../../lib/assert.js';
+
+export default function Queue( data )
 {
 	var spec = {
 		"queue_id": "int",

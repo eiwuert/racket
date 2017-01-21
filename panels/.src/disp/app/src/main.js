@@ -1,4 +1,31 @@
+import initAlerts from './alarm.js';
+import initReminderScript from './bookings-reminder.js';
+import initCalls from './calls.js';
+import initSettings from './settings.js';
+import initSessions from './sessions.js';
+import initChat from './chat/chat.js';
+import orderForms from './order-form/forms.js';
+import TabsWidget from './widgets/tabs.js';
+import StatusBarWidget from './widgets/status-bar.js';
+import ServiceLogWidget from './widgets/service-log.js';
+import OrdersTableWidget from './widgets/orders-table.js';
+import MapWidget from './widgets/map.js';
+import DriversTableWidget from './widgets/drivers-table.js';
+import CalculatorWidget from './widgets/calculator/calculator.js';
+import OrdersWidget from './widgets/orders-list/orders-widget.js';
+import initMonitorWidget from './widgets/monitor/monitor.js';
+import hotkeys from '../lib/hotkeys.js';
+import '../lib/autocomplete.js';
+import '../lib/jobs.js';
+import '../lib/mapdata.js';
+import '../lib/html5.js';
+import Dialog from '../lib/dialog.js';
+import DX from './dx.js';
+
+
 window.disp = new DispatcherClient();
+disp.dx = new DX( '/dx/dispatcher' );
+
 $( document ).ready( function()
 {
 	disp.on( "ready", function() {
@@ -96,4 +123,38 @@ function addWidget( func, parentId )
 	var w = new func( disp );
 	document.getElementById( parentId ).appendChild( w.root() );
 	return w;
+}
+
+/*
+ * Dialog for order cancelling.
+ */
+function showCancelDialog( order )
+{
+	var html = '<p>Отменить заказ?</p>'
+		+ '<textarea placeholder="Причина отмены"></textarea>';
+	if( order.taxi_id ) {
+		html += '<div><label><input type="checkbox"> Восстановить в очереди</label></div>';
+	}
+	var $content = $( '<div>' + html + '</div>' );
+	var $reason = $content.find( 'textarea' );
+	var $restore = $content.find( 'input[type="checkbox"]' );
+
+	var d = new Dialog( $content.get(0) );
+	d.addButton( 'Отменить заказ', cancel, 'yes' );
+	d.addButton( 'Закрыть окно', null, 'no' );
+	d.show();
+
+	function cancel()
+	{
+		var reason = $reason.val();
+		var restore = $restore.is( ':checked' );
+
+		var p = disp.cancelOrder( order.order_uid, reason );
+		if( restore && order.taxi_id ) {
+			p.then( function() {
+				disp.restoreDriverQueue( order.taxi_id )
+			});
+		}
+		this.close();
+	}
 }

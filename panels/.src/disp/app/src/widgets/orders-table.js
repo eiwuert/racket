@@ -1,4 +1,7 @@
-function OrdersTableWidget( disp )
+import {formatDateTime, formatPhone} from '../../lib/format.js';
+import Table from '../../lib/table.js';
+
+export default function OrdersTableWidget( disp )
 {
 	var $container = $( '<div></div>' );
 	this.root = function() {

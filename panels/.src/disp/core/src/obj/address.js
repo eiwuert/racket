@@ -1,4 +1,4 @@
-function Address( data )
+export default function Address( data )
 {
 	this.place = '';
 	this.street = '';

@@ -1,4 +1,7 @@
-function CustomerSection( $container )
+import {formatPhone} from '../../lib/format.js';
+import Dialog from '../../lib/dialog.js';
+
+export default function CustomerSection( $container )
 {
 	var ids = Date.now();
 	var s = '<div><label for="id1">Телефон клиента</label>'

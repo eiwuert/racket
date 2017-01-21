@@ -1,4 +1,9 @@
-function CalculatorWidget( disp )
+import CalcAddressPicker from './address-picker.js';
+import {formatNumber} from '../../../lib/format.js';
+import {fmt} from '../../../lib/fmt.js';
+import Map from '../../../lib/map.js';
+
+export default function CalculatorWidget( disp )
 {
 	var $container = $( '<div id="calc-widget"></div>' );
 
@@ -130,7 +135,7 @@ function CalculatorWidget( disp )
 			return;
 		}
 
-		dx.get( "route", {from: from.lat + "," + from.lng,
+		disp.dx.get( "route", {from: from.lat + "," + from.lng,
 			to: to.lat + "," + to.lng} )
 		.then( function( data )
 		{

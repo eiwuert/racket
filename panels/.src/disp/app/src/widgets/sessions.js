@@ -1,4 +1,9 @@
-function SessionsWidget( disp )
+import toast from '../../lib/toast.js';
+import {formatDateTime} from '../../lib/format.js';
+import {tpl} from '../../lib/fmt.js';
+import Dialog from '../../lib/dialog.js';
+
+export default function SessionsWidget( disp )
 {
 	var $container = $( '<div></div>' );
 

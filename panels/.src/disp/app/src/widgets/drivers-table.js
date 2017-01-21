@@ -1,4 +1,6 @@
-﻿function DriversTableWidget( disp )
+﻿import {tpl} from '../../lib/fmt.js';
+
+export default function DriversTableWidget( disp )
 {
 	var $table;
 

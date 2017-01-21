@@ -1,3 +1,5 @@
+export {natcmp, natcolsort};
+
 /*
  * Comparison function for natural sort.
  */

@@ -1,3 +1,5 @@
+export {fmt, tpl};
+
 var fmt = (function()
 {
 	function fmt( template, _args_ )

@@ -1,4 +1,8 @@
-function initSettings( disp, statusBar )
+import sounds from '../lib/sounds.js';
+import toast from '../lib/toast.js';
+import Dialog from '../lib/dialog.js';
+
+export default function initSettings( disp, statusBar )
 {
 	var dialog = null;
 	applySettings();

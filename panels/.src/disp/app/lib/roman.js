@@ -1,4 +1,4 @@
-function romanNumeral( n )
+export default function romanNumeral( n )
 {
 	if( n == 0 || n >= 5000 ) {
 		return n;

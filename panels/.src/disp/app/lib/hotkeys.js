@@ -1,3 +1,5 @@
+export default hotkeys;
+
 var hotkeys = (function()
 {
 	/*

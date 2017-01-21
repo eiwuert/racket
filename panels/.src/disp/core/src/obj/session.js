@@ -1,4 +1,6 @@
-function Session( data )
+import {assertObj} from '../../lib/assert.js';
+
+export default function Session( data )
 {
 	var spec = {
 		"session_id": "int",

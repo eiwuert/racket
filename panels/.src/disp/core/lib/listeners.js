@@ -1,3 +1,5 @@
+export default Listeners;
+
 function Listeners( events, statefulEvents )
 {
 	if( typeof statefulEvents == "undefined" ) {
