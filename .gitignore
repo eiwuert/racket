@@ -5,5 +5,5 @@ panels/cache/
 panels/appfiles/libs/phpexcel
 panels/content/
 panels/www/res/dispatcher/core.js
-panels/www/res/dispatcher/order.js
+panels/www/res/dispatcher/main.js
 panels/www/res/dispatcher/order.css

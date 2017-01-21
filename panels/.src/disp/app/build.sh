@@ -9,4 +9,4 @@ dest=../../../www/res/dispatcher
 	rm tmp.php
 
 # build the order script
-	rollup -f iife src/main.js > $dest/order.js
+	gulp
