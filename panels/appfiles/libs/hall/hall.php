@@ -83,8 +83,8 @@ if( !setting( 'debug' ) ) {
 $paths = array(
 	APPDIR . 'functions.php',
 	APPDIR . 'classes/classes.php',
-	APPDIR . 'classes.php',
-	APPDIR . 'init.php'
+	APPDIR . 'classes.php'
+	//APPDIR . 'init.php'
 );
 foreach( $paths as $path ) {
 	if( file_exists( $path ) ) include $path;
@@ -93,5 +93,7 @@ foreach( $paths as $path ) {
 $paths = glob( APPDIR . 'functions/' . '*.php' );
 foreach( $paths as $path ) require $path;
 
-S::run();
+function hmain() {
+	S::run();
+}
 ?>
