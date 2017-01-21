@@ -1,4 +1,4 @@
-import {formatTime, formatPhone} from '../../../lib/format.js';
+import {formatPhone} from '../../../lib/format.js';
 import {fmt} from '../../../lib/fmt.js';
 import Listeners from '../../../lib/listeners.js';
 import html from '../../../lib/html.js';
@@ -261,121 +261,120 @@ export default function OrdersWidget( disp, options )
 			while( a.length ) clearTimeout( a.shift() );
 		}
 	}
+}
 
-	//--
 
-	function getClassName( order )
-	{
-		if( !order.postponed() ) {
-			return order.closed() ? 'closed' : 'current';
-		}
-
-		var now = time.utc();
-		var t1 = order.reminder_time;
-		var t2 = order.exp_arrival_time;
-		if( t1 > t2 ) {
-			t1 = t2;
-		}
-
-		// Enough time - green.
-		if( now < t1 ) {
-			return 'far';
-		}
-		// after reminder - yellow
-		if( now < t2 ) {
-			return 'soon';
-		}
-		// 10 minutes late - red
-		if( now < t2 + 600 ) {
-			return 'urgent';
-		}
-		// expired.
-		return 'expired';
+function getClassName( order )
+{
+	if( !order.postponed() ) {
+		return order.closed() ? 'closed' : 'current';
 	}
 
-	function formatOrderDestination( order )
-	{
-		var addr;
-		var loc = disp.getLocation( order.src_loc_id );
-		if( loc ) {
-			addr = '<span class="location">' + loc.name + '</span>';
-		}
-		else {
-			addr = order.formatAddress();
-		}
-		return addr;
+	var now = time.utc();
+	var t1 = order.reminder_time;
+	var t2 = order.exp_arrival_time;
+	if( t1 > t2 ) {
+		t1 = t2;
 	}
 
-	function formatCustomer( order )
-	{
-		var n = order.customer_phone;
-		if( !n || n == '' || n == '+375' ) {
-			return '';
-		}
-		return fmt( '<a href="tel:%s">%s</a>',
-			order.customer_phone, formatPhone( order.customer_phone )
-		);
+	// Enough time - green.
+	if( now < t1 ) {
+		return 'far';
 	}
-
-	function formatStatus( order )
-	{
-		var s = order.statusName();
-		if( order.postponed() ) {
-			s += ", подать в " + formatTime( order.exp_arrival_time );
-		}
-		else {
-			s = formatTime( order.time_created ) + ", " + s;
-		}
-		return s;
+	// after reminder - yellow
+	if( now < t2 ) {
+		return 'soon';
 	}
-
-	/*
-	 * Write a UTC time as a readable local time string.
-	 */
-	function formatTime( t )
-	{
-		/*
-		 * As we receive a pure UTC, we have to compensate for the
-		 * client's wrong clock.
-		 */
-		t = time.local( t );
-		var d = new Date( t * 1000 );
-		var s = fmt( "%02d:%02d", d.getHours(), d.getMinutes() );
-
-		var now = new Date( time.utc() * 1000 );
-		if( d.getDate() == now.getDate()
-			&& d.getMonth() == now.getMonth()
-			&& d.getFullYear() == now.getFullYear() ) {
-			return s;
-		}
-
-		var diff = (d.getTime() - now.getTime()) / 1000 / 3600 / 24;
-
-		if( diff > 0 && diff < 1 ) {
-			s += " завтра";
-		}
-		else if( diff < 0 && diff > -1 ) {
-			s += " вчера";
-		}
-		else {
-			var monthNames = [
-				'января', 'февраля', 'марта', 'апреля', 'мая',
-				'июня', 'июля', 'августа', 'сентября', 'октября',
-				'ноября', 'декабря'
-			];
-			s += ", " + d.getDate() + " " + monthNames[d.getMonth()];
-		}
-
-		return s;
+	// 10 minutes late - red
+	if( now < t2 + 600 ) {
+		return 'urgent';
 	}
+	// expired.
+	return 'expired';
+}
 
-	function formatDriver( order )
-	{
-		var taxi = disp.getDriver( order.taxi_id );
-		var call_id = taxi ? taxi.call_id : null;
-		if( call_id ) {
-			return call_id;
-		}
+function formatOrderDestination( order )
+{
+	var addr;
+	var loc = disp.getLocation( order.src_loc_id );
+	if( loc ) {
+		addr = '<span class="location">' + loc.name + '</span>';
+	}
+	else {
+		addr = order.formatAddress();
+	}
+	return addr;
+}
+
+function formatCustomer( order )
+{
+	var n = order.customer_phone;
+	if( !n || n == '' || n == '+375' ) {
 		return '';
 	}
+	return fmt( '<a href="tel:%s">%s</a>',
+		order.customer_phone, formatPhone( order.customer_phone )
+	);
+}
+
+function formatStatus( order )
+{
+	var s = order.statusName();
+	if( order.postponed() ) {
+		s += ", подать в " + formatTime( order.exp_arrival_time );
+	}
+	else {
+		s = formatTime( order.time_created ) + ", " + s;
+	}
+	return s;
+}
+
+/*
+ * Write a UTC time as a readable local time string.
+ */
+function formatTime( t )
+{
+	/*
+	 * As we receive a pure UTC, we have to compensate for the
+	 * client's wrong clock.
+	 */
+	t = time.local( t );
+	var d = new Date( t * 1000 );
+	var s = fmt( "%02d:%02d", d.getHours(), d.getMinutes() );
+
+	var now = new Date( time.utc() * 1000 );
+	if( d.getDate() == now.getDate()
+		&& d.getMonth() == now.getMonth()
+		&& d.getFullYear() == now.getFullYear() ) {
+		return s;
+	}
+
+	var diff = (d.getTime() - now.getTime()) / 1000 / 3600 / 24;
+
+	if( diff > 0 && diff < 1 ) {
+		s += " завтра";
+	}
+	else if( diff < 0 && diff > -1 ) {
+		s += " вчера";
+	}
+	else {
+		var monthNames = [
+			'января', 'февраля', 'марта', 'апреля', 'мая',
+			'июня', 'июля', 'августа', 'сентября', 'октября',
+			'ноября', 'декабря'
+		];
+		s += ", " + d.getDate() + " " + monthNames[d.getMonth()];
+	}
+
+	return s;
+}
+
+function formatDriver( order )
+{
+	var taxi = disp.getDriver( order.taxi_id );
+	var call_id = taxi ? taxi.call_id : null;
+	if( call_id ) {
+		return call_id;
+	}
+	return '';
 }
