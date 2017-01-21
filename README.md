@@ -59,9 +59,7 @@ where needed.
 There are tables of town and street names in the database that are used
 to help dispatchers enter addresses. These are the `taxi_a_towns` and
 `taxi_a_streets` tables. They are supposed to be filled with names used
-by the dispatchers in your location. If that location happens to be one
-of Belarus cities, you can import the SQL dump from
-https://ontax.by/by-towns.sql.gz.
+by the dispatchers in your location.
 
 
 ## Running the server
