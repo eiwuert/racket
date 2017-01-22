@@ -1,49 +1,41 @@
-export default function StatusBarWidget( disp )
-{
-	var $c = $( '<div id="status-bar">\
-		<div class="indicators">\
-			<span class="no-sound hidden">Звук на нуле</span>\
-			<span class="rtt"></span>\
-			<span class="no-ping hidden">Нет связи с сервером</span>\
-		</div>\
-		<div class="buttons"></div>\
-	</div>' );
+var React = require('react');
+var ReactDOM = require('react-dom');
 
-	var $buttons = $c.find( '.buttons' );
-
+export default function(disp) {
+	var root = document.createElement('div');
+	ReactDOM.render(<Toolbar disp={disp} />, root);
+	
 	this.root = function() {
-		return $c.get(0);
+		return root;
 	};
+}
 
-	var _this = this;
-
-	disp.on( "setting-changed", sync );
-	function sync() {
-		//this.show( 'no-sound', sound.vol() == 0 );
+class Toolbar extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			rtt: 0
+		};
 	}
 
-	setInterval( function() {
-		var rtt = disp.RTT();
-		_this.set( 'rtt', rtt + ' мс' );
-		_this.show( 'no-ping', rtt > 5000 );
-	}, 1000 );
+	componentWillMount() {
+		var disp = this.props.disp;
+		var t = this;
+		this.timer = setInterval( function() {
+			t.setState({rtt: disp.RTT()});
+		}, 1000);
+	}
 
-	this.show = function( className, visible )
-	{
-		if( visible ) {
-			$c.find( '.' + className ).removeClass( 'hidden' );
-		} else {
-			$c.find( '.' + className ).addClass( 'hidden' );
-		}
-	};
-
-	this.set = function( className, html ) {
-		$c.find( '.' + className ).html( html );
-	};
-
-	this.addButton = function( className, title ) {
-		var $button = $( '<button type="button" class="'+className+'">'+title+'</button>' );
-		$buttons.append( $button );
-		return $button;
-	};
+	render() {
+		return (
+			<div id="status-bar">
+				<div className="indicators">
+					<span className="rtt">{this.state.rtt} мс</span>
+					{this.state.rtt > 5000?
+						<span className="no-ping">Нет связи с сервером</span> : null}
+				</div>
+				<div className="buttons"></div>
+			</div>
+		);
+	}
 }

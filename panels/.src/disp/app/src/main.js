@@ -49,10 +49,14 @@ $( document ).ready( function()
 function initWidgets()
 {
 	/*
-	 * Status bar and the settings button.
+	 * Toolbar
 	 */
 	var sb = addWidget( StatusBarWidget, "status-bar-container" );
-	initSettings( disp, sb );
+
+	/*
+	 * Settings button
+	 */
+	initSettings( disp );
 
 	/*
 	 * Order button
