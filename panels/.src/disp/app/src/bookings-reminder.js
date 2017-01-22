@@ -1,6 +1,6 @@
 import orderForms from './order-form/forms.js';
 import sounds from '../lib/sounds.js';
-import {formatTime} from '../lib/format.js';
+import {formatTime, formatSeconds} from '../lib/format.js';
 import Dialog from '../lib/dialog.js';
 
 export default function initReminderScript( disp )
