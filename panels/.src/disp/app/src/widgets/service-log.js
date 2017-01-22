@@ -1,63 +1,71 @@
-import html from '../../lib/html.js';
+var React = require('react'),
+	ReactDOM = require('react-dom');
 
 export default function ServiceLogWidget( disp )
 {
-	var $container = $( '<div id="events-log"></div>' );
-
+	var root = document.createElement('div');
 	this.root = function() {
-		return $container.get(0);
+		return root;
 	};
+	ReactDOM.render(<Log disp={disp} />, root);
+}
 
-	var MAX_LENGTH = 30;
-	var length = 0;
+const MAX_LENGTH = 30;
 
-	disp.dx.get( 'service-log', {n: MAX_LENGTH} )
-	.then( function( src )
-	{
-		var n = src.length;
-		if( !n ) return;
-		length = n;
-
-		var s = '';
-		for( var i = 0; i < n; i++ ) {
-			s = '<p>' + html.escape( src[i].text ) + '</p>' + s;
-		}
-		$container.html( s );
-	});
-
-	disp.on( 'service-log', function( event )
-	{
-		if( length >= MAX_LENGTH ) {
-			$container.children().last().remove();
-		}
-		else {
-			length++;
-		}
-		$container.prepend( '<p>' + html.escape( event.data.text ) + '</p>' );
-	});
-
-	function update( done )
-	{
-		disp.dx.get( 'service-log-update', {id: lastMessageId} )
-		.then( done ).then( pushMessages )
+class Log extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			messages: []
+		};
+		
+		this.id = 1;
 	}
 
-	function pushMessages( src )
-	{
-		var n = src.length;
-		if( !n ) return;
+	componentWillMount() {
+		var disp = this.props.disp;
+		var t = this;
 
-		for( var i = 0; i < n; i++ )
-		{
-			var msg = src[i];
-			if( length >= MAX_LENGTH ) {
-				$container.children().last().remove();
+		disp.dx.get( 'service-log', {n: MAX_LENGTH} )
+		.then( function( messages ) {
+			t.setState({messages: messages.reverse()});
+		
+			var id;
+			if(t.state.messages.length > 0) {
+				id = parseInt(t.state.messages[0].message_id, 10);
 			}
 			else {
-				length++;
+				id = 1;
 			}
-			$container.prepend( '<p>' + html.escape( msg.text ) + '</p>' );
-		}
-		lastMessageId = src[n-1].message_id;
+
+			disp.on( 'service-log', function( event )
+			{
+				t.setState(function(prevState, props) {
+					
+					var msg = {
+						text: event.data.text,
+						message_id: ++id
+					};
+
+					var messages = prevState.messages;
+					messages.unshift(msg);
+					if(messages.length > MAX_LENGTH) {
+						messages.pop();
+					}
+					return {messages};
+				});
+			});
+		
+		});
+
+		
 	}
-}
+	
+	render() {
+		return (
+			<div id="events-log">
+			{this.state.messages.map(m => <p key={m.message_id}>{m.text}</p>)}
+			</div>
+		);
+	}
+};
