@@ -1,363 +1,225 @@
 import {formatPhone} from '../../../lib/format.js';
 import {fmt} from '../../../lib/fmt.js';
 import Listeners from '../../../lib/listeners.js';
-import html from '../../../lib/html.js';
+var React = require('react');
+var ReactDOM = require('react-dom');
 
-export default function OrdersWidget( disp, options )
+export default function OrdersWidget(disp)
 {
-	options = options || {};
-	var $container = createList();
-	var listeners = new Listeners( ['order-click', 'cancel-click'] );
-
-	this.on = listeners.add.bind( listeners );
-
+	var listeners = new Listeners(['order-click', 'cancel-click']);
+	var root = $('<div></div>').get(0);
+	ReactDOM.render(
+		<Widget disp={disp} listeners={listeners}/>,
+		root
+		);
+	this.on = listeners.add.bind(listeners);
 	this.root = function() {
-		return $container.get(0);
+		return root;
 	};
+}
 
-	/*
-	 * order id => array of timeouts.
-	 */
-	var timeouts = {};
+class Widget extends React.Component {
+	render() {
+		return (
+			<div id="orders-widget">
+				<List disp={this.props.disp} listeners={this.props.listeners}
+				      class="postponed"
+				      filter={o => o.postponed()} />
+				<List disp={this.props.disp} listeners={this.props.listeners}
+				      class="current"
+				      filter={o => (!o.postponed() && !o.closed())} />
+				<List disp={this.props.disp} listeners={this.props.listeners}
+				      class="closed"
+				      filter={o => o.closed()} />
+			</div>
+			);
+	}
+}
+;
 
-	/*
-	 * Fill the widget with orders from the current list.
-	 */
-	disp.orders().forEach( function( order ) {
-		addOrder( order );
-	});
-
-	/*
-	 * When orders change, update the widget.
-	 */
-	disp.on( 'order-changed', function( e ) {
-		updateOrder( e.data.order );
-	});
-	disp.on( 'order-added', function( e ) {
-		addOrder( e.data.order );
-	});
-	disp.on( 'order-removed', function( e ) {
-		removeOrder( e.data.order );
-	});
-
-	//--
-
-	/*
-	 * Orders go into separate "sublists" depending on their status,
-	 * and they are sorted by different time values depending of which
-	 * sublist they are. To unify all that, every list item is assigned
-	 * a "stamp" determined by order status and relevant time value.
-	 */
-
-	function createList()
-	{
-		var $list = $( '<div id="orders-widget">\
-			<div class="postponed">\
-				<div class="list"></div>\
-			</div>\
-			<div class="current">\
-				<div class="list"></div>\
-			</div>\
-			<div class="closed">\
-				<div class="list"></div>\
-			</div>\
-		</div>' );
-
-		$list.on( 'click', '.order', function( event ) {
-			var uid = $(this).data( 'uid' );
-			var order = disp.getOrder( uid );
-			listeners.call( 'order-click', {order: order} );
-		});
-
-		$list.on( 'click', '.cancel', function( event ) {
-			event.stopPropagation();
-			var $t = $( this ).parents( '.order' );
-			var uid = $t.data( 'uid' );
-			var order = disp.getOrder( uid );
-			listeners.call( 'cancel-click', {order: order} );
-		});
-
-		return $list;
+class List extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			orders: this.props.disp.orders().filter(this.props.filter)
+		};
 	}
 
-	function addOrder( order )
-	{
-		var $el = $( '<div></div>' );
-		$el.data( 'uid', order.order_uid );
-		$el.data( 'stamp', orderStamp( order ) );
-		updateItem( $el, order );
-		insertItem( $el, order );
-		addTimers( order, $el );
-	};
-
-	function updateOrder( order )
-	{
-		var $el = findItem( order );
-		if( !$el ) {
-			console.warn( "updateOrder: no element" );
-			addOrder( order );
-			return;
-		}
-
-		/*
-		 * The order changed its class or time, remove its item and
-		 * insert where appropriate.
-		 */
-		var oldStamp = parseInt( $el.data( 'stamp' ), 10 );
-		var newStamp = orderStamp( order );
-		if( newStamp != oldStamp ) {
-			$el.data( 'stamp', newStamp );
-			$el.detach();
-			insertItem( $el, order );
-		}
-		updateItem( $el, order );
-
-		removeTimers( order );
-		addTimers( order, $el );
-	};
-
-	/*
-	 * Remove the given order from the list.
-	 */
-	function removeOrder( order )
-	{
-		var $el = findItem( order );
-		if( !$el ) {
-			console.warn( "removeOrder: no element" );
-			return;
-		}
-		$el.remove();
-		$el = null;
-
-		/*
-		 * If have timers, remove them.
-		 */
-		removeTimers( order );
-	};
-
-	// --
-
-	function orderStamp( order )
-	{
-		if( order.postponed() ) {
-			return order.exp_arrival_time;
-		}
-		if( order.closed() ) {
-			return -order.time_created;
-		}
-		return order.time_created;
+	refresh() {
+		var filter = this.props.filter;
+		var orders = this.props.disp.orders().filter(filter);
+		this.setState({orders});
 	}
 
-	function insertItem( $el, order )
-	{
-		var $list = getList( order );
-		var $nextItem = findNextItem( $list, $el );
-		if( $nextItem ) {
-			$el.insertBefore( $nextItem );
+	componentDidMount() {
+		this.refresh();
+		var e = ['order-changed', 'order-added', 'order-removed'];
+		var disp = this.props.disp;
+		var ref = this.refresh.bind(this);
+		e.forEach(e => disp.on(e, ref));
+	}
+
+	render() {
+		var orders = this.state.orders;
+		return (
+			<div className={this.props.class}>
+				<div className="list">
+					{orders.map(o => <Item listeners={this.props.listeners} key={o.order_id} order={o} />)}
+				</div>
+			</div>
+			);
+	}
+}
+
+class Item extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			className: this.className()
+		};
+	}
+
+	cancelClick(e) {
+		e.stopPropagation();
+		this.props.listeners.call('cancel-click', {order: this.props.order});
+	}
+
+	orderClick() {
+		this.props.listeners.call('order-click', {order: this.props.order});
+	}
+
+	componentDidMount() {
+		this.timer = setInterval(this.refresh.bind(this), 5000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.timer);
+		this.timer = null;
+	}
+
+	refresh() {
+		this.setState({className: this.className()});
+	}
+
+	statusString() {
+		var order = this.props.order;
+		var s = order.statusName();
+		if (order.postponed()) {
+			s += ", подать в " + formatTime(order.exp_arrival_time);
 		} else {
-			$list.append( $el );
+			s = formatTime(order.time_created) + ", " + s;
 		}
+		return s;
 	}
 
-	/*
-	 * Finds the element in the list before which the $el element must
-	 * be inserted. Returns null if $el must be placed at the end of
-	 * the list.
-	 */
-	function findNextItem( $list, $el )
-	{
-		var $next = null;
-		var stamp = parseInt( $el.data( 'stamp' ), 10 );
-		$list.find( '.order' ).each( function()
-		{
-			var $t = $( this );
-			if( parseInt( $t.data( 'stamp' ), 10 ) >= stamp ) {
-				$next = $t;
-				return false;
-			}
-		});
-		return $next;
+	render() {
+		var order = this.props.order;
+		var cancelButton = '';
+		if (order.status != order.CANCELLED) {
+			cancelButton = (
+				<div className="cancel" onClick={this.cancelClick.bind(this)}>Отменить</div>
+				);
+		}
+		return (
+			<div className={this.state.className} onClick={this.orderClick.bind(this)}>
+				{cancelButton}
+				<div className="number">№ {order.order_id}</div>
+				<DestinationInfo order={order} />
+				<div className="comments">{order.comments}</div>
+				<CustomerInfo order={order} />
+				<div className="status">{this.statusString()}</div>
+				<div className="driver">{formatDriver(order)}</div>
+			</div>
+			);
 	}
 
-	/*
-	 * Returns element from the lists for the given order.
-	 */
-	function findItem( order )
-	{
-		var $item = null;
-		$container.find( '.order' ).each( function()
-		{
-			var $t = $( this );
-			if( $t.data( 'uid' ) == order.order_uid ) {
-				$item = $t;
-				return false;
-			}
-		});
-		return $item;
+	className() {
+		var cn = 'order';
+		if (this.props.order.postponed()) {
+			cn += ' ' + this.classNameTime();
+		}
+		return cn;
 	}
 
-	/*
-	 * Returns the list to put the given order in.
-	 * There are several sublists in which order are put depending on
-	 * their status.
-	 */
-	function getList( order )
-	{
-		if( order.postponed() ) {
-			return $container.find( '.postponed .list' );
+	classNameTime() {
+		var order = this.props.order;
+		var now = time.utc();
+		var t1 = order.reminder_time;
+		var t2 = order.exp_arrival_time;
+		if (t1 > t2) {
+			t1 = t2;
 		}
-		if( order.closed() ) {
-			return $container.find( '.closed .list' );
+
+		// Enough time - green.
+		if (now < t1) {
+			return 'far';
 		}
-		return $container.find( '.current .list' );
-	}
-
-	function updateItem( $el, order )
-	{
-		var el = $el.get(0);
-		el.className = 'order ' + getClassName( order );
-		var s = '';
-		if( order.status != order.CANCELLED ) {
-			s += '<div class="cancel">Отменить</div>';
+		// after reminder - yellow
+		if (now < t2) {
+			return 'soon';
 		}
-		s += '<div class="number">№ ' + order.order_id + '</div>';
-		if( !options.hideAddresses ) {
-			s += '<div class="address">' + formatOrderDestination( order ) + '</div>';
+		// 10 minutes late - red
+		if (now < t2 + 600) {
+			return 'urgent';
 		}
-		s += '<div class="comments">' + html.escape( order.comments ) + '</div>';
-		s += '<div class="customer">' + formatCustomer( order ) + '</div>';
-		s += '<div class="status">' + formatStatus( order ) + '</div>';
-		s += '<div class="driver">' + formatDriver( order ) + '</div>';
-		el.innerHTML = s;
-	}
-
-	function addTimers( order, $el )
-	{
-		if( !order.postponed() ) return;
-		var a = [];
-
-		var times = [
-			order.reminder_time - time.utc() - 300, // "soon"
-			order.exp_arrival_time - time.utc(), // "urgent"
-			order.reminder_time - time.utc() // "expired"
-		];
-
-		times.forEach( function( t ) {
-			if( t <= 0 ) return;
-			var tid = setTimeout( updateItem.bind( undefined, $el, order ), t * 1000 );
-			a.push( tid );
-		});
-
-		if( a.length > 0 ) {
-			timeouts[order.id] = a;
-		}
-	}
-
-	function removeTimers( order )
-	{
-		if( order.id in timeouts ) {
-			var a = timeouts[order.id];
-			delete timeouts[order.id];
-			while( a.length ) clearTimeout( a.shift() );
-		}
+		// expired.
+		return 'expired';
 	}
 }
 
-
-function getClassName( order )
-{
-	if( !order.postponed() ) {
-		return order.closed() ? 'closed' : 'current';
+class CustomerInfo extends React.Component {
+	render() {
+		var order = this.props.order;
+		var n = order.customer_phone;
+		if (!n || n == '' || n == '+375') {
+			return null;
+		}
+		return <a href={'tel:' + n}>{formatPhone(n)}</a>;
 	}
-
-	var now = time.utc();
-	var t1 = order.reminder_time;
-	var t2 = order.exp_arrival_time;
-	if( t1 > t2 ) {
-		t1 = t2;
-	}
-
-	// Enough time - green.
-	if( now < t1 ) {
-		return 'far';
-	}
-	// after reminder - yellow
-	if( now < t2 ) {
-		return 'soon';
-	}
-	// 10 minutes late - red
-	if( now < t2 + 600 ) {
-		return 'urgent';
-	}
-	// expired.
-	return 'expired';
 }
 
-function formatOrderDestination( order )
-{
-	var addr;
-	var loc = disp.getLocation( order.src_loc_id );
-	if( loc ) {
-		addr = '<span class="location">' + loc.name + '</span>';
+class DestinationInfo extends React.Component {
+	render() {
+		var disp = window.disp;
+		var order = this.props.order;
+		var loc = disp.getLocation(order.src_loc_id);
+		var locInfo = null;
+		if (loc) {
+			locInfo = <span className="location">{loc.name}</span>;
+		} else {
+			locInfo = <span>{order.formatAddress()}</span>;
+		}
+		return <div className="destination">{locInfo}</div>;
 	}
-	else {
-		addr = order.formatAddress();
-	}
-	return addr;
-}
-
-function formatCustomer( order )
-{
-	var n = order.customer_phone;
-	if( !n || n == '' || n == '+375' ) {
-		return '';
-	}
-	return fmt( '<a href="tel:%s">%s</a>',
-		order.customer_phone, formatPhone( order.customer_phone )
-	);
-}
-
-function formatStatus( order )
-{
-	var s = order.statusName();
-	if( order.postponed() ) {
-		s += ", подать в " + formatTime( order.exp_arrival_time );
-	}
-	else {
-		s = formatTime( order.time_created ) + ", " + s;
-	}
-	return s;
 }
 
 /*
  * Write a UTC time as a readable local time string.
  */
-function formatTime( t )
+function formatTime(t)
 {
 	/*
 	 * As we receive a pure UTC, we have to compensate for the
 	 * client's wrong clock.
 	 */
-	t = time.local( t );
-	var d = new Date( t * 1000 );
-	var s = fmt( "%02d:%02d", d.getHours(), d.getMinutes() );
+	t = time.local(t);
+	var d = new Date(t * 1000);
+	var s = fmt("%02d:%02d", d.getHours(), d.getMinutes());
 
-	var now = new Date( time.utc() * 1000 );
-	if( d.getDate() == now.getDate()
+	var now = new Date(time.utc() * 1000);
+	if (d.getDate() == now.getDate()
 		&& d.getMonth() == now.getMonth()
-		&& d.getFullYear() == now.getFullYear() ) {
+		&& d.getFullYear() == now.getFullYear()) {
 		return s;
 	}
 
 	var diff = (d.getTime() - now.getTime()) / 1000 / 3600 / 24;
 
-	if( diff > 0 && diff < 1 ) {
+	if (diff > 0 && diff < 1) {
 		s += " завтра";
-	}
-	else if( diff < 0 && diff > -1 ) {
+	} else if (diff < 0 && diff > -1) {
 		s += " вчера";
-	}
-	else {
+	} else {
 		var monthNames = [
 			'января', 'февраля', 'марта', 'апреля', 'мая',
 			'июня', 'июля', 'августа', 'сентября', 'октября',
@@ -369,11 +231,11 @@ function formatTime( t )
 	return s;
 }
 
-function formatDriver( order )
+function formatDriver(order)
 {
-	var taxi = disp.getDriver( order.taxi_id );
+	var taxi = disp.getDriver(order.taxi_id);
 	var call_id = taxi ? taxi.call_id : null;
-	if( call_id ) {
+	if (call_id) {
 		return call_id;
 	}
 	return '';

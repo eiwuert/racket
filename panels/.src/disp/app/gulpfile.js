@@ -6,7 +6,7 @@ var gulp = require('gulp'),
 gulp.task('default', function() {
 
 	var comp = rollup({
-		plugins: [babel({presets: ['es2015-rollup']})],
+		plugins: [babel({presets: ['react', 'es2015-rollup']})],
 		format: 'iife'
 	}, {});
 
