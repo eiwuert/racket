@@ -86,8 +86,6 @@ class SoundSection extends React.Component {
 	}
 
 	render() {
-		var disp = this.props.disp;
-		//var parent = this.props.parent;
 		return (
 			<div>
 				<label>Громкость звуков</label>
