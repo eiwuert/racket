@@ -2,6 +2,9 @@ import sounds from '../lib/sounds.js';
 import toast from '../lib/toast.js';
 import Dialog from '../lib/dialog.js';
 
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 var testSound = sounds.track( "/res/dispatcher/phone.ogg" );
 
 export default function initSettings( disp )
@@ -33,7 +36,8 @@ export default function initSettings( disp )
 function createDialog(disp)
 {
 	var $c = $( '<div></div>' );
-	$c.append( soundSection(disp) );
+	
+	ReactDOM.render(<SoundSection disp={disp} />, $c.get(0));
 
 	var saveButton;
 	var dialog = new Dialog( $c );
@@ -56,35 +60,44 @@ function createDialog(disp)
 	return dialog;
 }
 
+class SoundSection extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			volume: props.disp.getSetting('sound-volume', 0.5)
+		};
+		console.log(this.state);
+	}
 
-function soundSection(disp)
-{
-	var s = '<div>\
-		<label>Громкость звуков</label>\
-		<input type="range" min="0.0" max="1.0"\
-			step="0.01">\
-		<button type="button">Проверка</button>\
-	</div>';
-	var $c = $( s );
+	onChange(e) {
+		this.setState({volume: e.target.value});
+		this.props.disp.changeSetting( "sound-volume", e.target.value );
+		sounds.vol(e.target.value);
+	}
 
-	var $range = $c.find( 'input' );
-	var $button = $c.find( 'button' );
-
-	var vol = disp.getSetting( "sound-volume", 0.5 )
-	$range.val( vol );
-	$range.on( "change", function() {
-		sounds.vol( this.value );
-		disp.changeSetting( "sound-volume", this.value );
-	});
-
-	$button.on( "click", function() {
-		var b = this;
-		b.disabled = true;
+	test(e) {
+		var button = e.target;
+		button.disabled = true;
 		testSound.play();
-		setTimeout( function() {
+		setTimeout(function() {
 			testSound.stop();
-			b.disabled = false;
-		}, 3000 );
-	});
-	return $c;
+			button.disabled = false;
+		}, 2000);
+	}
+
+	render() {
+		var disp = this.props.disp;
+		//var parent = this.props.parent;
+		return (
+			<div>
+				<label>Громкость звуков</label>
+				<input type="range"
+					min="0.0" max="1.0" step="0.01"
+					value={this.state.volume}
+					onChange={this.onChange.bind(this)}
+					/>
+				<button type="button" onClick={this.test.bind(this)}>Проверка</button>
+			</div>
+		);
+	}
 }
