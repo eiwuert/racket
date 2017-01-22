@@ -1,122 +1,128 @@
 import {formatDateTime, formatPhone} from '../../lib/format.js';
-import Table from '../../lib/table.js';
+var React = require('react');
+var ReactDOM = require('react-dom');
 
-export default function OrdersTableWidget( disp )
+export default function OrdersTableWidget(disp)
 {
-	var $container = $( '<div></div>' );
+	var $container = $('<div></div>');
 	this.root = function() {
 		return $container.get(0);
 	};
 
-	var controls = createControls( $container );
-	var table = createTable( $container );
+	ReactDOM.render(
+		<OrdersTable />,
+		$container.get(0)
+		);
+}
 
-	controls.onChange( showTable );
-	showTable();
-
-	function createControls( $container )
-	{
-		var $c = $( '<div>\
-			<label><input type="checkbox" checked> Текущие</label>\
-			<label><input type="checkbox" checked> Отложенные</label>\
-			<label><input type="checkbox"> Закрытые</label>\
-		</div>' );
-
-		var $cb = $c.find( 'input' );
-		var $open = $cb.eq(0);
-		var $pending = $cb.eq(1);
-		var $closed = $cb.eq(2);
-
-		function bool( $checkbox ) {
-			return $checkbox.is( ':checked' );
-		}
-
-		$container.append( $c );
-
-		return {
-			onChange: function( f ) {
-				$cb.on( 'change', f );
-			},
-			state: function() {
-				return {
-					open: bool( $open ),
-					pending: bool( $pending ),
-					closed: bool( $closed )
-				};
-			}
+class OrdersTable extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			closed: true,
+			open: true,
+			postponed: true
 		};
 	}
 
-	function createTable( $container )
-	{
-		var header = [
-			"time", "dispatcher", "customer", "addr", "comments",
-			"driver", "car", "status"
-		];
-		var names = {
-			time: "Время создания",
-			dispatcher: "Диспетчер",
-			customer: "Клиент",
-			addr: "Адрес подачи",
-			comments: "Комментарии",
-			driver: "Водитель",
-			car: "Автомобиль",
-			status: "Состояние"
-		};
-
-		var t = new Table( header, names );
-		t.appendTo( $container );
-		return t;
-	}
-
-	function showTable()
-	{
-		var show = controls.state();
-		table.empty();
-		disp.orders().forEach( function( order )
-		{
-			if( order.closed() && !show.closed ) {
-				return;
+	/*
+	 * Returns orders to be shown
+	 */
+	orders() {
+		var state = this.state;
+		return disp.orders().filter(function(order) {
+			if (state.open && (!order.closed() && !order.postponed())) {
+				return true;
 			}
-			if( !order.closed() && !show.open ) {
-				return;
+			if (state.closed && order.closed()) {
+				return true;
 			}
-			if( order.postponed() && !show.pending ) {
-				return;
+			if (state.postponed && order.postponed()) {
+				return true;
 			}
-			table.add( formatRow( order ) );
+			return false;
 		});
-		table.show();
 	}
 
-	function formatRow( order )
-	{
-		var driver = disp.getDriver( order.taxi_id );
-		var car = driver ? disp.getDriverCar( driver.id ) : null;
+	render() {
+		return (
+			<div>
+				{filter(this)}
+				<table className="items">
+					<thead>
+						<tr>
+							<th>Время создания</th>
+							<th>Диспетчер</th>
+							<th>Клиент</th>
+							<th>Адрес подачи</th>
+							<th>Комментарии</th>
+							<th>Водитель</th>
+							<th>Автомобиль</th>
+							<th>Статус</th>
+						</tr>
+					</thead>
+					<tbody>
+						{this.orders().map(o => <TableRow key={o.order_id} order={o} />)}
+					</tbody>
+				</table>
+			</div>
+			);
+	}
+};
 
-		var row = {
-			time: formatDateTime( time.local( order.time_created ) ),
-			dispatcher: order.owner_id,
-			customer: formatCustomer( order ),
-			addr: order.src.addr.format(),
-			comments: order.comments,
-			driver: driver? driver.format() : '',
-			car: car? car.format() : '',
-			status: order.statusName()
-		};
+function filter(parent) {
+	return (
+		<div>
+			{checkbox('open', 'Текущие', parent)}
+			{checkbox('postponed', 'Отложенные', parent)}
+			{checkbox('closed', 'Закрытые', parent)}
+		</div>
+		);
+}
 
-		return row;
+function checkbox(key, title, parent) {
+	function change(e) {
+		var diff = {};
+		diff[key] = e.target.checked;
+		parent.setState(diff);
+	}
+	return (<label>
+		<input type="checkbox"
+		       checked={parent.state[key]}
+		       onChange={change}
+		       />
+			{title}
+	</label>);
+};
+
+class TableRow extends React.Component {
+	render() {
+		var order = this.props.order;
+		var driver = disp.getDriver(order.taxi_id);
+		var car = driver ? disp.getDriverCar(driver.id) : null;
+		return (
+			<tr>
+				<td className="time">{formatDateTime(time.local(order.time_created))}</td>
+				<td className="dispatcher">{order.owner_id}</td>
+				<td className="customer">{this.formatCustomer()}</td>
+				<td className="addr">{order.src.addr.format()}</td>
+				<td className="comments">{order.comments}</td>
+				<td className="driver">{driver ? driver.format() : ''}</td>
+				<td className="car">{car ? car.format() : ''}</td>
+				<td className="status">{order.statusName()}</td>
+			</tr>
+			);
 	}
 
-	function formatCustomer( order )
-	{
-		if( !order.customer_phone ) {
+	formatCustomer() {
+		var order = this.props.order;
+		if (!order.customer_phone) {
 			return order.customer_name;
 		}
-		var s = formatPhone( order.customer_phone );
-		if( order.customer_name ) {
+		var s = formatPhone(order.customer_phone);
+		if (order.customer_name) {
 			s += ' (' + order.customer_name + ')';
 		}
 		return s;
 	}
-}
+};
