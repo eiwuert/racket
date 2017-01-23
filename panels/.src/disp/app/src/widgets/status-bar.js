@@ -1,14 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-export default function(disp) {
-	var root = document.createElement('div');
-	ReactDOM.render(<Toolbar disp={disp} />, root);
-	
-	this.root = function() {
-		return root;
-	};
-}
+export default Toolbar;
 
 class Toolbar extends React.Component {
 	constructor(props) {

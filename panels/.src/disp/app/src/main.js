@@ -6,7 +6,7 @@ import initSessions from './sessions.js';
 import initChat from './chat/chat.js';
 import orderForms from './order-form/forms.js';
 import TabsWidget from './widgets/tabs.js';
-import StatusBarWidget from './widgets/status-bar.js';
+import Toolbar from './widgets/status-bar.js';
 import ServiceLogWidget from './widgets/service-log.js';
 import OrdersTableWidget from './widgets/orders-table.js';
 import MapWidget from './widgets/map.js';
@@ -21,6 +21,9 @@ import '../lib/mapdata.js';
 import '../lib/html5.js';
 import Dialog from '../lib/dialog.js';
 import DX from './dx.js';
+
+var React = require('react');
+var ReactDOM = require('react-dom');
 
 
 window.disp = new DispatcherClient();
@@ -51,7 +54,7 @@ function initWidgets()
 	/*
 	 * Toolbar
 	 */
-	var sb = addWidget( StatusBarWidget, "status-bar-container" );
+	ReactDOM.render(<Toolbar disp={disp} />, $('#status-bar-container').get(0));
 
 	/*
 	 * Settings button
