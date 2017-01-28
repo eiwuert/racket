@@ -19,6 +19,8 @@ lib( 'macros' );
 lib( 'filler' );
 lib( 'str' );
 
+require __DIR__.'/vendor/autoload.php';
+
 function sid() {
 	return user::get_data( 'service_id' );
 }
