@@ -1,37 +1,43 @@
-import sounds from '../lib/sounds.js';
-import toast from '../lib/toast.js';
-import Dialog from '../lib/dialog.js';
+import sounds from '../../lib/sounds.js';
+import toast from '../../lib/toast.js';
+import Dialog from '../../lib/dialog.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 var testSound = sounds.track( "/res/dispatcher/phone.ogg" );
 
-export default function initSettings( disp )
-{
-	var dialog = null;
-	applySettings();
+export default class SettingsButton extends React.Component {
+	componentDidMount() {
+		var dialog = null;
+		applySettings();
 
-	function applySettings() {
-		sounds.vol( disp.getSetting( "sound-volume", 0.5 ) );
+		function applySettings() {
+			sounds.vol( disp.getSetting( "sound-volume", 0.5 ) );
+		}
+
+		var $b = $(ReactDOM.findDOMNode(this));
+		
+		$b.on( "click", function()
+		{
+			if( dialog ) {
+				dialog.focus();
+				return;
+			}
+
+			dialog = createDialog(disp);
+			dialog.on( "close", function() {
+				dialog = null;
+			});
+			dialog.show();
+		});
+		
 	}
 
-	var $b = $('<button class="settings" style="position: absolute; right: 0; top: 0;">Настройки</button>');
-	$(document.body).append($b);
-	$b.on( "click", function()
-	{
-		if( dialog ) {
-			dialog.focus();
-			return;
-		}
-		
-		dialog = createDialog(disp);
-		dialog.on( "close", function() {
-			dialog = null;
-		});
-		dialog.show();
-	});
-}
+	render() {
+		return (<button className="settings-button">Настройки</button>);
+	}
+};
 
 function createDialog(disp)
 {

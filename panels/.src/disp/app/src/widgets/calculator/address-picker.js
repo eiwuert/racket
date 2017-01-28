@@ -1,5 +1,20 @@
-export default function CalcAddressPicker( disp, $container )
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+class Picker extends React.Component {
+	componentDidMount() {
+		this.container = ReactDOM.findDOMNode(this).firstChild;
+		this.instance = new CalcAddressPicker(this.props.disp, this.container);
+	}
+
+	render() {
+		return <div><div></div></div>;
+	}
+};
+
+export default function CalcAddressPicker( disp, container )
 {
+	var $container = $(container);
 	var $c = $( '<div class="address-picker"></div>' );
 	var s = '<div><label>Город</label><input class="city"></div>\
 	<div><label>Улица</label><input class="street"></div>\

@@ -21,7 +21,7 @@ class Toolbar extends React.Component {
 
 	render() {
 		return (
-			<div id="status-bar">
+			<div className="toolbar">
 				<div className="indicators">
 					<span className="rtt">{this.state.rtt} мс</span>
 					{this.state.rtt > 5000?

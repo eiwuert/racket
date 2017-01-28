@@ -33,10 +33,7 @@ require_script( 'res/dispatcher/main.js' );
 	</nav>
 </header>
 
-<div id="status-bar-container"></div>
-<div id="order-button-container"></div>
-<div id="orders-container"></div>
-<div id="tabs-container"></div>
+<div id="app-container"></div>
 
 </body>
 </html>

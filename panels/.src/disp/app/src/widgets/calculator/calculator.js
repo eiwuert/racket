@@ -15,9 +15,9 @@ export default function CalculatorWidget( disp )
 	$container.append( $pane );
 
 	$pane.append( '<b>Откуда</b>' );
-	var from = new CalcAddressPicker( disp, $pane );
+	var from = new CalcAddressPicker( disp, $pane.get(0) );
 	$pane.append( '<b>Куда</b>' );
-	var dest = new CalcAddressPicker( disp, $pane );
+	var dest = new CalcAddressPicker( disp, $pane.get(0) );
 	var map = createMap();
 	var $fares = createFares();
 	var $output = $( '<div class="output"></div>' );

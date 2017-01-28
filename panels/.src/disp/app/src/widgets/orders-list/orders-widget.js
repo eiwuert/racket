@@ -21,7 +21,7 @@ export default function OrdersWidget(disp)
 class Widget extends React.Component {
 	render() {
 		return (
-			<div id="orders-widget">
+			<div className="orders-list">
 				<List disp={this.props.disp} listeners={this.props.listeners}
 				      class="postponed"
 				      filter={o => o.postponed()} />
