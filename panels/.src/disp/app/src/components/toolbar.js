@@ -12,7 +12,7 @@ class Toolbar extends React.Component {
 	}
 
 	componentWillMount() {
-		var disp = this.props.disp;
+		var disp = this.props.client;
 		var t = this;
 		this.timer = setInterval( function() {
 			t.setState({rtt: disp.RTT()});
