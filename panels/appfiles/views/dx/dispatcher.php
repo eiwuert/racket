@@ -81,88 +81,19 @@ function q_route( $sid )
 	if( !$url ){
 		return dx::error( "No router available" );
 	}
-	$url .= "viaroute?loc=$from&loc=$to";
 
-	$src = curl_get( $url, $err );
-	if( !$src ) {
-		return dx::error( "No response from router: $err" );
+	list($lat1, $lon1) = explode(',', $from);
+	list($lat2, $lon2) = explode(',', $to);
+
+	$client = new osrm_client($url);
+	$route = $client->route([$lat1, $lon1], [$lat2, $lon2]);
+	if(!$route) {
+		return dx::error('Couldn\'t get route');
 	}
-	$data = json_decode( $src, true );
-	if( !$data ) {
-		return dx::error( "Bad response from router" );
-	}
-	/* OSRM response has format: {
-		version: 0.3,
-		status: 0,
-		status_message: "Found route between points",
-		route_geometry: "..." (encoded string),
-		route_summary: {
-			total_distance: <meters>,
-			total_time: <seconds>,
-			start_point: ?,
-			alternative_geometris: [],
-			alternative_instructions: [],
-			alternative_summaries: [],
-			route_name: ?,
-			alternative_names: [],
-			via_points: [ [<lat>,<lon>], ... ],
-			hint_data: {
-				checksum: <int>,
-				locations: [ <encoded strings> ],
-				...
-			}
-		}
-	} */
-	if( $data['status'] != 0 ) {
-		return dx::error( $data['status_message'] );
-	}
-	/*
-	 * Route geometry is compressed into a string.
-	 */
-	$data['route_geometry'] = osrm_decode( $data['route_geometry'] );
-	return $data;
+	return $route;
 }
 
-/*
- * Decode a string into an array of pairs of float values (polyline).
- * This is the algorithm that Google Maps uses, but with 6 numbers
- * instead of 5.
- */
-function osrm_decode( $s )
-{
-	$precision = pow( 10, - 6 );
-	$len = strlen( $s );
-	$index = 0;
-	$lat = 0;
-	$lng = 0;
-	$a = array();
 
-	while( $index < $len)
-	{
-		$shift = 0;
-		$result = 0;
-
-		do {
-			$b = ord( $s[$index++] ) - 63;
-			$result |= ($b & 0x1f) << $shift;
-			$shift += 5;
-		} while ($b >= 0x20);
-
-		$dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-		$lat += $dlat;
-		$shift = 0;
-		$result = 0;
-		do {
-			$b = ord($s[$index++]) - 63;
-			$result |= ($b & 0x1f) << $shift;
-			$shift += 5;
-		} while ($b >= 0x20);
-		$dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-		$lng += $dlng;
-		$a[] = array( $lat * $precision, $lng * $precision );
-	}
-	return $a;
-}
 
 function q_locations( $sid )
 {
