@@ -15,6 +15,8 @@ import Calculator from './calculator.js';
 import SessionsTable from './sessions-table.js';
 import ServiceLog from './service-log.js';
 
+import DialogHost from './dialog-host.js';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
@@ -97,8 +99,8 @@ export default class App extends React.Component {
 					<TabPanel><SessionsTable client={this.props.client} /></TabPanel>
 					<TabPanel><ServiceLog client={this.props.client} /></TabPanel>
 				</Tabs>
+				<DialogHost />
 			</div>
 		);
 	}
 };
-

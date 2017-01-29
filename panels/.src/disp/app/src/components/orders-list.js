@@ -1,12 +1,11 @@
 import {formatPhone} from '../../lib/format.js';
 import {fmt} from '../../lib/fmt.js';
 import Listeners from '../../lib/listeners.js';
-import Dialog from '../../lib/dialog.js';
+import orderForms from '../order-form/forms.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-
-import orderForms from '../order-form/forms.js';
+import AppDialog from './app-dialog.js';
 
 export default class OrdersList extends React.Component {
 	constructor(props) {
@@ -20,7 +19,9 @@ export default class OrdersList extends React.Component {
 			orderForms.show(e.data.order);
 		});
 		t.listeners.add('cancel-click', function(e) {
-			showCancelDialog(e.data.order);
+			var order = e.data.order;
+			var disp = t.props.client;
+			window.__open(<CancelDialog order={order} client={disp} />, 'cancel-order-'+order.id);
 		});
 	}
 
@@ -181,7 +182,7 @@ class CustomerInfo extends React.Component {
 		}
 		return <a href={'tel:' + n}>{formatPhone(n)}</a>;
 	}
-}
+};
 
 class DestinationInfo extends React.Component {
 	render() {
@@ -246,37 +247,41 @@ function formatDriver(order)
 	return '';
 }
 
-
-/*
- * Dialog for order cancelling.
- */
-function showCancelDialog( order )
-{
-	var html = '<p>Отменить заказ?</p>'
-		+ '<textarea placeholder="Причина отмены"></textarea>';
-	if( order.taxi_id ) {
-		html += '<div><label><input type="checkbox"> Восстановить в очереди</label></div>';
-	}
-	var $content = $( '<div>' + html + '</div>' );
-	var $reason = $content.find( 'textarea' );
-	var $restore = $content.find( 'input[type="checkbox"]' );
-
-	var d = new Dialog( $content.get(0) );
-	d.addButton( 'Отменить заказ', cancel, 'yes' );
-	d.addButton( 'Закрыть окно', null, 'no' );
-	d.show();
-
-	function cancel()
-	{
+class CancelDialog extends React.Component {
+	cancel() {
+		var $content = $(ReactDOM.findDOMNode(this));
+		var $reason = $content.find( 'textarea' );
+		var $restore = $content.find( 'input[type="checkbox"]' );
+		
 		var reason = $reason.val();
 		var restore = $restore.is( ':checked' );
 
+		var order = this.props.order;
+		var disp = this.props.client;
 		var p = disp.cancelOrder( order.order_uid, reason );
 		if( restore && order.taxi_id ) {
 			p.then( function() {
 				disp.restoreDriverQueue( order.taxi_id );
 			});
 		}
-		this.close();
+		return p;
 	}
-}
+
+	render() {
+		var order = this.props.order;
+		return (
+			<AppDialog id={this.props.id}
+				title="Отмена заказа"
+				yes="Отменить заказ" no="Закрыть окно"
+				onAccept={this.cancel.bind(this)}>
+
+				<p>Отменить заказ?</p>
+				<textarea placeholder="Причина отмены"></textarea>
+				{order.taxi_id && 
+					<div>
+					<label><input type="checkbox" /> Восстановить в очереди</label>
+					</div>}
+			</AppDialog>
+		);
+	}
+};
