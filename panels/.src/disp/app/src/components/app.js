@@ -1,5 +1,6 @@
 import initReminderScript from '../bookings-reminder.js';
 import initCalls from '../calls.js';
+import Dialog from '../../lib/dialog.js';
 
 import OrderButton from './order-button.js';
 import OrdersList from './orders-list.js';
@@ -43,6 +44,11 @@ export default class App extends React.Component {
 			alert( "Ваша сессия была закрыта сервером, перезагрузите страницу." );
 			return;
 		});
+		
+		disp.on('driver-alarm-on', function(event) {
+			var driver = event.data.driver;
+			showAlarmDialog( driver );
+		});
 	}
 	
 	onSelect(i) {
@@ -51,9 +57,17 @@ export default class App extends React.Component {
 		// when this event is emitted.
 		setTimeout(function(){$(window).trigger('resize')}, 1);
 	}
-	
-	onAlertAccept() {
-		this.setState({tabIndex: 1});
+
+	showAlarmDialog( driver )
+	{
+		var t = this;
+		var d = new Dialog( "Водитель " + driver.call_id +
+			" отправил сигнал тревоги" );
+		d.addButton( "Принять", function() {
+			t.setState({tabIndex: 1});
+			d.close();
+		} );
+		d.show();
 	}
 
 	render() {
@@ -75,8 +89,7 @@ export default class App extends React.Component {
 					</TabList>
 					<TabPanel><Monitor client={this.props.client} /></TabPanel>
 					<TabPanel>
-						<DispatcherMap client={this.props.client}
-						onAlertAccept={this.onAlertAccept.bind(this)} />
+						<DispatcherMap client={this.props.client} />
 					</TabPanel>
 					<TabPanel><DriversTable client={this.props.client} /></TabPanel>
 					<TabPanel><OrdersTable client={this.props.client} /></TabPanel>
@@ -88,3 +101,4 @@ export default class App extends React.Component {
 		);
 	}
 };
+
