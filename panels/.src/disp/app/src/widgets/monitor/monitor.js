@@ -29,8 +29,6 @@ export default function initMonitorWidget( disp, tabs )
 	var qw = new QueuesWidget( disp );
 	$p.append( qw.root() );
 
-	tabs.addTab( "Очереди", $p.get(0) );
-
 	filterWidget.onChange( function( filter ) {
 		qw.selectDrivers( filter );
 		syncAnnounceButton();
@@ -73,6 +71,7 @@ export default function initMonitorWidget( disp, tabs )
 	});
 
 	return {
-		qw: qw
+		qw: qw,
+		root: $p.get(0)
 	};
 }

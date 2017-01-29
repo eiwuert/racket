@@ -1,19 +1,17 @@
-import hotkeys from '../../lib/hotkeys.js';
-
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+import hotkeys from '../../lib/hotkeys.js';
 import TabsWidget from '../widgets/tabs.js';
-import initMonitorWidget from '../widgets/monitor/monitor.js';
-import initChat from '../chat/chat.js';
-import MapWidget from '../widgets/map.js';
-import initAlerts from '../alarm.js';
-import DriversTableWidget from '../widgets/drivers-table.js';
-import OrdersTableWidget from '../widgets/orders-table.js';
-import CalculatorWidget from '../widgets/calculator/calculator.js';
-import ServiceLogWidget from '../widgets/service-log.js';
 
-import initSessions from '../sessions.js';
+import DispatcherMap from './dispatcher-map.js';
+import Monitor from './monitor.js';
+import DriversTable from './drivers-table.js';
+import OrdersTable from './orders-table.js';
+import Calculator from './calculator.js';
+import SessionsTable from './sessions-table.js';
+import ServiceLog from './service-log.js';
+
 
 export default class AppTabs extends React.Component {
 	componentDidMount() {
@@ -22,31 +20,45 @@ export default class AppTabs extends React.Component {
 		var tabs = new TabsWidget(disp);
 		container.appendChild(tabs.root());
 		hotkeys.bind( 'alt+m', tabs.next );
-
-		var monitor = initMonitorWidget( disp, tabs );
-		initChat( disp, monitor.qw );
-
-		var map = new MapWidget( disp );
-		tabs.addTab( 'Карта', map.root() );
-		tabs.PAGE_MAP = tabs.count() - 1;
-
-		initAlerts( disp, tabs, map );
-
-		var dw = new DriversTableWidget( disp );
-		tabs.addTab( 'Водители', dw.root() );
-
-		var orders = new OrdersTableWidget( disp );
-		tabs.addTab( 'Заказы', orders.root() );
-
-		var calc = new CalculatorWidget( disp );
-		tabs.addTab( "Калькулятор", calc.root() );
-
-		if( disp.sessionsEnabled() ) {
-			initSessions( disp, tabs );
+		
+		
+		ReactDOM.render(
+			<Monitor client={this.props.client} />,
+			tabs.addTab('Очереди').root()
+		);
+	
+		tabs.PAGE_MAP = tabs.count();
+		ReactDOM.render(
+			<DispatcherMap client={this.props.client} tabsWidget={tabs} />,
+			tabs.addTab('Карта').root()
+		);
+	
+		ReactDOM.render(
+			<DriversTable client={this.props.client} />,
+			tabs.addTab('Водители').root()
+		);
+	
+		ReactDOM.render(
+			<OrdersTable client={this.props.client} />,
+			tabs.addTab('Заказы').root()
+		);
+	
+		ReactDOM.render(
+			<Calculator client={this.props.client} />,
+			tabs.addTab('Калькулятор').root()
+		);
+	
+		if( this.props.client.sessionsEnabled() ) {
+			ReactDOM.render(
+				<SessionsTable client={this.props.client} />,
+				tabs.addTab('Смены').root()
+			);
 		}
 
-		var log = new ServiceLogWidget( disp );
-		tabs.addTab( 'Журнал', log.root() );
+		ReactDOM.render(
+			<ServiceLog client={this.props.client} />,
+			tabs.addTab('Журнал').root()
+		);
 	}
 
 	render() {

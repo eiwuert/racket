@@ -237,6 +237,10 @@ export default function Tabs( container )
 		this.setContent = function( html ) {
 			$body.html( html );
 		};
+		
+		this.root = function() {
+			return $body.get(0);
+		};
 	}
 
 	this.onChange = function( func ) {
