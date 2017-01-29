@@ -17,6 +17,8 @@ import ServiceLog from './service-log.js';
 
 import DialogHost from './dialog-host.js';
 
+import SessionRequestDialog from './session-request-dialog.js';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
@@ -51,8 +53,16 @@ export default class App extends React.Component {
 			var driver = event.data.driver;
 			showAlarmDialog( driver );
 		});
+		
+		disp.on( 'session-requested', function( event ) {
+			var r = event.data;
+			window.__open(<SessionRequestDialog
+				client={disp}
+				driverId={r.driver_id}
+				odometer={r.odometer} />, 'session-request-' + r.driver_id);
+		});
 	}
-	
+
 	onSelect(i) {
 		this.setState({tabIndex: i});
 		// Some widgets on the panes adjust their sizes

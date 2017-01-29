@@ -2,7 +2,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import {formatDateTime} from '../../lib/format.js';
-import sounds from '../../lib/sounds.js';
 import AppDialog from './app-dialog.js';
 
 export default class SessionsTable extends React.Component {
@@ -18,21 +17,22 @@ export default class SessionsTable extends React.Component {
 };
 
 class Table extends React.Component {
-	componentDidMount() {
+	constructor(props) {
+		super(props);
+		
 		var t = this;
 		var disp = t.props.client;
-
+		t.mounted = false;
 		disp.on( 'sessions-changed', function() {
-			t.forceUpdate();
+			if(t.mounted) t.forceUpdate();
 		});
+	}
+	componentDidMount() {
+		this.mounted = true;
+	}
 
-		disp.on( 'session-requested', function( event ) {
-			var r = event.data;
-			window.__open(<SessionRequestDialog
-				client={disp}
-				driverId={r.driver_id}
-				odometer={r.odometer} />, 'session-request-' + r.driver_id);
-		});
+	componentWillUnmount() {
+		this.mounted = false;
 	}
 
 	render() {
@@ -160,55 +160,6 @@ class CloseSessionDialog extends React.Component {
 		);
 	}
 };
-
-class SessionRequestDialog extends React.Component {
-	constructor(props) {
-		super(props);
-		this.sound = sounds.track( "/res/dispatcher/phone.ogg" );
-	}
-
-	accept() {
-		var disp = this.props.client;
-		var driver_id = this.props.driverId;
-		var odometer = this.props.odometer;
-		
-		this.sound.stop();
-
-		return disp.openSession( driver_id, odometer )
-			.catch( function( error ) {
-				/*
-				 * If the error is that the session already exists,
-				 * consume it and treat the request as successful.
-				 */
-				if( error == "open" ) {
-					return null;
-				}
-				/*
-				 * If not, pass the error along.
-				 */
-				alert(sessionError(error));
-				throw error;
-			})
-	}
-	
-	componentDidMount() {
-		this.sound.play();
-	}
-	
-	componentWillUnmount() {
-		this.sound.stop();
-	}
-
-	render() {
-		var disp = this.props.client;
-		var driver_id = this.props.driverId;
-		var d = disp.getDriver( driver_id );
-		return (<AppDialog yes="Разрешить" no="Игнорировать" onAccept={this.accept.bind(this)}>
-			Водитель {d.call_id} желает открыть смену
-		</AppDialog>);
-	}
-};
-
 
 /*
  * Returns text description of a session-related error code.
