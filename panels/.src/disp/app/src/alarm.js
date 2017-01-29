@@ -1,6 +1,6 @@
 import Dialog from '../lib/dialog.js';
 
-export default function initAlerts( disp, tabs, mapWidget )
+export default function initAlerts( disp, onAccept, mapWidget )
 {
 	/*
 	 * Display alarms that are currently on.
@@ -42,10 +42,7 @@ export default function initAlerts( disp, tabs, mapWidget )
 			" отправил сигнал тревоги" );
 		d.addButton( "Принять", function()
 		{
-			/*
-			 * Switch to the map tab.
-			 */
-			tabs.setPage( tabs.PAGE_MAP );
+			onAccept();
 
 			/*
 			 * Center the map on the driver.

@@ -8,7 +8,7 @@ export default class DispatcherMap extends React.Component {
 	componentDidMount() {
 		var map = new MapWidget(this.props.client);
 		ReactDOM.findDOMNode(this).firstChild.appendChild(map.root());
-		initAlerts(this.props.client, this.props.tabsWidget, map);
+		initAlerts(this.props.client, this.props.onAlertAccept, map);
 	}
 	render() {
 		return <div className="main-map"><div></div></div>;

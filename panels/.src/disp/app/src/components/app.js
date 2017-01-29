@@ -4,16 +4,27 @@ import initCalls from '../calls.js';
 import OrderButton from './order-button.js';
 import OrdersList from './orders-list.js';
 import SettingsButton from './settings-button.js';
-import AppTabs from './tabs.js';
 import Toolbar from './toolbar.js';
+
+import DispatcherMap from './dispatcher-map.js';
+import Monitor from './monitor.js';
+import DriversTable from './drivers-table.js';
+import OrdersTable from './orders-table.js';
+import Calculator from './calculator.js';
+import SessionsTable from './sessions-table.js';
+import ServiceLog from './service-log.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
 
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.client = props.client;
+		this.state = {
+			tabIndex: 0
+		};
 	}
 
 	componentDidMount() {
@@ -33,6 +44,17 @@ export default class App extends React.Component {
 			return;
 		});
 	}
+	
+	onSelect(i) {
+		this.setState({tabIndex: i});
+		// Some widgets on the panes adjust their sizes
+		// when this event is emitted.
+		setTimeout(function(){$(window).trigger('resize')}, 1);
+	}
+	
+	onAlertAccept() {
+		this.setState({tabIndex: 1});
+	}
 
 	render() {
 		return (
@@ -41,7 +63,27 @@ export default class App extends React.Component {
 				<SettingsButton client={this.client} />
 				<OrderButton client={this.client}/>
 				<OrdersList client={this.client}/>
-				<AppTabs client={this.client}/>
+				<Tabs onSelect={this.onSelect.bind(this)} selectedIndex={this.state.tabIndex}>
+					<TabList>
+						<Tab>Очереди</Tab>
+						<Tab>Карта</Tab>
+						<Tab>Водители</Tab>
+						<Tab>Заказы</Tab>
+						<Tab>Калькулятор</Tab>
+						<Tab>Смены</Tab>
+						<Tab>Журнал</Tab>
+					</TabList>
+					<TabPanel><Monitor client={this.props.client} /></TabPanel>
+					<TabPanel>
+						<DispatcherMap client={this.props.client}
+						onAlertAccept={this.onAlertAccept.bind(this)} />
+					</TabPanel>
+					<TabPanel><DriversTable client={this.props.client} /></TabPanel>
+					<TabPanel><OrdersTable client={this.props.client} /></TabPanel>
+					<TabPanel><Calculator client={this.props.client} /></TabPanel>
+					<TabPanel><SessionsTable client={this.props.client} /></TabPanel>
+					<TabPanel><ServiceLog client={this.props.client} /></TabPanel>
+				</Tabs>
 			</div>
 		);
 	}
