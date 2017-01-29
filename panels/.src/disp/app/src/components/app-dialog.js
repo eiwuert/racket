@@ -11,8 +11,13 @@ export default class AppDialog extends React.Component {
 
 	accept() {
 		var id = this.props.id;
-		Promise.resolve(this.props.onAccept())
-		.then(function() {
+		var val = this.props.onAccept();
+		if(val === false) {
+			window.__close(id);
+			return;
+		}
+
+		Promise.resolve(val).then(function() {
 			window.__close(id);
 		});
 	}
