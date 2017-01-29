@@ -1,14 +1,61 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import ServiceLogWidget from '../widgets/service-log.js';
+const MAX_LENGTH = 30;
 
 export default class ServiceLog extends React.Component {
-	componentDidMount() {
-		var w = new ServiceLogWidget(this.props.client);
-		ReactDOM.findDOMNode(this).firstChild.appendChild(w.root());
+	constructor(props) {
+		super(props);
+		this.state = {
+			messages: []
+		};
+		this.id = 1;
 	}
+
+	componentWillMount() {
+		var disp = this.props.client;
+		var t = this;
+
+		disp.dx.get( 'service-log', {n: MAX_LENGTH} )
+		.then( function( messages ) {
+			t.setState({messages: messages.reverse()});
+		
+			var id;
+			if(t.state.messages.length > 0) {
+				id = parseInt(t.state.messages[0].message_id, 10);
+			}
+			else {
+				id = 1;
+			}
+
+			disp.on( 'service-log', function( event )
+			{
+				t.setState(function(prevState, props) {
+					
+					var msg = {
+						text: event.data.text,
+						message_id: ++id
+					};
+
+					var messages = prevState.messages;
+					messages.unshift(msg);
+					if(messages.length > MAX_LENGTH) {
+						messages.pop();
+					}
+					return {messages};
+				});
+			});
+		
+		});
+
+		
+	}
+
 	render() {
-		return <div className="service-log"><div></div></div>;
+		return (
+			<div id="events-log">
+			{this.state.messages.map(m => <p key={m.message_id}>{m.text}</p>)}
+			</div>
+		);
 	}
 };
