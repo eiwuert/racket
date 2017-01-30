@@ -67,6 +67,10 @@ function initDragging(host) {
 	}
 
 	$h.on('mousedown', function(event) {
+		// Don't intercept clicks on form controls
+		if($(event.target).is('input, textarea, button, select')) {
+			return;
+		}
 		var $t = targetDialog(event);
 		if(!$t) {
 			return;
