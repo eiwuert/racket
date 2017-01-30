@@ -53,6 +53,7 @@ export default class DialogHost extends React.Component {
 
 function initDragging(host) {
 	var $h = $(host);
+	var $hostOffset = $h.offset();
 	var $dragElement = null;
 	var dragOffset = [0, 0];
 	
@@ -74,6 +75,7 @@ function initDragging(host) {
 
 		$dragElement = $t;
 		var off = $t.offset();
+
 		dragOffset = [
 			event.pageX - off.left,
 			event.pageY - off.top
@@ -83,11 +85,11 @@ function initDragging(host) {
 	$(window).on('mouseup', function() {
 		$dragElement = null;
 	});
-	
+
 	$(window).on('mousemove', function(event) {
 		if(!$dragElement) return;
-		var x = event.pageX - dragOffset[0];
-		var y = event.pageY - dragOffset[1];
+		var x = event.pageX - dragOffset[0] - $hostOffset.left;
+		var y = event.pageY - dragOffset[1] - $hostOffset.top;
 		$dragElement.css({
 			left: x,
 			top: y
