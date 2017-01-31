@@ -2,7 +2,7 @@ export default OrderForm;
 
 import AddressGroupSection from './address.js';
 import CustomerSection from './customer.js';
-import OptionsSection from './options.js';
+import Options from '../components/order-form/options.js';
 import PostponeSection from './postpone.js';
 import Listeners from '../../lib/listeners.js';
 import html from '../../lib/html.js';
@@ -32,29 +32,53 @@ function OrderForm( order )
 	var driverContainer = document.createElement('div');
 	$container.append(driverContainer);
 	
+	var optionsContainer = document.createElement('div');
+	$container.append(optionsContainer);
+
 	var s = {
-		driverId: '0'
+		driverId: '0',
+		opt: {
+			carClass: 'ordinary',
+			vip: false,
+			term: false
+		}
 	};
 	
+	if(order) {
+		s.opt = {
+			carClass: order.opt_car_class,
+			vip: order.opt_vip == '1',
+			term: order.opt_terminal == '1'
+		};
+	}
+
 	function onDriverChange(id) {
 		s.driverId = id;
-		syncOptions();
+		r();
+	}
+	
+	function onOptionsChange(opt) {
+		s.opt = opt;
 		r();
 	}
 
 	function r() {
-		ReactDOM.render(<DriverSelector onChange={onDriverChange} value={s.driverId}/>, driverContainer);
+		ReactDOM.render(<DriverSelector
+			onChange={onDriverChange}
+			value={s.driverId}/>, driverContainer);
+		ReactDOM.render(<Options
+			options={s.opt}
+			onChange={onOptionsChange}
+			disabled={s.driverId != '0'}/>, optionsContainer);
 	}
 	r();
 
 	this.setDriver = function( id ) {
 		s.driverId = id;
-		syncOptions();
 		r();
 	};
 
 
-	var options = new OptionsSection( div() );
 	var customer = new CustomerSection( div() );
 
 	$container.append( '<b>Место подачи</b>' );
@@ -78,13 +102,6 @@ function OrderForm( order )
 		from.set({addr: addr, loc_id: null});
 	});
 
-	function syncOptions() {
-		if( s.driverId != '0' ) {
-			options.disable();
-		} else {
-			options.enable();
-		}
-	}
 
 	/*
 	 * Comments input.
@@ -113,7 +130,6 @@ function OrderForm( order )
 
 	if( order ) {
 		$title.html( "Заказ № " + order.order_id );
-		options.set( order );
 		customer.set( order );
 		$comments.val( order.comments );
 		postpone.set( order );
@@ -181,7 +197,11 @@ function OrderForm( order )
 	function getOrder()
 	{
 		var data = obj.merge(
-			options.get(),
+			{
+				opt_car_class: s.opt.carClass,
+				opt_vip: s.opt.vip? '1' : '0',
+				opt_terminal: s.opt.term? '1' : '0'
+			},
 			customer.get(),
 			postpone.get()
 		);
