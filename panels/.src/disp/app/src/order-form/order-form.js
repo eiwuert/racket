@@ -3,7 +3,7 @@ export default OrderForm;
 import AddressGroupSection from './address.js';
 import CustomerSection from './customer.js';
 import Options from '../components/order-form/options.js';
-import PostponeSection from './postpone.js';
+import Postpone from '../components/order-form/postpone.js';
 import Listeners from '../../lib/listeners.js';
 import html from '../../lib/html.js';
 import obj from '../../lib/obj.js';
@@ -94,7 +94,10 @@ function OrderForm( order )
 	to.hide();
 	$toHeader.addClass( 'more' );
 
-	var postpone = new PostponeSection( div() );
+	var postponeContainer = document.createElement('div');
+	$container.append(postponeContainer);
+	
+	var postpone = new PostponeSection(postponeContainer);
 
 	
 
@@ -220,4 +223,74 @@ function OrderForm( order )
 
 		return order;
 	}
+}
+
+function PostponeSection( container )
+{
+	var c = document.createElement('div');
+	container.appendChild(c);
+	var s = {
+		disabled: true,
+		time: 0,
+		remind: 0
+	};
+
+	function r() {
+		ReactDOM.render(<Postpone
+			enabled={!s.disabled}
+			time={s.time}
+			remind={s.remind}
+			onTimeChange={onTimeChange}
+			onRemindChange={onRemindChange}
+			onToggle={onToggle}
+			/>, c);
+	}
+	r();
+
+	function onToggle(enable) {
+		s.disabled = !enable;
+		if(enable) {
+			s.time = time.utc();
+			s.remind = 0;	
+		}
+		r();
+	}
+	
+	function onTimeChange(t) {
+		s.time = t;
+		r();
+	}
+	
+	function onRemindChange(remind) {
+		s.remind = remind;
+		r();
+	}
+
+	this.get = function()
+	{
+		if(!s.disabled) {
+			return {
+				exp_arrival_time: s.time,
+				reminder_time: s.time - s.remind * 60
+			};
+		}
+		return {
+			exp_arrival_time: null,
+			reminder_time: null
+		};
+	};
+
+	this.set = function( order )
+	{
+		if( order.exp_arrival_time )
+		{
+			s.disabled = false;
+			s.time = order.exp_arrival_time;
+			s.remind = Math.round((order.exp_arrival_time - order.reminder_time)/60);
+		}
+		else {
+			s.disabled = true;
+		}
+		r();
+	};
 }
