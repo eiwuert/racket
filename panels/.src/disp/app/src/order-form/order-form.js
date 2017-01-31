@@ -12,11 +12,63 @@ import {formatPhone} from '../../lib/format.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+var _ = require('underscore');
 
 var time = window.time;
 var Order = window.Order;
 
 import DriverSelector from '../components/order-form/driver-selector.js';
+
+class FormPart extends React.Component {
+	driverChange(id) {
+		this.change({driverId: id});
+	}
+	
+	optionsChange(opt) {
+		this.change({opt});
+	}
+	
+	change(diff) {
+		var o = _.extend(_.clone(this.props.order), diff);
+		this.props.onChange(o);
+	}
+	
+	customerPhoneChange(phone) {
+		var customer = _.clone(this.props.order.customer);
+		customer.phone = phone;
+		this.change({customer});
+	}
+	
+	customerNameChange(name) {
+		var customer = _.clone(this.props.order.customer);
+		customer.name = name;
+		this.change({customer});
+	}
+	
+	acceptCustomerAddress(addr) {
+		this.props.onCustomerAddress(addr);
+	}
+
+	render() {
+		var o = this.props.order;
+		return (<div>
+			<div className="title">{this.props.title}</div>
+			<DriverSelector
+				onChange={this.driverChange.bind(this)}
+				value={o.driverId}/>
+			<Options
+				options={o.opt}
+				onChange={this.optionsChange.bind(this)}
+				disabled={o.driverId != '0'}/>
+			<CustomerSection
+				name={o.customer.name} phone={o.customer.phone}
+				onPhoneChange={this.customerPhoneChange.bind(this)}
+				onNameChange={this.customerNameChange.bind(this)}
+				onAddress={this.acceptCustomerAddress.bind(this)}
+			/>
+		</div>);
+	}
+};
 
 function OrderForm( order )
 {
@@ -27,18 +79,9 @@ function OrderForm( order )
 	this.on = listeners.add.bind( listeners );
 
 	var $container = $( '<form class="order-form"></form>' );
-	/*
-	 * Form title, for order number.
-	 */
-	var $title = $( '<div class="title"></div>' );
-	$container.append( $title );
-	
-	var driverContainer = document.createElement('div');
-	$container.append(driverContainer);
-	
-	var optionsContainer = document.createElement('div');
-	$container.append(optionsContainer);
 
+	var title = order ? ("Заказ № " + order.order_id) : "Новый заказ";
+	
 	var s = {
 		driverId: '0',
 		opt: {
@@ -79,62 +122,36 @@ function OrderForm( order )
 			phone: order.customer_phone
 		};
 	}
-
-	function onDriverChange(id) {
-		s.driverId = id;
-		r();
-	}
 	
-	function onOptionsChange(opt) {
-		s.opt = opt;
-		r();
-	}
-
+	var fc = document.createElement('div');
+	$container.append(fc);
+	
 	function r() {
-		ReactDOM.render(<DriverSelector
-			onChange={onDriverChange}
-			value={s.driverId}/>, driverContainer);
-		ReactDOM.render(<Options
-			options={s.opt}
-			onChange={onOptionsChange}
-			disabled={s.driverId != '0'}/>, optionsContainer);
+		ReactDOM.render(<FormPart title={title} order={s}
+			onChange={onFormChange}
+			onCustomerAddress={onCustomerAddress}/>, fc);
 	}
 	r();
+	
+	function onFormChange(order) {
+		s = order;
+		r();
+	}
 
+	this.setTitle = function( newtitle, className ) {
+		if(className) console.warn("Can't set title className");
+		title = newtitle;
+		r();
+	};
+	
 	this.setDriver = function( id ) {
 		s.driverId = id;
 		r();
 	};
-
-
-	var customerContainer = document.createElement('div');
-	$container.append(customerContainer);
 	
-	function r3() {
-		ReactDOM.render(<CustomerSection
-			name={s.customer.name} phone={s.customer.phone}
-			onPhoneChange={onCustomerPhoneChange}
-			onNameChange={onCustomerNameChange}
-			onAddress={onCustomerAddressAccept}
-			/>, customerContainer);
-	}
-	r3();
-	
-	function onCustomerPhoneChange(phone) {
-		s.customer.phone = phone;
-		s.customer.name = '';
-		r3();
-	}
-	
-	function onCustomerNameChange(name) {
-		s.customer.name = name;
-		r3();
-	}
-	
-	function onCustomerAddressAccept(addr) {
+	function onCustomerAddress(addr) {
 		from.set({addr: addr, loc_id: null});
 	}
-
 
 	$container.append( '<b>Место подачи</b>' );
 	var from = new AddressGroupSection( $container );
@@ -209,15 +226,11 @@ function OrderForm( order )
 	}
 
 	if( order ) {
-		$title.html( "Заказ № " + order.order_id );
 		$comments.val( order.comments );
 		from.set( order.src );
 		if( order.dest ) {
 			to.set( order.dest );
 		}
-	}
-	else {
-		$title.html( "Новый заказ" );
 	}
 
 	this.root = function() {
@@ -256,10 +269,7 @@ function OrderForm( order )
 		r3();
 	};
 
-	this.setTitle = function( title, className ) {
-		$title.html( title );
-		$title.get(0).className = 'title ' + className;
-	};
+	
 
 	function addButtons()
 	{
