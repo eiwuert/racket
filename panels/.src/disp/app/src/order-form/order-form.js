@@ -28,8 +28,32 @@ function OrderForm( order )
 	 */
 	var $title = $( '<div class="title"></div>' );
 	$container.append( $title );
+	
+	var driverContainer = document.createElement('div');
+	$container.append(driverContainer);
+	
+	var s = {
+		driverId: '0'
+	};
+	
+	function onDriverChange(id) {
+		s.driverId = id;
+		syncOptions();
+		r();
+	}
 
-	var driver = new DriverSection( div() );
+	function r() {
+		ReactDOM.render(<DriverSelector onChange={onDriverChange} value={s.driverId}/>, driverContainer);
+	}
+	r();
+
+	this.setDriver = function( id ) {
+		s.driverId = id;
+		syncOptions();
+		r();
+	};
+
+
 	var options = new OptionsSection( div() );
 	var customer = new CustomerSection( div() );
 
@@ -48,22 +72,14 @@ function OrderForm( order )
 
 	var postpone = new PostponeSection( div() );
 
-	/*
-	 * When a driver is specified, turn the options off.
-	 */
-	driver.onChange( syncOptions );
+	
 
 	customer.onAddress( function( addr ) {
 		from.set({addr: addr, loc_id: null});
 	});
 
-	this.setDriver = function( id ) {
-		driver.set( id );
-		syncOptions();
-	};
-
 	function syncOptions() {
-		if( driver.get() != '0' ) {
+		if( s.driverId != '0' ) {
 			options.disable();
 		} else {
 			options.enable();
@@ -154,7 +170,7 @@ function OrderForm( order )
 		$ok.on( 'click', function() {
 			listeners.call( "submit", {
 				order: getOrder(),
-				driverId: driver.get()
+				driverId: s.driverId
 			});
 		});
 		$no.on( "click", function() {
@@ -184,44 +200,4 @@ function OrderForm( order )
 
 		return order;
 	}
-}
-
-
-function DriverSection( $container )
-{
-	var s = {
-		id: ''
-	};
-
-	var _onChange = function() {};
-
-	function onChange(e) {
-		var t = e.target;
-		s.id = e.target.value;
-		r();
-		_onChange.call(t);
-	}
-
-	this.onChange = function(f) {
-		_onChange = f;
-	};
-	
-	function r() {
-		ReactDOM.render(<DriverSelector onChange={onChange} value={s.id}/>, $container.get(0));
-	}
-	
-	r();
-
-	
-	this.get = function() {
-		var id = s.id;
-		if( id != "" ) {
-			id = parseInt( id, 10 );
-		}
-		return id;
-	};
-	this.set = function( id ) {
-		s.id = parseInt(id, 10);
-		r();
-	};
 }
