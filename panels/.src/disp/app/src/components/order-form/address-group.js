@@ -12,6 +12,7 @@ export default class Group extends React.Component {
 	}
 
 	locChange(loc) {
+		loc.addr = loc.addr || emptyAddr();
 		this.props.onChange(loc);
 	}
 

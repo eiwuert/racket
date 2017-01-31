@@ -159,6 +159,21 @@ function OrderForm( order )
 		comments: ''
 	};
 	
+	s.sourceLocation = {
+		addr: emptyAddr(),
+		id: null,
+		name: ''
+	};
+	s.destLocation = {
+		addr: emptyAddr(),
+		id: null,
+		name: ''
+	};
+	s.sourceLocation.addr.place = disp.param('default_city');
+	s.destLocation.addr.place = disp.param('default_city');
+	
+		
+	
 	if(order) {
 		s.opt = {
 			carClass: order.opt_car_class,
@@ -174,6 +189,21 @@ function OrderForm( order )
 		}
 		else {
 			s.postpone.disabled = true;
+		}
+		
+		if( order.src ) {
+			s.sourceLocation = {
+				addr: order.src.addr || emptyAddr(),
+				id: order.src.loc_id,
+				name: ''
+			};
+		}
+		if(order.dest) {
+			s.destLocation = {
+				addr: order.dest.addr || emptyAddr(),
+				id: order.dest.loc_id,
+				name: ''
+			};
 		}
 		
 		s.customer = {
@@ -210,21 +240,50 @@ function OrderForm( order )
 	};
 	
 	function onCustomerAddress(addr) {
-		from.set({addr: addr, loc_id: null});
+		s.sourceLocation = {
+			addr: addr,
+			id: null,
+			name: ''
+		};
 	}
-
+	
+	var c3a = document.createElement('div');
+	var c3b = document.createElement('div');
+	
+	
 	$container.append( '<b>Место подачи</b>' );
-	var from = new AddressGroupSection( $container );
-
+	$container.append(c3a);
+	
 	var $toHeader = $( '<b>Место назначения</b>' );
+	$toHeader.addClass( 'more' );
 	$container.append( $toHeader );
-	var to = new AddressGroupSection( div( 'dest-section' ), 'dest' );
+	
+	var $wrap = $('<div></div>');
+	$container.append($wrap);
+	$wrap.hide();
+	$wrap.append(c3b);
+	
 	$toHeader.on( 'click', function() {
-		to.slideToggle();
+		$wrap.slideToggle();
 		$toHeader.toggleClass( 'more' );
 	});
-	to.hide();
-	$toHeader.addClass( 'more' );
+	
+	
+	
+	function r3() {
+		ReactDOM.render(<Group loc={s.sourceLocation} onChange={onSourceChange}/>, c3a);
+		ReactDOM.render(<Group loc={s.destLocation} onChange={onDestChange}/>, c3b);
+	}
+	r3();
+	
+	function onSourceChange(loc) {
+		s.sourceLocation = loc;
+		r3();
+	}
+	function onDestChange(loc) {
+		s.destLocation = loc;
+		r3();
+	}
 
 	var c2 = document.createElement('div');
 	$container.append(c2);
@@ -266,13 +325,6 @@ function OrderForm( order )
 		return $d;
 	}
 
-	if( order ) {
-		from.set( order.src );
-		if( order.dest ) {
-			to.set( order.dest );
-		}
-	}
-
 	this.root = function() {
 		return $container.get(0);
 	};
@@ -299,7 +351,9 @@ function OrderForm( order )
 	};
 
 	this.setQueue = function( qid ) {
-		from.setQueue( qid );
+		var loc = disp.getQueueLocation(qid);
+		if(!loc) return;
+		s.sourceLocation = loc;
 	};
 
 	this.setCustomerPhone = function( phone, trigger ) {
@@ -339,8 +393,14 @@ function OrderForm( order )
 		);
 		data.comments = s.comments;
 		data.status = Order.prototype.POSTPONED;
-		data.src = from.get();
-		data.dest = to.get();
+		data.src = {
+			addr: s.sourceLocation.addr,
+			loc_id: s.sourceLocation.id
+		};
+		data.dest = {
+			addr: s.destLocation.addr,
+			loc_id: s.destLocation.id
+		};
 
 		if( order ) {
 			for( var k in data ) {
@@ -362,58 +422,5 @@ function emptyAddr() {
 		building: '',
 		entrance: '',
 		apartment: ''
-	};
-}
-
-function AddressGroupSection( $container )
-{
-	var c = document.createElement('div');
-	$container.append(c);
-	var $c = $(c);
-	
-	var loc = {
-		addr: emptyAddr(),
-		id: null,
-		name: ''
-	};
-	loc.addr.place = disp.param('default_city');
-	
-	function r() {
-		ReactDOM.render(<Group loc={loc} onChange={onChange}/>, c);
-	}
-	r();
-	
-	function onChange(newLoc) {
-		loc = newLoc;
-		loc.addr = loc.addr || emptyAddr();
-		r();
-	}
-
-	this.get = function() {
-		return {
-			addr: loc.addr,
-			loc_id: loc.id
-		};
-	};
-
-	this.set = function(spec)
-	{
-		loc.addr = spec.addr || emptyAddr();
-		loc.id = spec.loc_id;
-		r();
-	};
-
-	this.setQueue = function(qid)
-	{
-		loc = disp.getQueueLocation(qid) || {addr: emptyAddr(), id: null};
-		r();
-	};
-
-	this.slideToggle = function() {
-		$c.slideToggle( 'fast' );
-	};
-
-	this.hide = function() {
-		$c.hide();
 	};
 }
