@@ -6,17 +6,47 @@ import AddressInput from '../address-input.js';
 import SuggestInput from '../suggest-input.js';
 
 export default class Group extends React.Component {
+	
+	addrChange(addr) {
+		this.props.onChange({addr: addr, id: null, name: ''});
+	}
+
+	locChange(loc) {
+		this.props.onChange(loc);
+	}
+
 	render() {
 		return (<div>
-			<Object
-				value={this.props.locName}
-				onChange={this.props.onLocChange}/>
-			<QueueSelector
-				value={this.props.qid}
-				onChange={this.props.onQueueChange}/>
+			<LocSelector
+				loc={this.props.loc}
+				onChange={this.locChange.bind(this)}/>
 			<AddressInput
-				address={this.props.addr}
-				onChange={this.props.onAddrChange}/>
+				address={this.props.loc.addr}
+				onChange={this.addrChange.bind(this)}/>
+		</div>);
+	}
+};
+
+class LocSelector extends React.Component {
+	queueChange(qid) {
+		var loc = disp.getQueueLocation(qid);
+		this.props.onChange(loc);
+	}
+
+	onLocChange(loc) {
+		this.props.onChange(loc);
+	}
+
+	render() {
+		var loc = this.props.loc;
+		var qid = locQueue(loc);
+		return (<div>
+			<ObjectInput
+				loc={loc}
+				onChange={this.onLocChange.bind(this)}/>
+			<QueueSelector
+				value={qid}
+				onChange={this.queueChange.bind(this)}/>
 		</div>);
 	}
 };
@@ -40,20 +70,41 @@ class QueueSelector extends React.Component {
 	}
 };
 
-class Object extends React.Component {
+class ObjectInput extends React.Component {
 	lookup(term, callback) {
 		disp.suggestLocations(term).then(function(locations) {
 			var strings = obj.column(locations, 'name');
 			callback(strings, locations);
 		});
 	}
+
+	onChange(name, loc) {
+		if(!loc) loc = {id: null, addr: null};
+		loc.name = name;
+		this.props.onChange(loc);
+	}
+
 	render() {
 		return (<div>
 			<label>Объект</label>
 			<SuggestInput
-				value={this.props.value}
+				value={this.props.loc.name}
 				func={this.lookup}
-				onChange={this.props.onChange}/>
+				onChange={this.onChange.bind(this)}/>
 		</div>);
 	}
 };
+
+
+
+function locQueue(loc) {
+	if(!loc) return null;
+	var loc_id = loc.id;
+	var q = disp.queues();
+	for( var i = 0; i < q.length; i++ ) {
+		if( q[i].loc_id == loc_id ) {
+			return q[i].id;
+		}
+	}
+	return null;
+}
