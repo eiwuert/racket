@@ -41,6 +41,11 @@ function OrderForm( order )
 			carClass: 'ordinary',
 			vip: false,
 			term: false
+		},
+		postpone: {
+			disabled: true,
+			time: 0,
+			remind: 0
 		}
 	};
 	
@@ -50,6 +55,16 @@ function OrderForm( order )
 			vip: order.opt_vip == '1',
 			term: order.opt_terminal == '1'
 		};
+		
+		if( order.exp_arrival_time )
+		{
+			s.postpone.disabled = false;
+			s.postpone.time = order.exp_arrival_time;
+			s.postpone.remind = Math.round((order.exp_arrival_time - order.reminder_time)/60);
+		}
+		else {
+			s.postpone.disabled = true;
+		}
 	}
 
 	function onDriverChange(id) {
@@ -97,7 +112,36 @@ function OrderForm( order )
 	var postponeContainer = document.createElement('div');
 	$container.append(postponeContainer);
 	
-	var postpone = new PostponeSection(postponeContainer);
+	function r2() {
+		ReactDOM.render(<Postpone
+			enabled={!s.postpone.disabled}
+			time={s.postpone.time}
+			remind={s.postpone.remind}
+			onTimeChange={onPostponeTimeChange}
+			onRemindChange={onPostponeRemindChange}
+			onToggle={onPostponeToggle}
+			/>, postponeContainer);
+	}
+	r2();
+	
+	function onPostponeToggle(enable) {
+		s.postpone.disabled = !enable;
+		if(enable) {
+			s.postpone.time = time.utc();
+			s.postpone.remind = 0;	
+		}
+		r2();
+	}
+	
+	function onPostponeTimeChange(t) {
+		s.postpone.time = t;
+		r2();
+	}
+	
+	function onPostponeRemindChange(remind) {
+		s.postpone.remind = remind;
+		r2();
+	}
 
 	
 
@@ -135,7 +179,6 @@ function OrderForm( order )
 		$title.html( "Заказ № " + order.order_id );
 		customer.set( order );
 		$comments.val( order.comments );
-		postpone.set( order );
 		from.set( order.src );
 		if( order.dest ) {
 			to.set( order.dest );
@@ -199,6 +242,20 @@ function OrderForm( order )
 
 	function getOrder()
 	{
+		var p;
+		if(!s.postpone.disabled) {
+			p = {
+				exp_arrival_time: s.postpone.time,
+				reminder_time: s.postpone.time - s.postpone.remind * 60
+			};
+		}
+		else {
+			p = {
+				exp_arrival_time: null,
+				reminder_time: null
+			};
+		}
+
 		var data = obj.merge(
 			{
 				opt_car_class: s.opt.carClass,
@@ -206,7 +263,7 @@ function OrderForm( order )
 				opt_terminal: s.opt.term? '1' : '0'
 			},
 			customer.get(),
-			postpone.get()
+			p
 		);
 		data.comments = $comments.val();
 		data.status = Order.prototype.POSTPONED;
@@ -223,74 +280,4 @@ function OrderForm( order )
 
 		return order;
 	}
-}
-
-function PostponeSection( container )
-{
-	var c = document.createElement('div');
-	container.appendChild(c);
-	var s = {
-		disabled: true,
-		time: 0,
-		remind: 0
-	};
-
-	function r() {
-		ReactDOM.render(<Postpone
-			enabled={!s.disabled}
-			time={s.time}
-			remind={s.remind}
-			onTimeChange={onTimeChange}
-			onRemindChange={onRemindChange}
-			onToggle={onToggle}
-			/>, c);
-	}
-	r();
-
-	function onToggle(enable) {
-		s.disabled = !enable;
-		if(enable) {
-			s.time = time.utc();
-			s.remind = 0;	
-		}
-		r();
-	}
-	
-	function onTimeChange(t) {
-		s.time = t;
-		r();
-	}
-	
-	function onRemindChange(remind) {
-		s.remind = remind;
-		r();
-	}
-
-	this.get = function()
-	{
-		if(!s.disabled) {
-			return {
-				exp_arrival_time: s.time,
-				reminder_time: s.time - s.remind * 60
-			};
-		}
-		return {
-			exp_arrival_time: null,
-			reminder_time: null
-		};
-	};
-
-	this.set = function( order )
-	{
-		if( order.exp_arrival_time )
-		{
-			s.disabled = false;
-			s.time = order.exp_arrival_time;
-			s.remind = Math.round((order.exp_arrival_time - order.reminder_time)/60);
-		}
-		else {
-			s.disabled = true;
-		}
-		r();
-	};
 }
