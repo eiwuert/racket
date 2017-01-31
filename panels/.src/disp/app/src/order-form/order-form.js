@@ -1,16 +1,20 @@
 export default OrderForm;
 
 import AddressGroupSection from './address.js';
-import CustomerSection from './customer.js';
+import CustomerSection from '../components/order-form/customer.js';
 import Options from '../components/order-form/options.js';
 import Postpone from '../components/order-form/postpone.js';
 import Listeners from '../../lib/listeners.js';
 import html from '../../lib/html.js';
 import obj from '../../lib/obj.js';
 import {tpl} from '../../lib/fmt.js';
+import {formatPhone} from '../../lib/format.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+
+var time = window.time;
+var Order = window.Order;
 
 import DriverSelector from '../components/order-form/driver-selector.js';
 
@@ -46,6 +50,10 @@ function OrderForm( order )
 			disabled: true,
 			time: 0,
 			remind: 0
+		},
+		customer: {
+			name: '',
+			phone: ''
 		}
 	};
 	
@@ -65,6 +73,11 @@ function OrderForm( order )
 		else {
 			s.postpone.disabled = true;
 		}
+		
+		s.customer = {
+			name: order.customer_name,
+			phone: order.customer_phone
+		};
 	}
 
 	function onDriverChange(id) {
@@ -94,7 +107,34 @@ function OrderForm( order )
 	};
 
 
-	var customer = new CustomerSection( div() );
+	var customerContainer = document.createElement('div');
+	$container.append(customerContainer);
+	
+	function r3() {
+		ReactDOM.render(<CustomerSection
+			name={s.customer.name} phone={s.customer.phone}
+			onPhoneChange={onCustomerPhoneChange}
+			onNameChange={onCustomerNameChange}
+			onAddress={onCustomerAddressAccept}
+			/>, customerContainer);
+	}
+	r3();
+	
+	function onCustomerPhoneChange(phone) {
+		s.customer.phone = phone;
+		s.customer.name = '';
+		r3();
+	}
+	
+	function onCustomerNameChange(name) {
+		s.customer.name = name;
+		r3();
+	}
+	
+	function onCustomerAddressAccept(addr) {
+		from.set({addr: addr, loc_id: null});
+	}
+
 
 	$container.append( '<b>Место подачи</b>' );
 	var from = new AddressGroupSection( $container );
@@ -143,13 +183,6 @@ function OrderForm( order )
 		r2();
 	}
 
-	
-
-	customer.onAddress( function( addr ) {
-		from.set({addr: addr, loc_id: null});
-	});
-
-
 	/*
 	 * Comments input.
 	 */
@@ -177,7 +210,6 @@ function OrderForm( order )
 
 	if( order ) {
 		$title.html( "Заказ № " + order.order_id );
-		customer.set( order );
 		$comments.val( order.comments );
 		from.set( order.src );
 		if( order.dest ) {
@@ -216,7 +248,12 @@ function OrderForm( order )
 	};
 
 	this.setCustomerPhone = function( phone, trigger ) {
-		customer.setPhone( phone, trigger );
+		s.customer.phone = phone;
+		s.customer.name = '';
+		if( trigger ) {
+			console.warn("Can't trigger phonechange");
+		}
+		r3();
 	};
 
 	this.setTitle = function( title, className ) {
@@ -255,14 +292,15 @@ function OrderForm( order )
 				reminder_time: null
 			};
 		}
-
+		
 		var data = obj.merge(
 			{
 				opt_car_class: s.opt.carClass,
 				opt_vip: s.opt.vip? '1' : '0',
-				opt_terminal: s.opt.term? '1' : '0'
+				opt_terminal: s.opt.term? '1' : '0',
+				customer_phone: s.customer.phone,
+				customer_name: s.customer.name
 			},
-			customer.get(),
 			p
 		);
 		data.comments = $comments.val();
