@@ -20,17 +20,17 @@ var Order = window.Order;
 import DriverSelector from '../components/order-form/driver-selector.js';
 
 class FormPart extends React.Component {
+	change(diff) {
+		var o = _.extend(_.clone(this.props.order), diff);
+		this.props.onChange(o);
+	}
+
 	driverChange(id) {
 		this.change({driverId: id});
 	}
 	
 	optionsChange(opt) {
 		this.change({opt});
-	}
-	
-	change(diff) {
-		var o = _.extend(_.clone(this.props.order), diff);
-		this.props.onChange(o);
 	}
 	
 	customerPhoneChange(phone) {
@@ -70,6 +70,64 @@ class FormPart extends React.Component {
 	}
 };
 
+class FormPart2 extends React.Component {
+	change(diff) {
+		var o = _.extend(_.clone(this.props.order), diff);
+		this.props.onChange(o);
+	}
+
+	onPostponeToggle(enable) {
+		var postpone = _.clone(this.props.order.postpone);
+		postpone.disabled = !enable;
+		if(enable) {
+			postpone.time = time.utc();
+			postpone.remind = 0;	
+		}
+		this.change({postpone});
+	}
+	
+	onPostponeTimeChange(t) {
+		var postpone = _.clone(this.props.order.postpone);
+		postpone.time = t;
+		this.change({postpone});
+	}
+	
+	onPostponeRemindChange(remind) {
+		var postpone = _.clone(this.props.order.postpone);
+		postpone.remind = remind;
+		this.change({postpone});
+	}
+	
+	commentsChange(event) {
+		this.change({comments: event.target.value});
+	}
+
+	render() {
+		var o = this.props.order;
+		return (<div>
+			<Postpone
+				enabled={!o.postpone.disabled}
+				time={o.postpone.time}
+				remind={o.postpone.remind}
+				onTimeChange={this.onPostponeTimeChange.bind(this)}
+				onRemindChange={this.onPostponeRemindChange.bind(this)}
+				onToggle={this.onPostponeToggle.bind(this)}
+			/>
+			<div>
+				<label>Комментарии</label>
+				<textarea value={o.comments} onChange={this.commentsChange.bind(this)}/>
+			</div>
+			<div className="status">{this.props.status}</div>
+			<button type="button"
+				disabled={this.props.status != ''}
+				onClick={this.props.onAccept}>Отправить</button>
+			<button type="button"
+				className="cancel"
+				onClick={this.props.onCancel}>Закрыть</button>
+		</div>);
+	}
+};
+
 function OrderForm( order )
 {
 	var listeners = new Listeners([
@@ -97,7 +155,8 @@ function OrderForm( order )
 		customer: {
 			name: '',
 			phone: ''
-		}
+		},
+		comments: ''
 	};
 	
 	if(order) {
@@ -121,6 +180,7 @@ function OrderForm( order )
 			name: order.customer_name,
 			phone: order.customer_phone
 		};
+		s.comments = order.comments;
 	}
 	
 	var fc = document.createElement('div');
@@ -166,55 +226,36 @@ function OrderForm( order )
 	to.hide();
 	$toHeader.addClass( 'more' );
 
-	var postponeContainer = document.createElement('div');
-	$container.append(postponeContainer);
+	var c2 = document.createElement('div');
+	$container.append(c2);
+	
+	var status = '';
 	
 	function r2() {
-		ReactDOM.render(<Postpone
-			enabled={!s.postpone.disabled}
-			time={s.postpone.time}
-			remind={s.postpone.remind}
-			onTimeChange={onPostponeTimeChange}
-			onRemindChange={onPostponeRemindChange}
-			onToggle={onPostponeToggle}
-			/>, postponeContainer);
+		ReactDOM.render(<FormPart2 order={s}
+			status={status}
+			onChange={onFormChange2}
+			onAccept={accept}
+			onCancel={cancel}
+			 />, c2);
 	}
 	r2();
-	
-	function onPostponeToggle(enable) {
-		s.postpone.disabled = !enable;
-		if(enable) {
-			s.postpone.time = time.utc();
-			s.postpone.remind = 0;	
-		}
-		r2();
-	}
-	
-	function onPostponeTimeChange(t) {
-		s.postpone.time = t;
-		r2();
-	}
-	
-	function onPostponeRemindChange(remind) {
-		s.postpone.remind = remind;
-		r2();
-	}
 
-	/*
-	 * Comments input.
-	 */
-	var $comments = $( html.textarea( "Комментарии" ) );
-	div().append( $comments );
-	$comments = $comments.filter( 'textarea' );
-	/*
-	 * Status string, for progress reports.
-	 */
-	var $status = $( '<div class="status"></div>' );
-	$container.append( $status );
-	/*
-	 * Buttons.
-	 */
-	addButtons();
+	function onFormChange2(order) {
+		s = order;
+		r2();
+	}
+	
+	function accept() {
+		listeners.call( "submit", {
+			order: getOrder(),
+			driverId: s.driverId
+		});
+	}
+	
+	function cancel() {
+		listeners.call( "cancel" );
+	}
 
 	var $controls = $container.find( "input, select, button:not(.cancel), textarea" );
 
@@ -226,7 +267,6 @@ function OrderForm( order )
 	}
 
 	if( order ) {
-		$comments.val( order.comments );
 		from.set( order.src );
 		if( order.dest ) {
 			to.set( order.dest );
@@ -237,18 +277,20 @@ function OrderForm( order )
 		return $container.get(0);
 	};
 
-	this.lock = function( status ) {
-		$status.html( status );
+	this.lock = function( newstatus ) {
+		status = newstatus;
+		r2();
 		$controls.prop( "disabled", true );
 	};
 
 	this.unlock = function() {
-		$status.html( "" );
+		status = '';
+		r2();
 		$controls.prop( "disabled", false );
 	};
 
 	this.locked = function() {
-		return $controls.prop( "disabled" );
+		return status != '';
 	};
 
 	this.orderId = function() {
@@ -266,26 +308,8 @@ function OrderForm( order )
 		if( trigger ) {
 			console.warn("Can't trigger phonechange");
 		}
-		r3();
+		r();
 	};
-
-	
-
-	function addButtons()
-	{
-		var $ok = $( '<button type="button">Отправить</button>' );
-		var $no = $( '<button type="button" class="cancel">Закрыть</button>' );
-		$container.append( $ok ).append( $no );
-		$ok.on( 'click', function() {
-			listeners.call( "submit", {
-				order: getOrder(),
-				driverId: s.driverId
-			});
-		});
-		$no.on( "click", function() {
-			listeners.call( "cancel" );
-		});
-	}
 
 	function getOrder()
 	{
@@ -313,7 +337,7 @@ function OrderForm( order )
 			},
 			p
 		);
-		data.comments = $comments.val();
+		data.comments = s.comments;
 		data.status = Order.prototype.POSTPONED;
 		data.src = from.get();
 		data.dest = to.get();
