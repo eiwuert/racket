@@ -128,18 +128,7 @@ class FormPart2 extends React.Component {
 	}
 };
 
-function OrderForm( order )
-{
-	var listeners = new Listeners([
-		"cancel",
-		"submit"
-	]);
-	this.on = listeners.add.bind( listeners );
-
-	var $container = $( '<form class="order-form"></form>' );
-
-	var title = order ? ("Заказ № " + order.order_id) : "Новый заказ";
-	
+function getState(order) {
 	var s = {
 		driverId: '0',
 		opt: {
@@ -156,23 +145,21 @@ function OrderForm( order )
 			name: '',
 			phone: ''
 		},
-		comments: ''
-	};
-	
-	s.sourceLocation = {
-		addr: emptyAddr(),
-		id: null,
-		name: ''
-	};
-	s.destLocation = {
-		addr: emptyAddr(),
-		id: null,
-		name: ''
+		comments: '',
+		
+		sourceLocation: {
+			addr: emptyAddr(),
+			id: null,
+			name: ''
+		},
+		destLocation: {
+			addr: emptyAddr(),
+			id: null,
+			name: ''
+		}
 	};
 	s.sourceLocation.addr.place = disp.param('default_city');
 	s.destLocation.addr.place = disp.param('default_city');
-	
-		
 	
 	if(order) {
 		s.opt = {
@@ -212,6 +199,22 @@ function OrderForm( order )
 		};
 		s.comments = order.comments;
 	}
+	
+	return s;
+}
+
+function OrderForm( order )
+{
+	var listeners = new Listeners([
+		"cancel",
+		"submit"
+	]);
+	this.on = listeners.add.bind( listeners );
+
+	var $container = $( '<form class="order-form"></form>' );
+
+	var title = order ? ("Заказ № " + order.order_id) : "Новый заказ";
+	var s = getState(order);
 	
 	var fc = document.createElement('div');
 	$container.append(fc);
@@ -267,8 +270,6 @@ function OrderForm( order )
 		$wrap.slideToggle();
 		$toHeader.toggleClass( 'more' );
 	});
-	
-	
 	
 	function r3() {
 		ReactDOM.render(<Group loc={s.sourceLocation} onChange={onSourceChange}/>, c3a);
