@@ -6,51 +6,39 @@ import Options from '../components/order-form/options.js';
 export default function OptionsSection( $container )
 {
 	var s = {
-		carClass: 'ordinary',
-		vip: false,
-		term: false,
+		opt: {
+			carClass: 'ordinary',
+			vip: false,
+			term: false
+		},
 		disabled: false
 	};
 	
 	function sync() {
 		ReactDOM.render(
-			<Options carClass={s.carClass} onCarClassChange={onClassChange}
-				vip={s.vip} onVipChange={onVipChange}
-				term={s.term} onTermChange={onTermChange}
-				disabled={s.disabled} />,
+			<Options options={s.opt} onChange={onChange} disabled={s.disabled} />,
 			$container.get(0)
 		);
 	}
-	
 	sync();
 	
-	function onClassChange(e) {
-		s.carClass = e.target.value;
-		sync();
-	}
-	
-	function onVipChange(e) {
-		s.vip = e.target.checked;
-		sync();
-	}
-	
-	function onTermChange(e) {
-		s.term = e.target.checked;
+	function onChange(opt) {
+		s.opt = opt;
 		sync();
 	}
 
 	this.get = function() {
 		return {
-			opt_car_class: s.carClass,
-			opt_vip: s.vip? '1' : '0',
-			opt_terminal: s.term? '1' : '0'
+			opt_car_class: s.opt.carClass,
+			opt_vip: s.opt.vip? '1' : '0',
+			opt_terminal: s.opt.term? '1' : '0'
 		};
 	};
 
 	this.set = function( order ) {
-		s.carClass = order.opt_car_class;
-		s.vip = order.opt_vip == '1';
-		s.term = order.opt_terminal == '1';
+		s.opt.carClass = order.opt_car_class;
+		s.opt.vip = order.opt_vip == '1';
+		s.opt.term = order.opt_terminal == '1';
 		sync();
 	};
 
