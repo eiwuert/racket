@@ -2,14 +2,17 @@ export default OrderForm;
 
 import AddressGroupSection from './address.js';
 import CustomerSection from './customer.js';
-import DriverSection from './drivers.js';
 import OptionsSection from './options.js';
 import PostponeSection from './postpone.js';
 import Listeners from '../../lib/listeners.js';
 import html from '../../lib/html.js';
 import obj from '../../lib/obj.js';
+import {tpl} from '../../lib/fmt.js';
 
-var OrderForm = ( function() {
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+import DriverSelector from '../components/order-form/driver-selector.js';
 
 function OrderForm( order )
 {
@@ -183,5 +186,42 @@ function OrderForm( order )
 	}
 }
 
-return OrderForm;
-})();
+
+function DriverSection( $container )
+{
+	var s = {
+		id: ''
+	};
+
+	var _onChange = function() {};
+
+	function onChange(e) {
+		var t = e.target;
+		s.id = e.target.value;
+		r();
+		_onChange.call(t);
+	}
+
+	this.onChange = function(f) {
+		_onChange = f;
+	};
+	
+	function r() {
+		ReactDOM.render(<DriverSelector onChange={onChange} value={s.id}/>, $container.get(0));
+	}
+	
+	r();
+
+	
+	this.get = function() {
+		var id = s.id;
+		if( id != "" ) {
+			id = parseInt( id, 10 );
+		}
+		return id;
+	};
+	this.set = function( id ) {
+		s.id = parseInt(id, 10);
+		r();
+	};
+}
