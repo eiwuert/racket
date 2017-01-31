@@ -5,12 +5,11 @@ import orderForms from '../order-form/forms.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-import AppDialog from './app-dialog.js';
 
 export default class OrdersList extends React.Component {
 	constructor(props) {
 		super(props);
-		this.listeners = new Listeners(['order-click', 'cancel-click']);
+		this.listeners = new Listeners(['order-click']);
 	}
 
 	componentDidMount() {
@@ -18,28 +17,27 @@ export default class OrdersList extends React.Component {
 		t.listeners.add('order-click', function(e) {
 			orderForms.show(e.data.order);
 		});
-		t.listeners.add('cancel-click', function(e) {
-			var order = e.data.order;
-			var disp = t.props.client;
-			window.__open(<CancelDialog order={order} client={disp} />, 'cancel-order-'+order.id);
-		});
 	}
 
 	render() {
 		var disp = this.props.client;
-		return (
-			<div className="orders-list">
-				<List disp={disp} listeners={this.listeners}
-				      class="postponed"
-				      filter={o => o.postponed()} />
-				<List disp={disp} listeners={this.listeners}
-				      class="current"
-				      filter={o => (!o.postponed() && !o.closed())} />
-				<List disp={disp} listeners={this.listeners}
-				      class="closed"
-				      filter={o => o.closed()} />
-			</div>
-			);
+		return (<div className="orders-list">
+			<List disp={disp} listeners={this.listeners}
+			      class="postponed"
+			      filter={o => o.postponed()}
+			      onCancelClick={this.props.onCancelClick}
+			      />
+			<List disp={disp} listeners={this.listeners}
+			      class="current"
+			      filter={o => (!o.postponed() && !o.closed())}
+			      onCancelClick={this.props.onCancelClick}
+			      />
+			<List disp={disp} listeners={this.listeners}
+			      class="closed"
+			      filter={o => o.closed()}
+				onCancelClick={this.props.onCancelClick}
+				/>
+		</div>);
 	}
 };
 
@@ -50,7 +48,7 @@ class List extends React.Component {
 			orders: this.props.disp.orders().filter(this.props.filter)
 		};
 	}
-
+	
 	refresh() {
 		var filter = this.props.filter;
 		var orders = this.props.disp.orders().filter(filter);
@@ -70,7 +68,7 @@ class List extends React.Component {
 		return (
 			<div className={this.props.class}>
 				<div className="list">
-					{orders.map(o => <Item listeners={this.props.listeners} key={o.order_id} order={o} />)}
+					{orders.map(o => <Item onCancelClick={this.props.onCancelClick} listeners={this.props.listeners} key={o.order_id} order={o} />)}
 				</div>
 			</div>
 			);
@@ -83,11 +81,12 @@ class Item extends React.Component {
 		this.state = {
 			className: this.className()
 		};
+		this.cancelClick = this.cancelClick.bind(this);
 	}
 
 	cancelClick(e) {
 		e.stopPropagation();
-		this.props.listeners.call('cancel-click', {order: this.props.order});
+		this.props.onCancelClick(this.props.order);
 	}
 
 	orderClick() {
@@ -120,14 +119,11 @@ class Item extends React.Component {
 
 	render() {
 		var order = this.props.order;
-		var cancelButton = '';
+		var cancelButton = null;
 		if (order.status != order.CANCELLED) {
-			cancelButton = (
-				<div className="cancel" onClick={this.cancelClick.bind(this)}>Отменить</div>
-				);
+			cancelButton = <div className="cancel" onClick={this.cancelClick}>Отменить</div>;
 		}
-		return (
-			<div className={this.state.className} onClick={this.orderClick.bind(this)}>
+		return (<div className={this.state.className} onClick={this.orderClick.bind(this)}>
 				{cancelButton}
 				<div className="number">№ {order.order_id}</div>
 				<DestinationInfo order={order} />
@@ -246,42 +242,3 @@ function formatDriver(order)
 	}
 	return '';
 }
-
-class CancelDialog extends React.Component {
-	cancel() {
-		var $content = $(ReactDOM.findDOMNode(this));
-		var $reason = $content.find( 'textarea' );
-		var $restore = $content.find( 'input[type="checkbox"]' );
-		
-		var reason = $reason.val();
-		var restore = $restore.is( ':checked' );
-
-		var order = this.props.order;
-		var disp = this.props.client;
-		var p = disp.cancelOrder( order.order_uid, reason );
-		if( restore && order.taxi_id ) {
-			p.then( function() {
-				disp.restoreDriverQueue( order.taxi_id );
-			});
-		}
-		return p;
-	}
-
-	render() {
-		var order = this.props.order;
-		return (
-			<AppDialog id={this.props.id}
-				title="Отмена заказа"
-				yes="Отменить заказ" no="Закрыть окно"
-				onAccept={this.cancel.bind(this)}>
-
-				<p>Отменить заказ?</p>
-				<textarea placeholder="Причина отмены"></textarea>
-				{order.taxi_id && 
-					<div>
-					<label><input type="checkbox" /> Восстановить в очереди</label>
-					</div>}
-			</AppDialog>
-		);
-	}
-};
