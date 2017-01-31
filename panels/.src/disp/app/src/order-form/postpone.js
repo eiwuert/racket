@@ -1,105 +1,12 @@
 import {fmt} from '../../lib/fmt.js';
 import html from '../../lib/html.js';
 
-export default function PostponeSection( $container )
-{
-	var $top = $( html.checkbox( "Отложить заказ" ) );
-	var $sub = $( '<div></div>' );
-	$sub.html( html.input( "Время подачи машины", "datetime-local" )
-		+ '<label>Напоминание</label><input type="number" min="0" step="5" value="5" size="2"> мин. до подачи' );
-	$container.append( $top );
-	$container.append( $sub );
+var React = require('react');
+var ReactDOM = require('react-dom');
 
-	var $checkbox = $top.filter( "input" ).eq(0);
-	var $time = $sub.find( "input" ).eq(0);
-	var $remind = $sub.find( "input" ).eq(1);
-
-	html5.fix( $time.get(0) );
-
-	/*
-	 * Because these elements are not inserted into the document yet,
-	 * jQuery's 'slideUp' won't work, so we additionally call 'hide'
-	 * at the beginning if necessary.
-	 */
-	if( !$checkbox.get(0).checked ) {
-		$sub.hide();
-	}
-
-	$checkbox.on( 'change', sync );
-	sync();
-	function sync()
-	{
-		/*
-		 * When checked, enable inputs and set default time.
-		 */
-		if( $checkbox.get(0).checked )
-		{
-			enable();
-			setTime( time.utc() );
-			$remind.val( 0 );
-			$sub.slideDown( "fast" );
-		}
-		/*
-		 * When unchecked, disable the inputs.
-		 */
-		else {
-			disable();
-			$sub.slideUp( "fast" );
-		}
-	}
-
-	this.get = function()
-	{
-		var data = {};
-		if( $checkbox.is( ':checked' ) ) {
-			var t = getTime();
-			data.exp_arrival_time = t;
-			data.reminder_time = t - $remind.val() * 60;
-		}
-		else {
-			data.exp_arrival_time = null;
-			data.reminder_time = null;
-		}
-		return data;
-	};
-
-	this.set = function( order )
-	{
-		if( order.exp_arrival_time )
-		{
-			$checkbox.prop( 'checked', true );
-			$sub.show();
-
-			setTime( order.exp_arrival_time );
-
-			var min = Math.round((order.exp_arrival_time - order.reminder_time)/60);
-			$remind.val( min )
-			enable();
-		}
-		else {
-			$checkbox.prop( 'checked', false );
-			disable();
-		}
-	};
-
-	//--
-
-	function enable() {
-		$time.prop( 'disabled', false );
-		$remind.prop( 'disabled', false );
-	}
-
-	function disable() {
-		$time.prop( 'disabled', true );
-		$remind.prop( 'disabled', true );
-	}
-
-	/*
-	 * Set postponement time input to the given UTC value.
-	 */
-	function setTime( utc )
-	{
-		var d = new Date( time.local( utc ) * 1000 );
+class Postpone extends React.Component {
+	render() {
+		var d = new Date(time.local(this.props.time) * 1000);
 		var s = fmt( "%d-%02d-%02dT%02d:%02d",
 			d.getFullYear(),
 			d.getMonth() + 1,
@@ -107,44 +14,131 @@ export default function PostponeSection( $container )
 			d.getHours(),
 			d.getMinutes()
 		);
-		$time.val( s );
-		/*
-		 * The datetime input is possibly emulated, so we have to
-		 * trigger the change event.
-		 */
-		$time.trigger( "change" );
+		return (<div>
+			<div>
+				<label>Время подачи машины</label>
+				<input type="datetime-local"
+					disabled={this.props.disabled}
+					value={s}
+					onChange={this.props.onTimeChange}/>
+			</div>
+			<div>
+				<label>Напоминание</label>
+				<input type="number" min="0" step="5" size="2"
+					disabled={this.props.disabled}
+					value={this.props.remind}
+					onChange={this.props.onRemindChange}
+					/> мин. до подачи
+				</div>
+		</div>);
+	}
+};
+
+export default function PostponeSection( $container )
+{
+	var $top = $( html.checkbox( "Отложить заказ" ) );
+	var $checkbox = $top.filter( "input" ).eq(0);
+
+	var $sub = $( '<div></div>' );
+	$container.append( $top );
+	$container.append( $sub );
+	
+	var s = {
+		disabled: true,
+		time: 0,
+		remind: 0
+	};
+
+	function r() {
+		ReactDOM.render(<Postpone
+			disabled={s.disabled}
+			time={s.time}
+			remind={s.remind}
+			onTimeChange={onTimeChange}
+			onRemindChange={onRemindChange}
+			/>, $sub.get(0));
+	}
+	
+	function onTimeChange(e) {
+		var t = parseTime(e.target.value);
+		if(!t) return;
+		s.time = t;
+		r();
+	}
+	
+	function onRemindChange(e) {
+		s.remind = e.target.value;
+		r();
 	}
 
-	function getTime()
-	{
-		var d = parseDateTime( $time.val() );
-		if( !d ) return null;
-		return time.utc( Math.round( d.getTime() / 1000 ) );
-	}
-
-	//--
-
-	/*
-	 * Parses a string like "2000-01-01T00:00[:00]" and returns a Date
-	 * object.
-	 */
-	function parseDateTime( dt )
-	{
-		var re = /^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)$/;
-		var m = dt.match( re );
-
-		if( !m ) {
-			re = /^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d)$/;
-			m = dt.match( re );
+	
+	$checkbox.on( 'change', function() {
+		s.disabled = !this.checked;
+		if(!s.disabled) {
+			s.time = time.utc();
+			s.remind = 0;
 		}
+		r();
+	});
 
-		if( !m ) return null;
+	this.get = function()
+	{
+		if(!s.disabled) {
+			return {
+				exp_arrival_time: s.time,
+				reminder_time: s.time - s.remind * 60
+			};
+		}
+		return {
+			exp_arrival_time: null,
+			reminder_time: null
+		};
+	};
 
-		var Y = m[1];
-		var M = m[2] - 1; /* 0-based, surprise! */
-		var D = m[3];
-		var h = m[4];
-		var m = m[5];
-		return new Date( Y, M, D, h, m );
+	this.set = function( order )
+	{
+		if( order.exp_arrival_time )
+		{
+			$checkbox.prop( 'checked', true );
+			s.disabled = false;
+			s.time = order.exp_arrival_time;
+			s.remind = Math.round((order.exp_arrival_time - order.reminder_time)/60);
+		}
+		else {
+			$checkbox.prop( 'checked', false );
+			s.disabled = true;
+		}
+		r();
+	};
+}
+
+function parseTime(dt) {
+	var d = parseDateTime(dt);
+	if(!d) return null;
+	return time.utc(Math.round(d.getTime()/1000));
+}
+
+/*
+ * Parses a string like "2000-01-01T00:00[:00]" and returns a Date
+ * object.
+ */
+function parseDateTime( dt )
+{
+	var re = /^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)$/;
+	var match = dt.match( re );
+	if( !match ) {
+		re = /^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d)$/;
+		match = dt.match( re );
 	}
+
+	if( !match ) return null;
+
+	var Y = match[1];
+	var M = match[2] - 1; /* 0-based, surprise! */
+	var D = match[3];
+	var h = match[4];
+	var m = match[5];
+	var s = (match.length > 6)? match[6] : 0;
+	var d = new Date( Y, M, D, h, m, s );
+	return d;
 }

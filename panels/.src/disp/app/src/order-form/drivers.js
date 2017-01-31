@@ -1,28 +1,56 @@
 import {tpl} from '../../lib/fmt.js';
 import html from '../../lib/html.js';
 
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+class DriverSelector extends React.Component {
+	render() {
+		return (<div>
+			<label>Водитель</label>
+			<select className="driver" value={this.props.value} onChange={this.props.onChange}>
+			<option value="0">Выбрать автоматически</option>
+			{disp.drivers().map(d => <option key={d.id} value={d.id}>{d.call_id} - {d.surname()}</option>)}
+			</select>
+		</div>);
+	}
+};
+
 export default function DriverSection( $container )
 {
-	var s = '<select class="driver"><option value="0">Выбрать автоматически</option>';
-	disp.drivers().forEach( function( d ) {
-		s += tpl( '<option value="?">? - ?</option>',
-			d.id, d.call_id, d.surname() );
-	});
-	s += '</select>';
-	var $select = $( s );
+	var s = {
+		id: ''
+	};
 
-	$container.append( '<label>Водитель</label>' );
-	$container.append( $select );
+	var _onChange = function() {};
 
-	this.onChange = function( f ) { $select.on( 'change', f ); };
+	function onChange(e) {
+		var t = e.target;
+		s.id = e.target.value;
+		r();
+		_onChange.call(t);
+	}
+
+	this.onChange = function(f) {
+		_onChange = f;
+	};
+	
+	function r() {
+		ReactDOM.render(<DriverSelector onChange={onChange} value={s.id}/>, $container.get(0));
+	}
+	
+	r();
+
+	
 	this.get = function() {
-		var id = $select.val();
+		var id = s.id;
 		if( id != "" ) {
 			id = parseInt( id, 10 );
 		}
 		return id;
 	};
 	this.set = function( id ) {
-		$select.val( id );
+		s.id = parseInt(id, 10);
+		r();
 	};
 }
