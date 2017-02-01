@@ -19,6 +19,7 @@ import DialogHost from './dialog-host.js';
 
 import SessionRequestDialog from './session-request-dialog.js';
 import CancelOrderDialog from './cancel-order-dialog.js';
+import orderForms from '../order-form/forms.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -86,6 +87,10 @@ export default class App extends React.Component {
 	onCancelClick(order) {
 		window.__open(<CancelOrderDialog order={order} client={disp} />, 'cancel-order-'+order.id);
 	}
+	
+	onOrderClick(order) {
+		orderForms.show(order);
+	}
 
 	render() {
 		return (
@@ -93,7 +98,10 @@ export default class App extends React.Component {
 				<Toolbar client={this.client} />
 				<SettingsButton client={this.client} />
 				<OrderButton client={this.client}/>
-				<OrdersList client={this.client} onCancelClick={this.onCancelClick}/>
+				<OrdersList
+					client={this.client}
+					onOrderClick={this.onOrderClick}
+					onCancelClick={this.onCancelClick}/>
 				<Tabs onSelect={this.onSelect.bind(this)} selectedIndex={this.state.tabIndex}>
 					<TabList>
 						<Tab>Очереди</Tab>

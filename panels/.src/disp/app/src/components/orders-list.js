@@ -1,40 +1,29 @@
 import {formatPhone} from '../../lib/format.js';
 import {fmt} from '../../lib/fmt.js';
-import Listeners from '../../lib/listeners.js';
-import orderForms from '../order-form/forms.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 export default class OrdersList extends React.Component {
-	constructor(props) {
-		super(props);
-		this.listeners = new Listeners(['order-click']);
-	}
-
-	componentDidMount() {
-		var t = this;
-		t.listeners.add('order-click', function(e) {
-			orderForms.show(e.data.order);
-		});
-	}
-
 	render() {
 		var disp = this.props.client;
 		return (<div className="orders-list">
-			<List disp={disp} listeners={this.listeners}
+			<List disp={disp}
 			      class="postponed"
 			      filter={o => o.postponed()}
+			      onOrderClick={this.props.onOrderClick}
 			      onCancelClick={this.props.onCancelClick}
 			      />
-			<List disp={disp} listeners={this.listeners}
+			<List disp={disp}
 			      class="current"
 			      filter={o => (!o.postponed() && !o.closed())}
+			      onOrderClick={this.props.onOrderClick}
 			      onCancelClick={this.props.onCancelClick}
 			      />
-			<List disp={disp} listeners={this.listeners}
+			<List disp={disp}
 			      class="closed"
 			      filter={o => o.closed()}
+			      onOrderClick={this.props.onOrderClick}
 				onCancelClick={this.props.onCancelClick}
 				/>
 		</div>);
@@ -68,7 +57,10 @@ class List extends React.Component {
 		return (
 			<div className={this.props.class}>
 				<div className="list">
-					{orders.map(o => <Item onCancelClick={this.props.onCancelClick} listeners={this.props.listeners} key={o.order_id} order={o} />)}
+					{orders.map(o => <Item key={o.order_id}
+						order={o}
+						onOrderClick={this.props.onOrderClick}
+						onCancelClick={this.props.onCancelClick} />)}
 				</div>
 			</div>
 			);
@@ -82,6 +74,7 @@ class Item extends React.Component {
 			className: this.className()
 		};
 		this.cancelClick = this.cancelClick.bind(this);
+		this.orderClick = this.orderClick.bind(this);
 	}
 
 	cancelClick(e) {
@@ -90,7 +83,7 @@ class Item extends React.Component {
 	}
 
 	orderClick() {
-		this.props.listeners.call('order-click', {order: this.props.order});
+		this.props.onOrderClick(this.props.order);
 	}
 
 	componentDidMount() {
@@ -123,7 +116,7 @@ class Item extends React.Component {
 		if (order.status != order.CANCELLED) {
 			cancelButton = <div className="cancel" onClick={this.cancelClick}>Отменить</div>;
 		}
-		return (<div className={this.state.className} onClick={this.orderClick.bind(this)}>
+		return (<div className={this.state.className} onClick={this.orderClick}>
 				{cancelButton}
 				<div className="number">№ {order.order_id}</div>
 				<DestinationInfo order={order} />
