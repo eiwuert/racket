@@ -1,48 +1,73 @@
 import Map from '../../lib/map.js';
 
+var React = require('react'), ReactDOM = require('react-dom');
+
+class Controls extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			ready: false,
+			areas: []
+		}
+	}
+
+	componentDidMount() {
+		getBounds().then(areas => this.setState({ready: true, areas: areas}));
+	}
+
+	render() {
+		if(!this.state.ready) {
+			return <div>Загрузка...</div>;
+		}
+
+		return (<div>{
+			this.state.areas.map((b, i) => <button type="button" key={i}
+				onClick={this.props.onSelect.bind(undefined, b)}>{b.name}</button>)
+		}</div>);
+	}
+};
+
+
 export default function MapWidget( disp )
 {
 	var $container = $( '<div id="map-widget"></div>' );
 	this.root = function() {
 		return $container.get(0);
 	};
+	
+	
 
 	// driver id => marker name
 	var driverClasses = {};
 
-	var map;
-
-	/*
-	 * The main program of the widget.
-	 */
-	getBounds().then( function( bounds )
+	var map = createMap();
+	
+	function createMap()
 	{
-		var controls = createControls( bounds );
-		map = createMap();
-		controls.onClick( function( bounds ) {
-			map.setBounds( bounds );
+		var $map = $( '<div class="map"></div>' );
+		$container.append( $map );
+		map = new Map( $map.get(0) );
+		map.addZoomControl( 'topleft' );
+		map.setBounds = function( b ) {
+			map.fitBounds( b.min_lat, b.max_lat, b.min_lon, b.max_lon );
+		};
+		$(window).on( "resize", function() {
+			map.leaflet.invalidateSize();
 		});
-		onFirstDisplay( $container, function() {
-			map.setBounds( bounds[0] );
-		});
-		showQueues( map );
-		showDrivers( map );
+		return map;
+	}
+	onFirstDisplay( $container, function() {
+		getBounds().then(bounds => map.setBounds(bounds[0]));
 	});
-
-	function onFirstDisplay( $e, func )
-	{
-		var $w = $(window);
-		function track()
-		{
-			if( !$e.is( ":visible" ) ) {
-				return;
-			}
-			func();
-			$w.off( "resize", track );
-		}
-
-		$w.on( "resize", track );
-		track();
+	showQueues( map );
+	showDrivers( map );
+	
+	var c = document.createElement('div');
+	$container.append(c);
+	ReactDOM.render(<Controls onSelect={selectArea}/>, c);
+	
+	function selectArea(bounds) {
+		map.setBounds(bounds);
 	}
 
 	this.setPosition = function( coords ) {
@@ -71,78 +96,6 @@ export default function MapWidget( disp )
 			return;
 		}
 		putCarMarker( map, driver );
-	}
-
-	//--
-
-	function getBounds()
-	{
-		var P = {ok: null, fail: null};
-		var promise = new Promise( function( ok, fail )
-		{
-			P.ok = ok;
-			P.fail = fail;
-		});
-
-		var minskBounds = {
-			name: "Минск и окрестность",
-			min_lat: 53.87,
-			max_lat: 53.93,
-			min_lon: 27.555,
-			max_lon: 27.575
-		};
-
-		var town = disp.param( "default_city" );
-		if( town ) {
-			mapdata.getAddressBounds( {place: town}, function( bounds ) {
-				bounds.name = town;
-				P.ok( [bounds] );
-			});
-		}
-		else {
-			P.ok( [minskBounds] );
-		}
-		return promise;
-	}
-
-	/*
-	 * Creates buttons that switch map bounds.
-	 */
-	function createControls( bounds )
-	{
-		var callback = null;
-		bounds.forEach( function( b )
-		{
-			var $button = $( '<button type="button">'+b.name+'</button>' );
-			$container.append( $button );
-			$button.on( 'click', function() {
-				if( callback ) callback( b );
-			});
-		});
-
-		return {
-			onClick: function( f ) {
-				if(callback) {
-					throw "only one onClick allowed";
-				}
-				callback = f;
-			}
-		};
-	}
-
-	function createMap()
-	{
-		var $map = $( '<div class="map"></div>' );
-		$container.append( $map );
-		map = new Map( $map.get(0) );
-		map.addZoomControl( 'topleft' );
-		map.setBounds = function( b ) {
-			map.fitBounds( b.min_lat, b.max_lat, b.min_lon, b.max_lon );
-		};
-		$(window).on( "resize", function() {
-			map.leaflet.invalidateSize();
-		});
-		return map;
 	}
 
 	function showQueues( map )
@@ -248,4 +201,59 @@ export default function MapWidget( disp )
 	}
 
 	//--
+}
+
+function onFirstDisplay( $e, func )
+{
+	var $w = $(window);
+	function track()
+	{
+		if( !$e.is( ":visible" ) ) {
+			return;
+		}
+		func();
+		$w.off( "resize", track );
+	}
+
+	$w.on( "resize", track );
+	track();
+}
+
+
+var boundsCache = null;
+
+function getBounds()
+{
+	if(boundsCache) {
+		return Promise.resolve(boundsCache);
+	}
+
+	var P = {ok: null, fail: null};
+	var promise = new Promise( function( ok, fail )
+	{
+		P.ok = ok;
+		P.fail = fail;
+	});
+
+	var minskBounds = {
+		name: "Минск и окрестность",
+		min_lat: 53.87,
+		max_lat: 53.93,
+		min_lon: 27.555,
+		max_lon: 27.575
+	};
+
+	var town = disp.param( "default_city" );
+	if( town ) {
+		mapdata.getAddressBounds( {place: town}, function( bounds ) {
+			bounds.name = town;
+			boundsCache = [bounds];
+			P.ok( [bounds] );
+		});
+	}
+	else {
+		boundsCache = [minskBounds];
+		P.ok( [minskBounds] );
+	}
+	return promise;
 }
