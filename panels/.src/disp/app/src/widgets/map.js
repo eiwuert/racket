@@ -2,28 +2,59 @@ import Map from '../../lib/map.js';
 
 var React = require('react'), ReactDOM = require('react-dom');
 
-class Controls extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			ready: false,
-			areas: []
-		}
-	}
+class MapC extends React.Component {
 
 	componentDidMount() {
-		getBounds().then(areas => this.setState({ready: true, areas: areas}));
+		if(this.map) return;
+		
+		this.map = this.createMap(ReactDOM.findDOMNode(this).firstChild);
+		this.props.setMap(this.map);
+		
+		this.markers = [];
+		
+		var l = this.map.leaflet;
+		var t = this;
+	
+		l.on('move', function() {
+			var b = l.getBounds();
+			t.props.onMove({
+				min_lat: b.getSouth(),
+				max_lat: b.getNorth(),
+				min_lon: b.getWest(),
+				max_lon: b.getEast()
+			});
+		});
+	}
+
+	createMap(c) {
+		var map = new Map(c);
+		map.addZoomControl( 'topleft' );
+		map.setBounds = function( b ) {
+			map.fitBounds( b.min_lat, b.max_lat, b.min_lon, b.max_lon );
+		};
+		return map;
+	}
+	
+	componentWillReceiveProps(nextProps) {
+		var t = this;
+		var map = this.map;
+		var l = map.leaflet;
+
+		map.setBounds(nextProps.bounds);
+		
+		t.markers.forEach(m => l.removeLayer(m));
+		t.markers = [];
+		nextProps.markers.forEach(function(p, i) {
+			var m = L.marker(p.coords, p.options);
+			m.addTo(l);
+			t.markers.push(m);
+		});
 	}
 
 	render() {
-		if(!this.state.ready) {
-			return <div>Загрузка...</div>;
-		}
-
-		return (<div>{
-			this.state.areas.map((b, i) => <button type="button" key={i}
-				onClick={this.props.onSelect.bind(undefined, b)}>{b.name}</button>)
-		}</div>);
+		return (<div>
+			<div className="map"></div>
+		</div>);
 	}
 };
 
@@ -34,94 +65,99 @@ export default function MapWidget( disp )
 	this.root = function() {
 		return $container.get(0);
 	};
-	
-	
 
 	// driver id => marker name
 	var driverClasses = {};
-
-	var map = createMap();
 	
-	function createMap()
-	{
-		var $map = $( '<div class="map"></div>' );
-		$container.append( $map );
-		map = new Map( $map.get(0) );
-		map.addZoomControl( 'topleft' );
-		map.setBounds = function( b ) {
-			map.fitBounds( b.min_lat, b.max_lat, b.min_lon, b.max_lon );
-		};
+	//var map = createMap();
+	var map;
+
+	function receiveMap(m) {
+		map = m;
+		
 		$(window).on( "resize", function() {
 			map.leaflet.invalidateSize();
 		});
-		return map;
+		showDrivers( map );
 	}
-	onFirstDisplay( $container, function() {
-		getBounds().then(bounds => map.setBounds(bounds[0]));
-	});
-	showQueues( map );
-	showDrivers( map );
 	
 	var c = document.createElement('div');
 	$container.append(c);
 	ReactDOM.render(<Controls onSelect={selectArea}/>, c);
 	
-	function selectArea(bounds) {
-		map.setBounds(bounds);
+	
+	var s = {
+		bounds: {min_lat: -50, max_lat: 50, min_lon: -180, max_lon: 180},
+		markers: []
+	};
+	
+	var flagIcon = L.icon({
+		iconUrl: "/res/dispatcher/images/flag-icon.png",
+		iconSize: [25, 27],
+		iconAnchor: [12, 27]
+	});
+	
+	disp.queues().forEach( function( q )
+	{
+		var coords = q.coords();
+		if( !coords[0] || !coords[1] ) {
+			return;
+		}
+		var options = {
+			title: q.name,
+			icon: flagIcon
+		};
+		s.markers.push({coords, options});
+	});
+	
+	var d = document.createElement('div');
+	$container.append(d);
+	function r() {
+		ReactDOM.render(<MapC setMap={receiveMap}
+			bounds={s.bounds}
+			markers={s.markers}
+			onMove={onMove}
+			/>, d);
+	}
+	r();
+	
+	function onMove(b) {
+		s.bounds = b;
 	}
 
+	function selectArea(bounds) {
+		s.bounds = bounds;
+		r();
+		//map.setBounds(bounds);
+	}
+	
+	getBounds().then(function(list) {
+		selectArea(list[0]);
+	});
+
 	this.setPosition = function( coords ) {
-		map.panTo( coords[0], coords[1] );
+		var b = s.bounds;
+		var center = [
+			(b.min_lat + b.max_lat)/2,
+			(b.min_lon + b.max_lon)/2
+		];
+		var dLat = coords[0] - center[0];
+		var dLon = coords[1] - center[1];
+		
+		b.min_lat += dLat;
+		b.max_lat += dLat;
+		b.min_lon += dLon;
+		b.max_lon += dLon;
+		selectArea(b);
+
 
 	};
 
 	this.setZoom = function( level ) {
-		map.setZoom( level );
+		console.warn("No setZoom");
+		//map.setZoom( level );
 	};
-
-	this.setClass = function( driverId, className ) {
-		driverClasses[driverId] = className;
-		updateMarker( driverId );
-	};
-
-	this.removeClass = function( driverId, className ) {
-		delete driverClasses[driverId];
-		updateMarker( driverId );
-	};
-
-	function updateMarker( id )
-	{
-		var driver = disp.getDriver( id );
-		if( driver.is_online != '1' ) {
-			return;
-		}
-		putCarMarker( map, driver );
-	}
-
-	function showQueues( map )
-	{
-		var flagIcon = L.icon({
-			iconUrl: "/res/dispatcher/images/flag-icon.png",
-			iconSize: [25, 27],
-			iconAnchor: [12, 27]
-		});
-
-		disp.queues().forEach( function( q )
-		{
-			var coords = q.coords();
-			if( !coords[0] || !coords[1] ) {
-				return;
-			}
-			var options = {
-				title: q.name,
-				icon: flagIcon
-			};
-
-			map.setMarker( 'q_' + q.queue_id,
-				coords[0], coords[1], options );
-		});
-	}
-
+	
 	function showDrivers( map )
 	{
 		disp.drivers().forEach( function( d )
@@ -148,6 +184,29 @@ export default function MapWidget( disp )
 			putCarMarker( map, driver );
 		});
 	}
+
+
+
+	this.setClass = function( driverId, className ) {
+		driverClasses[driverId] = className;
+		updateMarker( driverId );
+	};
+
+	this.removeClass = function( driverId, className ) {
+		delete driverClasses[driverId];
+		updateMarker( driverId );
+	};
+
+	function updateMarker( id )
+	{
+		var driver = disp.getDriver( id );
+		if( driver.is_online != '1' ) {
+			return;
+		}
+		putCarMarker( map, driver );
+	}
+
+	
 
 	//--
 
@@ -257,3 +316,28 @@ function getBounds()
 	}
 	return promise;
 }
+
+class Controls extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			ready: false,
+			areas: []
+		}
+	}
+
+	componentDidMount() {
+		getBounds().then(areas => this.setState({ready: true, areas: areas}));
+	}
+
+	render() {
+		if(!this.state.ready) {
+			return <div>Загрузка...</div>;
+		}
+
+		return (<div>{
+			this.state.areas.map((b, i) => <button type="button" key={i}
+				onClick={this.props.onSelect.bind(undefined, b)}>{b.name}</button>)
+		}</div>);
+	}
+};
