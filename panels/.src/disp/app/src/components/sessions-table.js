@@ -1,8 +1,9 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-
 import {formatDateTime} from '../../lib/format.js';
 import AppDialog from './app-dialog.js';
+import EventRepeater from '../event-repeater.js';
+
+var React = require('react');
+var ReactDOM = require('react-dom');
 
 export default class SessionsTable extends React.Component {
 	openClick() {
@@ -19,33 +20,37 @@ export default class SessionsTable extends React.Component {
 class Table extends React.Component {
 	constructor(props) {
 		super(props);
-		
-		var t = this;
-		var disp = t.props.client;
-		t.mounted = false;
-		disp.on( 'sessions-changed', function() {
-			if(t.mounted) t.forceUpdate();
-		});
+		var disp = props.client;
+		this.state = {
+			sessions: disp.sessions()
+		};
+		this.events = new EventRepeater(disp);
+		this.refresh = this.refresh.bind(this);
 	}
+	
+	refresh() {
+		this.setState({sessions: this.props.client.sessions()});
+	}
+
 	componentDidMount() {
-		this.mounted = true;
+		this.events.on('sessions-changed', this.refresh);
 	}
 
 	componentWillUnmount() {
-		this.mounted = false;
+		this.events.off('sessions-changed', this.refresh);
 	}
 
 	render() {
 		var disp = this.props.client;
 		return (<table className="table table-bordered table-condensed">
-		<thead><tr><th>Начало</th>
-		<th>Водитель</th>
-		<th>Машина</th>
-		<th></th></tr>
-		</thead>
-		<tbody>
-			{ disp.sessions().map(s => <Row key={s.session_id} session={s} client={this.props.client}/>) }
-		</tbody>
+			<thead><tr><th>Начало</th>
+				<th>Водитель</th>
+				<th>Машина</th>
+				<th></th></tr>
+			</thead>
+			<tbody>
+				{ disp.sessions().map(s => <Row key={s.session_id} session={s} client={this.props.client}/>) }
+			</tbody>
 		</table>);
 	}
 };
