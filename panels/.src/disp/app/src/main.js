@@ -1,5 +1,4 @@
 import '../lib/autocomplete.js';
-import '../lib/jobs.js';
 import '../lib/mapdata.js';
 import '../lib/html5.js';
 import DX from './dx.js';
