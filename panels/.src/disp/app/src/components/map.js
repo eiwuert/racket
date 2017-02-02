@@ -1,18 +1,39 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import Map from '../../lib/map.js';
-
 export default class MapC extends React.Component {
+	createMap() {
+		var root = ReactDOM.findDOMNode(this).firstChild;
+
+		var b = this.props.bounds;
+		var center = [
+			(b.min_lat + b.max_lat) / 2,
+			(b.min_lon + b.max_lon) / 2
+		];
+
+		var map = L.map(root, {
+			center: center,
+			zoom: 11
+		});
+
+		var osm = new L.TileLayer(
+			location.protocol + "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				minZoom: 7, maxZoom: 18,
+				attribution: "Map data © OpenStreetMap contributors"
+			}
+		);
+		map.addLayer(osm);
+		return map;
+	}
 
 	componentDidMount() {
-		if (this.map)
+		if (this.map) {
 			return;
-
-		this.map = this.createMap(ReactDOM.findDOMNode(this).firstChild);
+		}
+		this.map = this.createMap();
 		this.markers = [];
 
-		var l = this.map.leaflet;
+		var l = this.map;
 		var t = this;
 
 		l.on('moveend', function() {
@@ -28,25 +49,20 @@ export default class MapC extends React.Component {
 		this.sync(this.props);
 	}
 
-	createMap(c) {
-		var map = new Map(c);
-		map.addZoomControl('topleft');
-		map.setBounds = function(b) {
-			map.fitBounds(b.min_lat, b.max_lat, b.min_lon, b.max_lon);
-		};
-		return map;
-	}
-
 	sync(props) {
 		var t = this;
-		var map = this.map;
-		var l = map.leaflet;
+		var l = this.map;
 
-		map.setBounds(props.bounds);
+		var b = props.bounds;
+		console.log(b);
+		l.fitBounds([
+			[b.min_lat, b.min_lon],
+			[b.max_lat, b.max_lon]
+		]);
 
 		t.markers.forEach(m => l.removeLayer(m));
 		t.markers = [];
-		props.markers.forEach(function(p, i) {
+		props.markers.forEach(function(p) {
 			var m = L.marker(p.coords, p.options);
 			m.addTo(l);
 			t.markers.push(m);
@@ -59,7 +75,7 @@ export default class MapC extends React.Component {
 
 	render() {
 		return (<div>
-	<div className="map"></div>
-</div>);
+			<div className="map"></div>
+		</div>);
 	}
 };
