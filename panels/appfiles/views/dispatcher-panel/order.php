@@ -9,12 +9,16 @@ require_script( 'res/lib/jquery.js' );
 require_script( 'res/lib/leaflet/leaflet.js' );
 require_script( 'res/lib/leaflet/leaflet.label.js' );
 require_script( 'res/lib/fill.js' );
-require_stylesheet( 'res/lib/admin.css' );
+//require_stylesheet( 'res/lib/admin.css' );
 
 require_stylesheet( 'res/dispatcher/main.css' );
 require_stylesheet( 'res/dispatcher/order.css' );
 require_script( 'res/dispatcher/core.js' );
 require_script( 'res/dispatcher/main.js' );
+
+require_stylesheet('res/lib/bootstrap/css/bootstrap.min.css');
+require_stylesheet('res/lib/bootstrap/css/bootstrap-theme.min.css');
+require_script('res/lib/bootstrap/js/bootstrap.min.js');
 ?>
 </head>
 <body>
