@@ -29,6 +29,6 @@ export default class DriversTable extends React.Component {
 				car_color: c.color
 			};
 		});
-		return <Table cols={columns} data={data} className="items" />;
+		return <Table cols={columns} data={data}/>;
 	}
 };

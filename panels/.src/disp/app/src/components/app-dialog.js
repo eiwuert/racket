@@ -42,10 +42,16 @@ export default class AppDialog extends React.Component {
 				<div className="content">{this.props.children}</div>
 				<div className="buttons">
 					{this.props.yes &&
-						<button type="button" onClick={this.accept.bind(this)}>{this.props.yes}</button>}
-					<button type="button" onClick={this.decline.bind(this)}>{this.props.no}</button>
+						<button type="button"
+							className={"btn " + this.props.yesClass}
+							onClick={this.accept.bind(this)}>{this.props.yes}</button>
+					}
+					<button type="button" className="btn" onClick={this.decline.bind(this)}>{this.props.no}</button>
 				</div>
 			</div>
 		);
 	}
+};
+AppDialog.defaultProps = {
+	yesClass: 'btn-primary'
 };

@@ -47,32 +47,29 @@ class DriversFilter extends React.Component {
 		var s = this.props.state;
 		var t = this;
 
-		return (<div id="cars-selector">
+		return (<div className="drivers-selector">
 			<b>Выбор водителей</b>
-			<span>
-				<label><input
-					type="checkbox" name="term"
-					checked={s.term}
-					onChange={t.change}/> терминал</label>
-			</span>
-			<span>
+			<label className="checkbox-inline"><input
+				type="checkbox" name="term"
+				checked={s.term}
+				onChange={t.change}/> терминал
+			</label>
 			{
 				disp.driverTypes().map(function(type, i) {
 					var checked = s.types.indexOf(type.type_id) != -1;
 
-					return (<label key={i}><input
+					return (<label  className="checkbox-inline"
+						key={i}><input
 						type="checkbox" name="types"
 						value={type.type_id}
 						checked={checked}
 						onChange={t.change}/> {type.name}</label>);
 				})
 			}
-			</span>
-			<span>
 			{
 				disp.driverGroups().map(function(group, i) {
 					var checked = s.groups.indexOf(group.group_id) != -1;
-					return <label key={i}><input
+					return <label className="checkbox-inline" key={i}><input
 						type="checkbox"
 						name="groups"
 						value={group.group_id}
@@ -81,7 +78,6 @@ class DriversFilter extends React.Component {
 						/> {group.name}</label>;
 				})
 			}
-			</span>
 		</div>);
 	}
 };

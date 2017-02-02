@@ -19,6 +19,6 @@ export default class OrderButton extends React.Component {
 		});
 	}
 	render() {
-		return <button type="button" className="order-button">Создать заказ (insert)</button>;
+		return <button type="button" className="order-button btn btn-primary">Создать заказ (insert)</button>;
 	}
 };

@@ -37,7 +37,7 @@ export default class OrdersTable extends React.Component {
 		return (
 			<div>
 				{filter(this)}
-				<table className="items">
+				<table className="table table-bordered table-condensed">
 					<thead>
 						<tr>
 							<th>Время создания</th>
@@ -90,6 +90,17 @@ class TableRow extends React.Component {
 		var order = this.props.order;
 		var driver = disp.getDriver(order.taxi_id);
 		var car = driver ? disp.getDriverCar(driver.id) : null;
+		var stateClass = 'status';
+		if(order.status == order.DROPPED) {
+			stateClass += ' warning';
+		}
+		else if(order.postponed()) {
+			stateClass += ' info';
+		}
+		else if(order.closed()) {
+			stateClass += ' success';
+		}
+
 		return (
 			<tr>
 				<td className="time">{formatDateTime(time.local(order.time_created))}</td>
@@ -99,7 +110,7 @@ class TableRow extends React.Component {
 				<td className="comments">{order.comments}</td>
 				<td className="driver">{driver ? driver.format() : ''}</td>
 				<td className="car">{car ? car.format() : ''}</td>
-				<td className="status">{order.statusName()}</td>
+				<td className={stateClass}>{order.statusName()}</td>
 			</tr>
 			);
 	}

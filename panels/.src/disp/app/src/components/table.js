@@ -17,6 +17,10 @@ export default class Table extends React.Component {
 	}
 };
 
+Table.defaultProps = {
+	className: 'table table-bordered table-condensed'
+};
+
 class Row extends React.Component {
 	render() {
 		var data = this.props.data;

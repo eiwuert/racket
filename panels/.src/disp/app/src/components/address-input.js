@@ -67,8 +67,8 @@ export default class AddressInput extends React.Component {
 			</div>
 			<div>
 				<label>Подъезд, квартира</label>
-				<input className="entrance" value={a.entrance} onChange={this.onChange}/>,
-				<input className="apartment" value={a.apartment} onChange={this.onChange}/>
+				<input className="entrance" size="2" value={a.entrance} onChange={this.onChange}/>,
+				<input className="apartment" size="2" value={a.apartment} onChange={this.onChange}/>
 			</div>
 		</div>);
 	};

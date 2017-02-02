@@ -27,16 +27,19 @@ export default class CancelOrderDialog extends React.Component {
 		var order = this.props.order;
 		return (
 			<AppDialog id={this.props.id}
-				title="Отмена заказа"
+				title={"Отмена заказа № " + order.order_id}
 				yes="Отменить заказ" no="Закрыть окно"
+				yesClass="btn-danger"
 				onAccept={this.cancel.bind(this)}>
 
-				<p>Отменить заказ?</p>
-				<textarea placeholder="Причина отмены"></textarea>
-				{order.taxi_id && 
-					<div>
-					<label><input type="checkbox" /> Восстановить в очереди</label>
-					</div>}
+				<div className="form-group">
+					<label>Причина отмены</label>
+					<textarea className="form-control" rows="2"></textarea>
+				</div>
+				{order.taxi_id &&
+				<div className="form-group">
+					<label><input type="checkbox" className="form-control" /> Восстановить в очереди</label>
+				</div>}
 			</AppDialog>
 		);
 	}

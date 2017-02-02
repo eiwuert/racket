@@ -10,7 +10,7 @@ export default class SessionsTable extends React.Component {
 	}
 	render() {
 		return (<div className="sessions-table">
-			<button type="button" onClick={this.openClick.bind(this)}>Открыть смену</button>
+			<button type="button" className="btn btn-default" onClick={this.openClick.bind(this)}>Открыть смену</button>
 			<Table client={this.props.client}/>
 		</div>);
 	}
@@ -37,7 +37,7 @@ class Table extends React.Component {
 
 	render() {
 		var disp = this.props.client;
-		return (<table className="items">
+		return (<table className="table table-bordered table-condensed">
 		<thead><tr><th>Начало</th>
 		<th>Водитель</th>
 		<th>Машина</th>
@@ -87,7 +87,7 @@ class Row extends React.Component {
 			<td>{formatDateTime( time.local( s.time_started ) )}</td>
 			<td>{driver.call_id}</td>
 			<td>{car.name}</td>
-			<td><button type="button" onClick={this.click.bind(this)}>Закрыть</button></td>
+			<td><button type="button" className="btn btn-danger btn-xs" onClick={this.click.bind(this)}>Закрыть</button></td>
 			</tr>);
 	}
 };
@@ -115,13 +115,16 @@ class OpenSessionDialog extends React.Component {
 	render() {
 		return (
 			<AppDialog id={this.props.id} yes="Открыть" no="Отменить" onAccept={this.accept.bind(this)}>
-				<div>
+				<div className="form-group">
 					<label>Водитель</label>
 					<UnadmittedDriversList client={this.props.client} />
 				</div>
-				<div>
+				<div className="form-group">
 					<label>Одометр</label>
-					<input type="number" min="0" step="1" />
+					<div className="input-group">
+						<input type="number" min="0" step="1" className="form-control" />
+						<div className="input-group-addon"> км</div>
+					</div>
 				</div>
 			</AppDialog>);
 	}
@@ -133,7 +136,7 @@ class UnadmittedDriversList extends React.Component {
 		var disp = this.props.client;
 		var list = disp.drivers().filter(d => disp.sessionRequired(d.id));
 		return (
-			<select>
+			<select className="form-control">
 				<option value="0"></option>
 				{list.map(d => <option key={d.id} value={d.id}>{d.call_id} - {d.surname()}</option>)}
 			</select>
@@ -148,16 +151,17 @@ class CloseSessionDialog extends React.Component {
 		return this.props.client.closeSession( this.props.driver.id, odometer );
 	}
 	render() {
-		return (
-			<AppDialog
-				id={this.props.id}
-				title={'Закрытие смены для ' + this.props.driver.call_id}
-				yes="Закрыть"
-				no="Отменить"
-				onAccept={this.accept.bind(this)}>
-				<div><label>Одометр</label><input type="number" min="0" step="1" /></div>
-			</AppDialog>
-		);
+		return (<AppDialog
+			id={this.props.id}
+			title={'Закрытие смены для ' + this.props.driver.call_id}
+			yes="Закрыть"
+			no="Отменить"
+			onAccept={this.accept.bind(this)}>
+			<div className="form-group">
+				<label>Одометр</label>
+				<input className="form-control" type="number" min="0" step="1" />
+			</div>
+		</AppDialog>);
 	}
 };
 
