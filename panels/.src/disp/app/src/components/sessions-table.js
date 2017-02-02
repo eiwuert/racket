@@ -79,7 +79,7 @@ class Row extends React.Component {
 			<td>{formatDateTime( time.local( s.time_started ) )}</td>
 			<td>{driver.call_id}</td>
 			<td>{car.name}</td>
-			<td><button type="button" className="btn btn-danger btn-xs" onClick={this.click.bind(this)}>Закрыть</button></td>
+			<td><button type="button" className="btn btn-xs" onClick={this.click.bind(this)}>Закрыть</button></td>
 			</tr>);
 	}
 };

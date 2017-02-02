@@ -2,6 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import MapC from './map.js';
+var L = window.L;
 
 var flagIcon = L.icon({
 	iconUrl: "/res/dispatcher/images/flag-icon.png",
@@ -57,7 +58,7 @@ class Controls extends React.Component {
 		this.state = {
 			ready: false,
 			areas: []
-		}
+		};
 	}
 
 	componentDidMount() {
@@ -144,4 +145,3 @@ function getBounds()
 	}
 	return promise;
 }
-
