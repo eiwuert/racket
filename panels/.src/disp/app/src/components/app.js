@@ -31,8 +31,11 @@ export default class App extends React.Component {
 		super(props);
 		this.client = props.client;
 		this.state = {
-			tabIndex: 0
+			tabIndex: 0,
+			imitationsDialog: false
 		};
+
+		this.toggleImitationsDialog = this.toggleImitationsDialog.bind(this);
 	}
 
 	componentDidMount() {
@@ -84,17 +87,19 @@ export default class App extends React.Component {
 		} );
 		d.show();
 	}
-	
+
 	onCancelClick(order) {
 		window.__open(<CancelOrderDialog order={order} client={disp} />, 'cancel-order-'+order.id);
 	}
-	
+
 	onOrderClick(order) {
 		orderForms.show(order);
 	}
-	
-	imitationsDialog() {
-		window.__open(<ImitationsDialog/>, 'imitations-dialog');
+
+	toggleImitationsDialog() {
+		this.setState(function(s) {
+			return {imitationsDialog: !s.imitationsDialog};
+		});
 	}
 
 	render() {
@@ -118,7 +123,8 @@ export default class App extends React.Component {
 						<Tab>Журнал</Tab>
 					</TabList>
 					<TabPanel>
-						<button type="button" onClick={this.imitationsDialog.bind(this)}>Добавить имитацию</button>
+						<button type="button"
+							onClick={this.toggleImitationsDialog}>Добавить имитацию</button>
 						<Monitor client={this.props.client} />
 					</TabPanel>
 					<TabPanel>
@@ -131,6 +137,7 @@ export default class App extends React.Component {
 					<TabPanel><ServiceLog client={this.props.client} /></TabPanel>
 				</Tabs>
 				<DialogHost />
+				{this.state.imitationsDialog && <ImitationsDialog onDecline={this.toggleImitationsDialog}/>}
 			</div>
 		);
 	}
