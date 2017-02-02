@@ -2,7 +2,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import MapC from './map.js';
-import EventRepeater from '../event-repeater.js';
 
 var flagIcon = L.icon({
 	iconUrl: "/res/dispatcher/images/flag-icon.png",
@@ -18,9 +17,6 @@ export default class DispatcherMap extends React.Component {
 			queues: getQueues(),
 			drivers: getDrivers()
 		};
-		
-		this.repeater = new EventRepeater(disp);
-
 		this.selectArea = this.selectArea.bind(this);
 		this.refreshDrivers = this.refreshDrivers.bind(this);
 	}
@@ -34,13 +30,13 @@ export default class DispatcherMap extends React.Component {
 	}
 
 	componentDidMount() {
-		this.repeater.on('driver-online-changed', this.refreshDrivers);
-		this.repeater.on('driver-moved', this.refreshDrivers);
+		disp.events.on('driver-online-changed', this.refreshDrivers);
+		disp.events.on('driver-moved', this.refreshDrivers);
 	}
 
 	componentWillUnmount() {
-		this.repeater.off('driver-online-changed', this.refreshDrivers);
-		this.repeater.off('driver-moved', this.refreshDrivers);
+		disp.events.off('driver-online-changed', this.refreshDrivers);
+		disp.events.off('driver-moved', this.refreshDrivers);
 	}
 
 	render() {

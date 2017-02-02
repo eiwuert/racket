@@ -1,7 +1,5 @@
 import {formatDateTime} from '../../lib/format.js';
 import AppDialog from './app-dialog.js';
-import EventRepeater from '../event-repeater.js';
-
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -12,7 +10,6 @@ export default class SessionsTable extends React.Component {
 		this.state = {
 			sessions: disp.sessions()
 		};
-		this.events = new EventRepeater(disp);
 		this.refresh = this.refresh.bind(this);
 	}
 	
@@ -21,11 +18,11 @@ export default class SessionsTable extends React.Component {
 	}
 
 	componentDidMount() {
-		this.events.on('sessions-changed', this.refresh);
+		this.props.client.events.on('sessions-changed', this.refresh);
 	}
 
 	componentWillUnmount() {
-		this.events.off('sessions-changed', this.refresh);
+		this.props.client.events.off('sessions-changed', this.refresh);
 	}
 
 	render() {
