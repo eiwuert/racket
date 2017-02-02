@@ -1,4 +1,3 @@
-import ImitationsWidget from './imitations.js';
 import DriversFilterWidget from './drivers-filter.js';
 import QueuesWidget from './queues/queues-widget.js';
 import AnnounceDialog from '../../chat/announce-dialog.js';
@@ -10,10 +9,6 @@ import AnnounceDialog from '../../chat/announce-dialog.js';
 export default function initMonitorWidget( disp, tabs )
 {
 	var $p = $( '<div></div>' );
-	if( disp.imitationsEnabled() ) {
-		var im = new ImitationsWidget( disp );
-		$p.append( im.root() );
-	}
 	var filterWidget = new DriversFilterWidget( disp );
 	$p.append( filterWidget.root() );
 

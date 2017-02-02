@@ -18,6 +18,7 @@ import ServiceLog from './service-log.js';
 import DialogHost from './dialog-host.js';
 
 import SessionRequestDialog from './session-request-dialog.js';
+import ImitationsDialog from './imitations-dialog.js';
 import CancelOrderDialog from './cancel-order-dialog.js';
 import orderForms from '../order-form/forms.js';
 
@@ -91,6 +92,10 @@ export default class App extends React.Component {
 	onOrderClick(order) {
 		orderForms.show(order);
 	}
+	
+	imitationsDialog() {
+		window.__open(<ImitationsDialog/>, 'imitations-dialog');
+	}
 
 	render() {
 		return (
@@ -112,7 +117,10 @@ export default class App extends React.Component {
 						<Tab>Смены</Tab>
 						<Tab>Журнал</Tab>
 					</TabList>
-					<TabPanel><Monitor client={this.props.client} /></TabPanel>
+					<TabPanel>
+						<button type="button" onClick={this.imitationsDialog.bind(this)}>Добавить имитацию</button>
+						<Monitor client={this.props.client} />
+					</TabPanel>
 					<TabPanel>
 						<DispatcherMap client={this.props.client} />
 					</TabPanel>

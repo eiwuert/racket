@@ -35,25 +35,6 @@
 	margin-right: 2px;
 }
 
-.w-dialog .content .menu > div {
-	display: inline-block;
-	text-align: center;
-	min-width: 2.2em;
-	border-radius: 2px;
-	padding: 2px 6px;
-	margin-bottom: 2px;
-	margin-right: 2px;
-	background-color: #BACCEF;
-	color: black;
-	font-weight: bold;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.w-dialog .content .menu > div:hover {
-	background-color: powderblue;
-}
-
 .w-toast {
 	background-color: black;
 	border-radius: 4px;

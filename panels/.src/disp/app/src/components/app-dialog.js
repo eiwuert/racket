@@ -1,11 +1,12 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
+var Promise = window.Promise;
 
 export default class AppDialog extends React.Component {
 	constructor(props) {
 		super(props);
 		if(!props.id) {
-			throw new Error("Missing `id` property");
+			throw new Error("Missing `id` property. Pass `this.props.id` to the AppDialog.");
 		}
 	}
 
@@ -40,7 +41,8 @@ export default class AppDialog extends React.Component {
 				<div className="title">{this.props.title}</div>
 				<div className="content">{this.props.children}</div>
 				<div className="buttons">
-					<button type="button" onClick={this.accept.bind(this)}>{this.props.yes}</button>
+					{this.props.yes &&
+						<button type="button" onClick={this.accept.bind(this)}>{this.props.yes}</button>}
 					<button type="button" onClick={this.decline.bind(this)}>{this.props.no}</button>
 				</div>
 			</div>
