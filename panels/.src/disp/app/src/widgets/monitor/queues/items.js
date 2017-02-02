@@ -1,5 +1,5 @@
 import geo from '../../../../lib/geo.js';
-import obj from '../../../../lib/obj.js';
+var _ = require('underscore');
 
 export default function QueuesWidgetItems( disp )
 {
@@ -141,7 +141,7 @@ export default function QueuesWidgetItems( disp )
 		var n = cond.length;
 		if( n == 0 ) return false;
 		for( var i = 0; i < n; i++ ) {
-			if( obj.match( driver, cond[i] ) ) {
+			if(_.isMatch(driver, cond[i])) {
 				return true;
 			}
 		}
@@ -238,7 +238,7 @@ export default function QueuesWidgetItems( disp )
 			for( var i = 0; i < filters.length; i++ )
 			{
 				var f = filters[i];
-				if( obj.match( taxi, f ) ) {
+				if( _.isMatch( taxi, f ) ) {
 					className += ' ' + selectClass;
 					break;
 				}

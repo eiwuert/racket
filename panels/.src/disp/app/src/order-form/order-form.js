@@ -1,12 +1,11 @@
 export default OrderForm;
 
 import Listeners from '../../lib/listeners.js';
-import obj from '../../lib/obj.js';
-
 import Form from '../components/order-form/form.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+var _ = require('underscore');
 
 var Order = window.Order;
 	
@@ -134,17 +133,14 @@ function OrderForm( order )
 				reminder_time: null
 			};
 		}
-		
-		var data = obj.merge(
-			{
-				opt_car_class: s.opt.carClass,
-				opt_vip: s.opt.vip? '1' : '0',
-				opt_terminal: s.opt.term? '1' : '0',
-				customer_phone: s.customer.phone,
-				customer_name: s.customer.name
-			},
-			p
-		);
+
+		var data = _.extend(p, {
+			opt_car_class: s.opt.carClass,
+			opt_vip: s.opt.vip? '1' : '0',
+			opt_terminal: s.opt.term? '1' : '0',
+			customer_phone: s.customer.phone,
+			customer_name: s.customer.name
+		});
 		data.comments = s.comments;
 		data.status = Order.prototype.POSTPONED;
 		data.src = {

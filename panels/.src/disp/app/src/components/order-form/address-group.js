@@ -1,7 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
+var _ = require('underscore');
 
-import obj from '../../../lib/obj.js';
 import AddressInput from '../address-input.js';
 import SuggestInput from '../suggest-input.js';
 
@@ -74,7 +74,7 @@ class QueueSelector extends React.Component {
 class ObjectInput extends React.Component {
 	lookup(term, callback) {
 		disp.suggestLocations(term).then(function(locations) {
-			var strings = obj.column(locations, 'name');
+			var strings = _.pluck(locations, 'name');
 			callback(strings, locations);
 		});
 	}
