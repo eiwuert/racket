@@ -1,7 +1,16 @@
-import CalcAddressPicker from './address-picker.js';
+//import CalcAddressPicker from './address-picker.js';
 import {formatNumber} from '../../../lib/format.js';
 import {fmt} from '../../../lib/fmt.js';
 import Map from '../../../lib/map.js';
+
+var L = window.L;
+
+var React = require('react'), ReactDOM = require('react-dom');
+import AddressInput from '../../components/address-input.js';
+
+function emptyAddr() {
+	return {place: disp.param('default_city'), street: '', house: '', building: '', entrance: '', apartment: ''};
+}
 
 export default function CalculatorWidget( disp )
 {
@@ -15,9 +24,55 @@ export default function CalculatorWidget( disp )
 	$container.append( $pane );
 
 	$pane.append( '<b>Откуда</b>' );
-	var from = new CalcAddressPicker( disp, $pane.get(0) );
+	var fromContainer = document.createElement('div');
+	$pane.append(fromContainer);
 	$pane.append( '<b>Куда</b>' );
-	var dest = new CalcAddressPicker( disp, $pane.get(0) );
+	var toContainer = document.createElement('div');
+	$pane.append(toContainer);
+	
+	var s = {
+		fromAddr: emptyAddr(),
+		destAddr: emptyAddr()
+	};
+
+	function r() {
+		ReactDOM.render(<AddressInput address={s.fromAddr} onChange={setFromAddr}/>, fromContainer);
+		ReactDOM.render(<AddressInput address={s.destAddr} onChange={setDestAddr}/>, toContainer);
+	}
+	r();
+	
+	function setFromAddr(a) {
+		s.fromAddr = a;
+		syncFromAddr(fromMarker, a);
+		r();
+	}
+	
+	function setDestAddr(a) {
+		s.destAddr = a;
+		syncFromAddr(destMarker, a);
+		r();
+	}
+
+	function syncFromAddr(marker, addr) {
+		/*
+		 * Remove marker and output.
+		 */
+		marker.setLatLng( [0, 0] );
+		route.setLatLngs( [[0, 0]] );
+		$output.empty();
+		/*
+		 * Request coordinates, then put marker and recalculate.
+		 */
+		mapdata.getAddressBounds( addr, function( bounds ) {
+			if( !bounds ) {
+				$output.html( 'Не удалось определить координаты по адресу' );
+				return;
+			}
+			marker.setLatLng( [bounds.lat, bounds.lon] );
+			updateEstimation();
+		});
+	}
+	
 	var map = createMap();
 	var $fares = createFares();
 	var $output = $( '<div class="output"></div>' );
@@ -60,64 +115,41 @@ export default function CalculatorWidget( disp )
 		showData();
 	});
 
-	setupPicker( from, fromMarker );
-	setupPicker( dest, destMarker );
-
-	function setupPicker( picker, marker )
-	{
-		picker.onChange( function( addr )
-		{
-			/*
-			 * Remove marker and output.
-			 */
-			marker.setLatLng( [0, 0] );
-			route.setLatLngs( [[0, 0]] );
-			$output.empty();
-			/*
-			 * Request coordinates, then put marker and recalculate.
-			 */
-			mapdata.getAddressBounds( addr, function( bounds ) {
-				if( !bounds ) {
-					$output.html( 'Не удалось определить координаты по адресу' );
-					return;
-				}
-				marker.setLatLng( [bounds.lat, bounds.lon] );
-				updateEstimation();
-			});
-		});
-	}
-
 	fromMarker.addEventListener( "dragend",
-		syncFromMarker.bind( undefined, fromMarker, from ) );
+		syncFromMarker.bind( undefined, fromMarker, 'fromAddr' ) );
 	destMarker.addEventListener( "dragend",
-		syncFromMarker.bind( undefined, destMarker, dest ) );
+		syncFromMarker.bind( undefined, destMarker, 'destAddr' ) );
 
-	setupMap( "click", from, fromMarker );
-	setupMap( "contextmenu", dest, destMarker );
-
-	function setupMap( clickType, picker, marker )
+	map.addEventListener( 'click', function( event )
 	{
-		map.addEventListener( clickType, function( event )
-		{
-			marker.setLatLng( event.latlng );
-			syncFromMarker( marker, picker );
-			return false;
-		});
-	}
+		fromMarker.setLatLng( event.latlng );
+		syncFromMarker( fromMarker, 'fromAddr' );
+		return false;
+	});
+	
+	map.addEventListener( 'contextmenu', function( event )
+	{
+		destMarker.setLatLng( event.latlng );
+		syncFromMarker( destMarker, 'destAddr' );
+		return false;
+	});
 
-	function syncFromMarker( marker, picker )
+	function syncFromMarker( marker, addrName )
 	{
 		/*
 		 * Empty address picker, request and show address.
 		 */
-		picker.set( null );
+		s[addrName] = emptyAddr();
+		r();
+
 		var pos = marker.getLatLng();
 		mapdata.getPointAddress( pos.lat, pos.lng,
 			function( addr ) {
 				for( var k in addr ) {
 					addr[k.replace("address_", "")] = addr[k];
 				}
-				picker.set( addr );
+				s[addrName] = addr;
+				r();
 			}
 		);
 
