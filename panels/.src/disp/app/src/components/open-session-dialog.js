@@ -1,4 +1,5 @@
 import Dialog from './dialog.js';
+import DriverSelector from './driver-selector.js';
 var React = require('react'), ReactDOM = require('react-dom');
 
 /*
@@ -8,7 +9,7 @@ export default class OpenSessionDialog extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			noDriver: true
+			driverId: 0
 		};
 	}
 
@@ -25,10 +26,8 @@ export default class OpenSessionDialog extends React.Component {
 		this.props.onAccept({driverId, odometer});
 	}
 
-	onDriverChange(e) {
-		this.setState({
-			noDriver: e.target.value == '0'
-		});
+	onDriverChange(driverId) {
+		this.setState({driverId});
 	}
 
 	render() {
@@ -36,16 +35,16 @@ export default class OpenSessionDialog extends React.Component {
 		if(this.state.noDriver) {
 			cn += ' has-error';
 		}
+
+		var list = disp.drivers().filter(d => disp.sessionRequired(d.id));
+
 		return (
 			<Dialog yes="Открыть" onAccept={this.accept.bind(this)}
 				no="Отменить" onDecline={this.props.onDecline}>
-				<div className={cn}>
-					<label>Водитель</label>
-					<UnadmittedDriversList
-						client={this.props.client}
-						onChange={this.onDriverChange.bind(this)}
-						/>
-				</div>
+				<DriverSelector
+					drivers={list}
+					value={this.state.driverId}
+					onChange={this.onDriverChange.bind(this)}/>
 				<div className="form-group">
 					<label>Одометр</label>
 					<div className="input-group">
@@ -54,19 +53,5 @@ export default class OpenSessionDialog extends React.Component {
 					</div>
 				</div>
 			</Dialog>);
-	}
-};
-
-// List of drivers who need their session opened
-class UnadmittedDriversList extends React.Component {
-	render() {
-		//var disp = this.props.client;
-		var list = disp.drivers().filter(d => disp.sessionRequired(d.id));
-		return (
-			<select className="form-control" onChange={this.props.onChange}>
-				<option value="0"></option>
-				{list.map(d => <option key={d.id} value={d.id}>{d.call_id} - {d.surname()}</option>)}
-			</select>
-		);
 	}
 };

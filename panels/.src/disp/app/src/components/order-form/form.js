@@ -2,7 +2,7 @@ import Group from './address-group.js';
 import CustomerSection from './customer.js';
 import Options from './options.js';
 import Postpone from './postpone.js';
-import DriverSelector from './driver-selector.js';
+import DriverSelector from '../driver-selector.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -94,6 +94,7 @@ export default class Form extends React.Component {
 		return (<form className="order-form">
 			<div className="title">{this.props.title}</div>
 			<DriverSelector
+				drivers={disp.drivers()}
 				onChange={this.driverChange.bind(this)}
 				value={o.driverId}/>
 			<Options
