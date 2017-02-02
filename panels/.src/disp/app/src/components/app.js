@@ -17,6 +17,7 @@ import ServiceLog from './service-log.js';
 
 import DialogHost from './dialog-host.js';
 
+import OpenSessionDialog from './open-session-dialog.js';
 import SessionRequestDialog from './session-request-dialog.js';
 import ImitationsDialog from './imitations-dialog.js';
 import CancelOrderDialog from './cancel-order-dialog.js';
@@ -26,16 +27,21 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
 
+import AppDialog from './app-dialog.js';
+
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.client = props.client;
 		this.state = {
 			tabIndex: 0,
-			imitationsDialog: false
+			imitationsDialog: false,
+			newSessionDialog: false
 		};
 
 		this.toggleImitationsDialog = this.toggleImitationsDialog.bind(this);
+		this.toggleSessionDialog = this.toggleSessionDialog.bind(this);
+		this.createSession = this.createSession.bind(this);
 	}
 
 	componentDidMount() {
@@ -102,6 +108,22 @@ export default class App extends React.Component {
 		});
 	}
 
+	toggleSessionDialog() {
+		this.setState(function(s) {
+			return {newSessionDialog: !s.newSessionDialog};
+		});
+	}
+
+	createSession(spec) {
+		var {driverId, odometer} = spec;
+		disp.openSession( driverId, odometer )
+			.catch( function( error ) {
+				alert(sessionError( error ));
+				throw error;
+			});
+		this.toggleSessionDialog();
+	}
+
 	render() {
 		return (
 			<div className="dispatcher-app">
@@ -133,11 +155,20 @@ export default class App extends React.Component {
 					<TabPanel><DriversTable client={this.props.client} /></TabPanel>
 					<TabPanel><OrdersTable client={this.props.client} /></TabPanel>
 					<TabPanel><Calculator client={this.props.client} /></TabPanel>
-					<TabPanel><SessionsTable client={this.props.client} /></TabPanel>
+					<TabPanel>
+						<SessionsTable
+							onNewClick={this.toggleSessionDialog}
+							client={this.props.client} />
+					</TabPanel>
 					<TabPanel><ServiceLog client={this.props.client} /></TabPanel>
 				</Tabs>
 				<DialogHost />
-				{this.state.imitationsDialog && <ImitationsDialog onDecline={this.toggleImitationsDialog}/>}
+				{this.state.imitationsDialog &&
+					<ImitationsDialog onDecline={this.toggleImitationsDialog}/>}
+				{this.state.newSessionDialog &&
+					<OpenSessionDialog
+						onAccept={this.createSession}
+						onDecline={this.toggleSessionDialog}/>}
 			</div>
 		);
 	}

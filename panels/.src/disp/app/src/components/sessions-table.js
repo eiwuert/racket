@@ -6,18 +6,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 export default class SessionsTable extends React.Component {
-	openClick() {
-		window.__open(<OpenSessionDialog client={this.props.client} />, 'open-session');
-	}
-	render() {
-		return (<div className="sessions-table">
-			<button type="button" className="btn btn-default" onClick={this.openClick.bind(this)}>Открыть смену</button>
-			<Table client={this.props.client}/>
-		</div>);
-	}
-};
-
-class Table extends React.Component {
 	constructor(props) {
 		super(props);
 		var disp = props.client;
@@ -41,17 +29,19 @@ class Table extends React.Component {
 	}
 
 	render() {
-		var disp = this.props.client;
-		return (<table className="table table-bordered table-condensed">
-			<thead><tr><th>Начало</th>
-				<th>Водитель</th>
-				<th>Машина</th>
-				<th></th></tr>
-			</thead>
-			<tbody>
-				{ disp.sessions().map(s => <Row key={s.session_id} session={s} client={this.props.client}/>) }
-			</tbody>
-		</table>);
+		return (<div className="sessions-table">
+			<button type="button" className="btn btn-default" onClick={this.props.onNewClick}>Открыть смену</button>
+			<table className="table table-bordered table-condensed">
+				<thead><tr><th>Начало</th>
+					<th>Водитель</th>
+					<th>Машина</th>
+					<th></th></tr>
+				</thead>
+				<tbody>
+					{ disp.sessions().map(s => <Row key={s.session_id} session={s} client={this.props.client}/>) }
+				</tbody>
+			</table>
+		</div>);
 	}
 };
 
@@ -97,57 +87,6 @@ class Row extends React.Component {
 	}
 };
 
-class OpenSessionDialog extends React.Component {
-	accept() {
-		var $s = $(ReactDOM.findDOMNode(this));
-		var $id = $s.find( 'select' );
-		var $km = $s.find( 'input' );
-		
-		var driver_id = $id.val();
-		var odometer = $km.val();
-		console.log(driver_id, odometer);
-		if( driver_id == '0' ) {
-			toast( "Не выбран водитель" );
-			return false;
-		}
-
-		return disp.openSession( driver_id, odometer )
-			.catch( function( error ) {
-				alert(sessionError( error ));
-				throw error;
-			});
-	}
-	render() {
-		return (
-			<AppDialog id={this.props.id} yes="Открыть" no="Отменить" onAccept={this.accept.bind(this)}>
-				<div className="form-group">
-					<label>Водитель</label>
-					<UnadmittedDriversList client={this.props.client} />
-				</div>
-				<div className="form-group">
-					<label>Одометр</label>
-					<div className="input-group">
-						<input type="number" min="0" step="1" className="form-control" />
-						<div className="input-group-addon"> км</div>
-					</div>
-				</div>
-			</AppDialog>);
-	}
-};
-
-// List of drivers who need their session opened
-class UnadmittedDriversList extends React.Component {
-	render() {
-		var disp = this.props.client;
-		var list = disp.drivers().filter(d => disp.sessionRequired(d.id));
-		return (
-			<select className="form-control">
-				<option value="0"></option>
-				{list.map(d => <option key={d.id} value={d.id}>{d.call_id} - {d.surname()}</option>)}
-			</select>
-		);
-	}
-};
 
 class CloseSessionDialog extends React.Component {
 	accept() {
