@@ -6,13 +6,15 @@ export default class MapC extends React.Component {
 		var root = ReactDOM.findDOMNode(this).firstChild;
 
 		var b = this.props.bounds;
-		var center = [
-			(b.min_lat + b.max_lat) / 2,
-			(b.min_lon + b.max_lon) / 2
-		];
+		if(b) {
+			var center = [
+				(b.min_lat + b.max_lat) / 2,
+				(b.min_lon + b.max_lon) / 2
+			];
+		}
 
 		var map = L.map(root, {
-			center: center,
+			//center: center,
 			zoom: 11
 		});
 
@@ -32,11 +34,15 @@ export default class MapC extends React.Component {
 		}
 		this.map = this.createMap();
 		this.markers = [];
+		this.routes = [];
 
 		var l = this.map;
 		var t = this;
 
 		l.on('moveend', function() {
+			if(!t.props.onMoveEnd) {
+				return;
+			}
 			var b = l.getBounds();
 			t.props.onMoveEnd({
 				min_lat: b.getSouth(),
@@ -44,6 +50,20 @@ export default class MapC extends React.Component {
 				min_lon: b.getWest(),
 				max_lon: b.getEast()
 			});
+		});
+		
+		l.on('click', function(e) {
+			if(!t.props.onClick) {
+				return;
+			}
+			t.props.onClick([e.latlng.lat, e.latlng.lng]);
+		});
+		
+		l.on('contextmenu', function(e) {
+			if(!t.props.onContextMenu) {
+				return;
+			}
+			t.props.onContextMenu([e.latlng.lat, e.latlng.lng]);
 		});
 
 		this.sync(this.props);
@@ -54,19 +74,30 @@ export default class MapC extends React.Component {
 		var l = this.map;
 
 		var b = props.bounds;
-		console.log(b);
-		l.fitBounds([
-			[b.min_lat, b.min_lon],
-			[b.max_lat, b.max_lon]
-		]);
+		if(b) {
+			l.fitBounds([
+				[b.min_lat, b.min_lon],
+				[b.max_lat, b.max_lon]
+			]);
+		}
 
 		t.markers.forEach(m => l.removeLayer(m));
 		t.markers = [];
-		props.markers.forEach(function(p) {
-			var m = L.marker(p.coords, p.options);
-			m.addTo(l);
-			t.markers.push(m);
-		});
+		if(props.markers) {
+			props.markers.forEach(function(p) {
+				var m = L.marker(p.coords, p.options);
+				m.addTo(l);
+				t.markers.push(m);
+			});
+		}
+		
+		t.routes.forEach(r => l.removeLayer(r));
+		t.routes = [];
+		if(props.routes) {
+			props.routes.forEach(function(points) {
+				var r = L.polyline(points).addTo(l);
+			});
+		}
 	}
 
 	componentWillReceiveProps(nextProps) {
