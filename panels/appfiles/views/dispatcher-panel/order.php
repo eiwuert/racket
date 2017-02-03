@@ -19,6 +19,9 @@ require_script( 'res/dispatcher/main.js' );
 require_stylesheet('res/lib/bootstrap/css/bootstrap.min.css');
 require_stylesheet('res/lib/bootstrap/css/bootstrap-theme.min.css');
 require_script('res/lib/bootstrap/js/bootstrap.min.js');
+
+require_script('res/lib/jquery-ui/jquery-ui.min.js');
+require_stylesheet('res/lib/jquery-ui/jquery-ui.min.css');
 ?>
 </head>
 <body>

@@ -5,6 +5,9 @@ var React = require('react'), ReactDOM = require('react-dom');
  * title, yes, onAccept, no, onDecline, yesClass
  */
 export default class Dialog extends React.Component {
+	componentDidMount() {
+		$(this.root).draggable();
+	}
 	render() {
 		return (
 			<div className="dialog" ref={r => this.root = r}>
