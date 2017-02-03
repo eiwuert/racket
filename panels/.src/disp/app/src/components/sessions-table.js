@@ -30,18 +30,6 @@ export default class SessionsTable extends React.Component {
 	onCloseClick(s) {
 		var disp = this.props.client;
 		var driver = disp.getDriver( s.driver_id );
-		/*
-		 * If the driver is an imitation, close the session without
-		 * asking.
-		 */
-		if( driver.is_fake == '1' ) {
-			disp.closeSession( driver.id, 0 );
-			return;
-		}
-		/*
-		 * If the driver is real, ask for the odometer value before
-		 * closing.
-		 */
 		this.setState({closeDialog: driver});
 	}
 
