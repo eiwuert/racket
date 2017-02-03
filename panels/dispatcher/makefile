@@ -1,4 +1,4 @@
-dest=../../../www/res/dispatcher
+dest=../www/res/dispatcher
 
 styles:
 	cat css/main.css.php css/*.css > tmp.php

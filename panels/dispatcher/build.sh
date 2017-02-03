@@ -1,6 +1,6 @@
 #!/bin/sh
 
-dest=../../../www/res/dispatcher
+dest=../www/res/dispatcher
 
 
 # build the stylesheet

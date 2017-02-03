@@ -13,5 +13,5 @@ gulp.task('default', function() {
 	gulp.src('src/main.js')
 	.pipe(comp)
 	.pipe(browserify())
-	.pipe(gulp.dest('../../../www/res/dispatcher'));
+	.pipe(gulp.dest('../www/res/dispatcher'));
 });
