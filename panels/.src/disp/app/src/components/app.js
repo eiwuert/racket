@@ -14,8 +14,6 @@ import Calculator from './calculator.js';
 import SessionsTable from './sessions-table.js';
 import ServiceLog from './service-log.js';
 
-import DialogHost from './dialog-host.js';
-
 import OpenSessionDialog from './open-session-dialog.js';
 import SessionRequestDialog from './session-request-dialog.js';
 import ImitationsDialog from './imitations-dialog.js';
@@ -185,7 +183,6 @@ export default class App extends React.Component {
 					</TabPanel>
 					<TabPanel><ServiceLog client={this.props.client} /></TabPanel>
 				</Tabs>
-				<DialogHost />
 				{this.state.imitationsDialog &&
 					<ImitationsDialog onDecline={this.toggleImitationsDialog}/>}
 				{this.state.newSessionDialog &&
