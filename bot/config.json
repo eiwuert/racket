@@ -1,0 +1,14 @@
+{
+	"Defaults": {
+		"ServerAddr": "localhost:12345",
+		"WebPrefix": "http://taxi.loc/dx/driver/",
+		"DeclineProb": 0.0,
+		"ArriveSignalProb": 1.0,
+		"CustomOrdersFreq": 0,
+		"BadCustomerProb": 0.2
+	},
+
+	"Bots": [
+		{"Login": "007", "Password": "123"}
+	]
+}
