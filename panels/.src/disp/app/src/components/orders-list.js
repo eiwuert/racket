@@ -1,31 +1,65 @@
 import {formatPhone} from '../../lib/format.js';
 import {fmt} from '../../lib/fmt.js';
-
+import CancelOrderDialog from './cancel-order-dialog.js';
 var React = require('react');
 var ReactDOM = require('react-dom');
+var _ = require('underscore');
 
 export default class OrdersList extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			cancelDialogs: {}
+		};
+		this.showCancelDialog = this.showCancelDialog.bind(this);
+		this.hideCancelDialog = this.hideCancelDialog.bind(this);
+	}
+	
+	showCancelDialog(order) {
+		this.setState(function(s) {
+			s.cancelDialogs[order.id] = order;
+			return {
+				cancelDialogs: s.cancelDialogs
+			};
+		});
+	}
+	
+	hideCancelDialog(order) {
+		this.setState(function(s) {
+			var cancelDialogs = s.cancelDialogs;
+			delete cancelDialogs[order.id];
+			return {cancelDialogs};
+		});
+	}
+
 	render() {
 		var disp = this.props.client;
+		var t = this;
 		return (<div className="orders-list">
 			<List disp={disp}
 			      class="postponed"
 			      filter={o => o.postponed()}
 			      onOrderClick={this.props.onOrderClick}
-			      onCancelClick={this.props.onCancelClick}
+			      onCancelClick={this.showCancelDialog}
 			      />
 			<List disp={disp}
 			      class="current"
 			      filter={o => (!o.postponed() && !o.closed())}
 			      onOrderClick={this.props.onOrderClick}
-			      onCancelClick={this.props.onCancelClick}
+			      onCancelClick={this.showCancelDialog}
 			      />
 			<List disp={disp}
 			      class="closed"
 			      filter={o => o.closed()}
 			      onOrderClick={this.props.onOrderClick}
-				onCancelClick={this.props.onCancelClick}
+				onCancelClick={this.showCancelDialog}
 				/>
+			{_.values(this.state.cancelDialogs).map(function(order) {
+					return <CancelOrderDialog key={order.id}
+						order={order} client={disp}
+						onAccept={t.hideCancelDialog}
+						onDecline={t.hideCancelDialog} />;
+			})}
 		</div>);
 	}
 };
@@ -186,7 +220,7 @@ class DestinationInfo extends React.Component {
 		}
 		return <div className="destination">{locInfo}</div>;
 	}
-}
+};
 
 /*
  * Write a UTC time as a readable local time string.

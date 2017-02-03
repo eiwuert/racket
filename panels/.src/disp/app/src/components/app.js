@@ -20,13 +20,12 @@ import DialogHost from './dialog-host.js';
 import OpenSessionDialog from './open-session-dialog.js';
 import SessionRequestDialog from './session-request-dialog.js';
 import ImitationsDialog from './imitations-dialog.js';
-import CancelOrderDialog from './cancel-order-dialog.js';
+
 import orderForms from '../order-form/forms.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
-var _ = require('underscore');
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -35,8 +34,7 @@ export default class App extends React.Component {
 		this.state = {
 			tabIndex: 0,
 			imitationsDialog: false,
-			newSessionDialog: false,
-			cancelDialogs: {}
+			newSessionDialog: false
 		};
 
 		this.toggleImitationsDialog = this.toggleImitationsDialog.bind(this);
@@ -94,23 +92,6 @@ export default class App extends React.Component {
 		d.show();
 	}
 
-	onCancelClick(order) {
-		this.setState(function(s) {
-			s.cancelDialogs[order.id] = order;
-			return {
-				cancelDialogs: s.cancelDialogs
-			};
-		});
-	}
-
-	hideCancelDialog(order) {
-		this.setState(function(s) {
-			var cancelDialogs = s.cancelDialogs;
-			delete cancelDialogs[order.id];
-			return {cancelDialogs};
-		});
-	}
-
 	onOrderClick(order) {
 		orderForms.show(order);
 	}
@@ -146,8 +127,7 @@ export default class App extends React.Component {
 				<OrderButton client={this.client}/>
 				<OrdersList
 					client={this.client}
-					onOrderClick={this.onOrderClick}
-					onCancelClick={this.onCancelClick.bind(this)}/>
+					onOrderClick={this.onOrderClick}/>
 				<Tabs onSelect={this.onSelect.bind(this)} selectedIndex={this.state.tabIndex}>
 					<TabList>
 						<Tab>Очереди</Tab>
@@ -183,12 +163,6 @@ export default class App extends React.Component {
 					<OpenSessionDialog
 						onAccept={this.createSession}
 						onDecline={this.toggleSessionDialog}/>}
-				{_.values(this.state.cancelDialogs).map(function(order) {
-					return <CancelOrderDialog key={order.id}
-						order={order} client={disp}
-						onAccept={t.hideCancelDialog.bind(t)}
-						onDecline={t.hideCancelDialog.bind(t)} />;
-				})}
 			</div>
 		);
 	}
