@@ -1,4 +1,3 @@
-import initReminderScript from '../bookings-reminder.js';
 import initCalls from '../calls.js';
 import Dialog from '../../lib/dialog.js';
 
@@ -28,6 +27,8 @@ var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
 var _ = require('underscore');
 
+import OrderReminderDialog from './order-reminder-dialog.js';
+
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -51,7 +52,6 @@ export default class App extends React.Component {
 	}
 
 	componentDidMount() {
-		initReminderScript(this.client);
 		initCalls(this.client);
 
 		var disp = this.client;
@@ -79,6 +79,11 @@ export default class App extends React.Component {
 				s.sessionRequests[r.driver_id] = r;
 			});
 		});
+
+		/*
+		 * Check for postponed orders regularly
+		 */
+		setInterval(this.forceUpdate.bind(this), 5000);
 	}
 
 	onSelect(i) {
@@ -134,6 +139,16 @@ export default class App extends React.Component {
 
 	render() {
 		var t = this;
+
+		// Postponed orders we have to remind about
+		var now = time.utc();
+		var remindOrders = disp.orders().filter(function(o) {
+			if(orderForms.findOrderForm(o)) {
+				return false;
+			}
+			return o.postponed() && now >= o.reminder_time;
+		});
+
 		return (
 			<div className="dispatcher-app">
 				<Toolbar client={this.client} />
@@ -187,6 +202,13 @@ export default class App extends React.Component {
 							onDecline={t.hideSessionRequest}
 								/>);
 					})
+				}
+				{
+					remindOrders.map(o => <OrderReminderDialog key={o.id}
+						onAccept={() => t.forceUpdate()}
+						onDecline={() => t.forceUpdate()}
+						client={t.props.client}
+						order={o}/>)
 				}
 			</div>
 		);
