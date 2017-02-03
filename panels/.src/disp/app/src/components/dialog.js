@@ -18,7 +18,9 @@ export default class Dialog extends React.Component {
 						<button type="button"
 							className={'btn ' + this.props.yesClass}
 							onClick={this.props.onAccept}>{this.props.yes}</button>}
-					<button type="button" onClick={this.props.onDecline}>{this.props.no}</button>
+					<button type="button"
+						className="btn"
+						onClick={this.props.onDecline}>{this.props.no}</button>
 				</div>
 			</div>
 		);

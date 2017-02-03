@@ -148,7 +148,9 @@ class Item extends React.Component {
 		var order = this.props.order;
 		var cancelButton = null;
 		if (order.status != order.CANCELLED) {
-			cancelButton = <div className="cancel" onClick={this.cancelClick}>Отменить</div>;
+			cancelButton = <button type="button"
+				className="btn btn-default btn-xs pull-right"
+				onClick={this.cancelClick}>Отменить</button>;
 		}
 		return (<div className={this.state.className} onClick={this.orderClick}>
 				{cancelButton}
@@ -164,8 +166,16 @@ class Item extends React.Component {
 
 	className() {
 		var cn = 'order';
-		if (this.props.order.postponed()) {
+		var o = this.props.order;
+
+		if(o.postponed()) {
 			cn += ' ' + this.classNameTime();
+		}
+		else if(o.status == o.FINISHED) {
+			cn += ' ' + 'bg-success';
+		}
+		else if(isActive(o)) {
+			cn += ' ' + 'bg-primary';
 		}
 		return cn;
 	}
@@ -179,20 +189,16 @@ class Item extends React.Component {
 			t1 = t2;
 		}
 
-		// Enough time - green.
+		// Enough time
 		if (now < t1) {
-			return 'far';
+			return 'bg-info';
 		}
-		// after reminder - yellow
+		// after reminder
 		if (now < t2) {
-			return 'soon';
+			return 'bg-warning';
 		}
-		// 10 minutes late - red
-		if (now < t2 + 600) {
-			return 'urgent';
-		}
-		// expired.
-		return 'expired';
+		// late
+		return 'bg-danger';
 	}
 }
 
@@ -268,4 +274,14 @@ function formatDriver(order)
 		return call_id;
 	}
 	return '';
+}
+
+function isActive(order) {
+	var list = [
+		order.WAITING,
+		order.STARTED,
+		order.ASSIGNED,
+		order.ARRIVED
+	];
+	return list.indexOf(order.status) != -1;
 }
