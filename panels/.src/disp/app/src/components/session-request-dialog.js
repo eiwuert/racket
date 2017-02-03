@@ -2,7 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import sounds from '../../lib/sounds.js';
-import AppDialog from './app-dialog.js';
+import Dialog from './app-dialog.js';
 
 export default class SessionRequestDialog extends React.Component {
 	constructor(props) {
@@ -17,7 +17,7 @@ export default class SessionRequestDialog extends React.Component {
 		
 		this.sound.stop();
 
-		return disp.openSession( driver_id, odometer )
+		var p = disp.openSession( driver_id, odometer )
 			.catch( function( error ) {
 				/*
 				 * If the error is that the session already exists,
@@ -32,8 +32,13 @@ export default class SessionRequestDialog extends React.Component {
 				alert(error);
 				throw error;
 			})
+		this.props.onAccept(driver_id);
 	}
-	
+
+	decline() {
+		this.props.onDecline(this.props.driverId);
+	}
+
 	componentDidMount() {
 		this.sound.play();
 	}
@@ -46,8 +51,10 @@ export default class SessionRequestDialog extends React.Component {
 		var disp = this.props.client;
 		var driver_id = this.props.driverId;
 		var d = disp.getDriver( driver_id );
-		return (<AppDialog yes="Разрешить" no="Игнорировать" onAccept={this.accept.bind(this)}>
+		return (<Dialog yes="Разрешить" no="Игнорировать"
+			onAccept={this.accept.bind(this)}
+			onDecline={this.decline.bind(this)}>
 			Водитель {d.call_id} желает открыть смену
-		</AppDialog>);
+		</Dialog>);
 	}
 };

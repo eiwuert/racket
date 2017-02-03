@@ -26,6 +26,7 @@ import orderForms from '../order-form/forms.js';
 var React = require('react');
 var ReactDOM = require('react-dom');
 var {Tab, Tabs, TabList, TabPanel} = require('react-tabs');
+var _ = require('underscore');
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -34,18 +35,25 @@ export default class App extends React.Component {
 		this.state = {
 			tabIndex: 0,
 			imitationsDialog: false,
-			newSessionDialog: false
+			newSessionDialog: false,
+			sessionRequests: {}
 		};
 
-		this.toggleImitationsDialog = this.toggleImitationsDialog.bind(this);
-		this.toggleSessionDialog = this.toggleSessionDialog.bind(this);
-		this.createSession = this.createSession.bind(this);
+		var names = [
+			'toggleImitationsDialog',
+			'toggleSessionDialog',
+			'createSession',
+			'hideSessionRequest'
+		];
+		for(var n of names) {
+			this[n] = this[n].bind(this);
+		}
 	}
 
 	componentDidMount() {
 		initReminderScript(this.client);
 		initCalls(this.client);
-		
+
 		var disp = this.client;
 		disp.on( "connection-error", function( event ) {
 			if( event.data.error == "Unauthorised" ) {
@@ -58,18 +66,18 @@ export default class App extends React.Component {
 			alert( "Ваша сессия была закрыта сервером, перезагрузите страницу." );
 			return;
 		});
-		
+
 		disp.on('driver-alarm-on', function(event) {
 			var driver = event.data.driver;
 			showAlarmDialog( driver );
 		});
-		
+
+		var t = this;
 		disp.on( 'session-requested', function( event ) {
 			var r = event.data;
-			window.__open(<SessionRequestDialog
-				client={disp}
-				driverId={r.driver_id}
-				odometer={r.odometer} />, 'session-request-' + r.driver_id);
+			t.setState(function(s) {
+				s.sessionRequests[r.driver_id] = r;
+			});
 		});
 	}
 
@@ -118,6 +126,12 @@ export default class App extends React.Component {
 		this.toggleSessionDialog();
 	}
 
+	hideSessionRequest(driverId) {
+		this.setState(function(s) {
+			delete s.sessionRequests[driverId];
+		});
+	}
+
 	render() {
 		var t = this;
 		return (
@@ -163,6 +177,17 @@ export default class App extends React.Component {
 					<OpenSessionDialog
 						onAccept={this.createSession}
 						onDecline={this.toggleSessionDialog}/>}
+				{
+					_.values(this.state.sessionRequests).map(function(request) {
+						return (<SessionRequestDialog
+							client={t.props.client}
+							driverId={request.driver_id}
+							odometer={request.odometer}
+							onAccept={t.hideSessionRequest}
+							onDecline={t.hideSessionRequest}
+								/>);
+					})
+				}
 			</div>
 		);
 	}
