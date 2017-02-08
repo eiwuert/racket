@@ -224,8 +224,7 @@ class mod_queues
 			'prev_pos' => $prev
 		);
 
-		$sid = get_taxi_service( $taxi_id );
-		announce_event( $sid, EV_QUEUE_CHANGE, $data );
+		announce_event( EV_QUEUE_CHANGE, $data );
 
 		if( $pos ) {
 			$name = queue_name( $pos->qid );
@@ -235,7 +234,7 @@ class mod_queues
 		else {
 			$msg = '{t} убран из очереди';
 		}
-		service_log( $sid, $msg, $taxi_id );
+		service_log( $msg, $taxi_id );
 	}
 
 	static function clear_saved_position( $taxi_id )
@@ -314,7 +313,7 @@ class mod_queues
 			$taxi_id = $a[0];
 			$reason = $a[1];
 			self::log( $taxi_id, "Cleaning from queues: $reason" );
-			service_log( get_taxi_service( $taxi_id ), 'Автоочистка очереди.' );
+			service_log( 'Автоочистка очереди.' );
 			$prev = get_queue_position( $taxi_id );
 			taxi_queues::remove_car( $taxi_id );
 			self::clear_saved_position( $taxi_id );
@@ -323,7 +322,7 @@ class mod_queues
 	}
 
 	private static function log( $taxi_id, $msg ) {
-		logmsg( $msg, get_taxi_service( $taxi_id ), $taxi_id );
+		logmsg( $msg, $taxi_id );
 	}
 }
 ?>

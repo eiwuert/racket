@@ -13,9 +13,7 @@
 function types_table()
 {
 	$types = DB::getRecords( "SELECT type_id, name
-		FROM taxi_driver_types
-		WHERE service_id = %d", sid()
-	);
+		FROM taxi_driver_types" );
 
 	$table = new table();
 	foreach( $types as $t ) {

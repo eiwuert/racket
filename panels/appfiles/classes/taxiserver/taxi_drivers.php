@@ -136,10 +136,9 @@ class taxi_drivers
 		DB::exec( "COMMIT" );
 	}
 
-	static function groups( $service_id )
+	static function groups()
 	{
-		$R = DB::getRecords( "SELECT group_id, name FROM taxi_driver_groups
-			WHERE service_id = %d", $service_id );
+		$R = DB::getRecords( "SELECT group_id, name FROM taxi_driver_groups" );
 		$map = array();
 		foreach( $R as $r ) {
 			$map[$r['group_id']] = $r;

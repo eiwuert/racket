@@ -7,11 +7,11 @@ init( function()
 	$ns = 'master_orders::';
 	add_cmdfunc( T_CENTER, 'update-orders', $ns.'msg_update_orders' );
 	add_cmdfunc( T_CENTER, 'cancel-order', $ns.'msg_cancel_order' );
-	listen_events( null, EV_ORDER_ARRIVED, $ns.'ev_order_status' );
-	listen_events( null, EV_ORDER_STARTED, $ns.'ev_order_status' );
-	listen_events( null, EV_ORDER_FINISHED, $ns.'ev_order_status' );
-	listen_events( null, EV_ORDER_CANCELLED, $ns.'ev_order_status' );
-	listen_events( null, EV_TAXI_POSITION, $ns.'ev_taxi_position' );
+	listen_events( EV_ORDER_ARRIVED, $ns.'ev_order_status' );
+	listen_events( EV_ORDER_STARTED, $ns.'ev_order_status' );
+	listen_events( EV_ORDER_FINISHED, $ns.'ev_order_status' );
+	listen_events( EV_ORDER_CANCELLED, $ns.'ev_order_status' );
+	listen_events( EV_TAXI_POSITION, $ns.'ev_taxi_position' );
 });
 
 class master_orders
@@ -84,7 +84,6 @@ class master_orders
 	static function ev_taxi_position( $event )
 	{
 		$driver_id = $event->data['taxi_id'];
-		$sid = $event->sid;
 		$pos = $event->data['pos'];
 
 		/*
@@ -102,7 +101,7 @@ class master_orders
 
 		foreach( $rows as $r )
 		{
-			$user = new conn_user( T_CENTER, $r['owner_id'], $sid );
+			$user = new conn_user( T_CENTER, $r['owner_id'] );
 			$data = array(
 				'uid' => $r['order_uid'],
 				'latitude' => $pos->lat,
@@ -122,18 +121,18 @@ class master_orders
 		if( $type != T_CENTER ) {
 			return null;
 		}
-		return new conn_user( T_CENTER, $acc_id, $order->service_id() );
+		return new conn_user( T_CENTER, $acc_id );
 	}
 
 	static function msg_cancel_order( $msg, $user )
 	{
 		$uid = $msg->data( 'uid' );
-		logmsg( "Center cancels order $uid", $user->sid, $user->id );
+		logmsg( "Center cancels order $uid", $user->id );
 
 		$order_id = DB::getValue( "SELECT order_id FROM taxi_orders
 		WHERE order_uid = '%s' AND owner_id = %d", $uid, $user->id );
 		if( !$order_id ) {
-			logmsg( "No such order", $user->sid, $user->id );
+			logmsg( "No such order", $user->id );
 			return false;
 		}
 

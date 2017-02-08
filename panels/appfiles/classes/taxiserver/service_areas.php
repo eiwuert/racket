@@ -20,23 +20,21 @@ class service_areas
 	/*
 	 * Returns all areas of the given service.
 	 */
-	static function get_areas( $service_id )
+	static function get_areas()
 	{
-		return DB::getRecords( "SELECT * FROM ".self::T."
-			WHERE service_id = %d", $service_id );
+		return DB::getRecords( "SELECT * FROM ".self::T );
 	}
 
 	/*
 	 * Returns all areas of the given service containing the given
 	 * point.
 	 */
-	static function get_containing_areas( $service_id, $lat, $lon )
+	static function get_containing_areas( $lat, $lon )
 	{
 		return DB::getRecords( "SELECT * FROM ".self::T."
-			WHERE service_id = %d
-			AND %f BETWEEN min_lat AND max_lat
+			WHERE %f BETWEEN min_lat AND max_lat
 			AND %f BETWEEN min_lon AND max_lon",
-			$service_id, $lat, $lon
+			$lat, $lon
 		);
 	}
 }

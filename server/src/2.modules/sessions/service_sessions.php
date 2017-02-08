@@ -48,7 +48,7 @@ class service_sessions
 	/*
 	 * Get table of open sessions. Used by dispatchers.
 	 */
-	static function get_open_sessions_r( $service_id )
+	static function get_open_sessions_r()
 	{
 		return DB::getRecords( "
 			SELECT
@@ -60,8 +60,7 @@ class service_sessions
 			JOIN taxi_accounts acc
 				ON acc.acc_id = w.driver_id
 			WHERE w.time_finished IS NULL
-			AND acc.service_id = %d
-			AND acc.deleted = 0", $service_id );
+			AND acc.deleted = 0" );
 	}
 
 	/*

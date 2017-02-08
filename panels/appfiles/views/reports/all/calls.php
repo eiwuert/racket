@@ -15,7 +15,7 @@ $dispatcher_id = Vars::get( 'dispatcher-id' );
 $act = Vars::get( 'act' );
 if( $act )
 {
-	$table = get_stats( sid(), $t1, $t2, $dispatcher_id );
+	$table = get_stats( $t1, $t2, $dispatcher_id );
 
 	if( $act == 'show' ) {
 		show_form( $t1, $t2, $dispatcher_id );
@@ -30,9 +30,8 @@ else
 	show_form( $t1, $t2, $dispatcher_id );
 }
 
-function get_stats( $sid, $t1, $t2, $dispatcher_id )
+function get_stats( $t1, $t2, $dispatcher_id )
 {
-	$sid = intval( $sid );
 	$t1 = intval( $t1 );
 	$t2 = intval( $t2 );
 	$dispatcher_id = intval( $dispatcher_id );
@@ -60,8 +59,7 @@ function get_stats( $sid, $t1, $t2, $dispatcher_id )
 			FROM taxi_calls c
 				JOIN taxi_accounts a ON a.acc_id = c.disp_id
 				LEFT JOIN taxi_orders o ON o.call_id = c.call_id
-			WHERE a.service_id = $sid
-				AND $where
+			WHERE $where
 			ORDER BY c.creation_time
 		) A
 		GROUP BY cday
@@ -84,9 +82,7 @@ function show_form( $t1, $t2, $dispatcher_id )
 	$dispatchers = array_column( DB::getRecords(
 		"SELECT acc_id, call_id FROM taxi_accounts
 		WHERE type = 'dispatcher'
-		AND service_id = %d
-		AND deleted = 0",
-		sid()
+		AND deleted = 0"
 	), 'call_id', 'acc_id' );
 	?>
 	<h1><?= page_title() ?></h1>

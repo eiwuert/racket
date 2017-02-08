@@ -32,9 +32,8 @@ function update_157_session( $taxi_id ) {
 
 function session_needed( $driver_id )
 {
-	$sid = get_taxi_service( $driver_id );
 	// If sessions are disabled, then not needed.
-	if( !service_option( $sid, 'sessions' ) ) {
+	if( !service_option( 'sessions' ) ) {
 		return false;
 	}
 	// If updated successfully, then OK.
@@ -67,7 +66,6 @@ class ext157_sessions
 	*/
 	private static function get_taxi_coordinates( $taxi_id, $min_t = 0 )
 	{
-		$sid = get_taxi_service( $taxi_id );
 		$lat = $lon = null;
 		/*
 		 * Get latitude and longitude of the car.
@@ -84,7 +82,7 @@ class ext157_sessions
 			 * them from the positions archive for the session's period.
 			 */
 			logmsg( "No coordinates, trying to get from the archive.",
-				$sid, $taxi_id );
+				$taxi_id );
 			$pos = taxi_logs::last_driver_pos( $taxi_id );
 			if( $pos && $pos['t'] >= $min_t )
 			{
@@ -93,7 +91,7 @@ class ext157_sessions
 			}
 		}
 		if( !$lat || !$lon ) {
-			logmsg( "No coordinates", $sid, $taxi_id );
+			logmsg( "No coordinates", $taxi_id );
 			return null;
 		}
 
@@ -105,18 +103,15 @@ class ext157_sessions
 	 */
 	static function open_session( $taxi_id, $odometer, $dispatcher_id )
 	{
-		$sid = get_taxi_service( $taxi_id );
-		if( !$sid ) return "unknown_driver";
-
 		$car_id = driver_car_id( $taxi_id );
 		if( !$car_id ) {
-			logmsg( "Could not open session: no car", $sid, $taxi_id );
+			logmsg( "Could not open session: no car", $taxi_id );
 			return "no_car";
 		}
 
 		if( service_sessions::get_taxi_session_r( $taxi_id ) ) {
 			logmsg( "Could not open session: already open",
-				$sid, $taxi_id );
+				$taxi_id );
 			return "open";
 		}
 
@@ -133,9 +128,9 @@ class ext157_sessions
 		}
 
 		logmsg( "Open session for #$taxi_id, odometer=$odometer",
-			$sid, $taxi_id );
-		logmsg( "Begin position: $lat, $lon", $sid, $taxi_id  );
-		logmsg( "Begin address: $address", $sid, $taxi_id  );
+			$taxi_id );
+		logmsg( "Begin position: $lat, $lon", $taxi_id  );
+		logmsg( "Begin address: $address", $taxi_id  );
 
 		$id = DB::insertRecord( 'taxi_works', array(
 			'driver_id' => $taxi_id,
@@ -148,16 +143,16 @@ class ext157_sessions
 		));
 
 		if( !$id ) {
-			logmsg( "Could not open session", $sid, $taxi_id  );
+			logmsg( "Could not open session", $taxi_id  );
 			return "unknown";
 		}
 
 		service_sessions::update_session_activity( $id );
 
 		taxi_drivers::update_odometer( $taxi_id, $odometer );
-		service_log( $sid, 'Смена {?} начата ({t}, одометр {?})',
+		service_log( 'Смена {?} начата ({t}, одометр {?})',
 			$id, $taxi_id, $odometer );
-		announce_event( $sid, EV_SESSION_OPENED, array(
+		announce_event( EV_SESSION_OPENED, array(
 			'taxi_id' => $taxi_id,
 			'session_id' => $id,
 			'time_started' => time(),
@@ -172,9 +167,8 @@ class ext157_sessions
 	static function close_session( $taxi_id, $odometer, $dispatcher_id )
 	{
 		$odometer = intval( $odometer );
-		$sid = get_taxi_service( $taxi_id );
 		logmsg( "Close session: taxi #$taxi_id, odometer=$odometer",
-			$sid, $taxi_id  );
+			$taxi_id  );
 
 		$s = service_sessions::get_taxi_session_r( $taxi_id );
 		if( !$s ) {
@@ -195,7 +189,7 @@ class ext157_sessions
 			$lon = null;
 			$address = '';
 		}
-		logmsg( "End address: $address", $sid, $taxi_id  );
+		logmsg( "End address: $address", $taxi_id  );
 
 		service_sessions::close_session( $session_id, $odometer,
 			$dispatcher_id, $lat, $lon, $address );
@@ -205,9 +199,9 @@ class ext157_sessions
 		 */
 		taxi_drivers::update_odometer( $taxi_id, $odometer );
 
-		service_log( $sid, 'Смена {?} ({t}) завершена (одометр {?})',
+		service_log( 'Смена {?} ({t}) завершена (одометр {?})',
 			$session_id, $taxi_id, $odometer );
-		announce_event( $sid, EV_SESSION_CLOSED, array(
+		announce_event( EV_SESSION_CLOSED, array(
 			'taxi_id' => $taxi_id,
 			'session_id' => $session_id )
 		);
@@ -218,13 +212,12 @@ class ext157_sessions
 	*/
 	static function send_request( $taxi_id, $odometer )
 	{
-		$sid = get_taxi_service( $taxi_id );
 		logmsg( "Session request from #$taxi_id, odometer=$odometer",
-			$sid, $taxi_id  );
-		announce_event( $sid, EV_SESSION_REQUEST, array(
+			$taxi_id  );
+		announce_event( EV_SESSION_REQUEST, array(
 			'taxi_id' => $taxi_id,
 			'odometer' => $odometer
-		), $sid );
+		) );
 	}
 
 	/*
@@ -251,8 +244,8 @@ class ext157_sessions
 	{
 		$s = service_sessions::get_taxi_session_r( $taxi_id );
 		if( !$s ) return false;
-		$sid = $s['id'];
-		service_sessions::update_session_activity( $sid );
+		$session_id = $s['id'];
+		service_sessions::update_session_activity( $session_id );
 		return true;
 	}
 
@@ -264,17 +257,16 @@ class ext157_sessions
 		$S = service_sessions::get_inactive_sessions_r(
 			self::SESSION_TIMEOUT, self::MAX_SESSION_DURATION );
 
-		foreach( $S as $s )
+		foreach( $S as $session )
 		{
-			$taxi_id = $s['driver_id'];
-			$sid = get_taxi_service( $taxi_id );
-			if( $s['idle_time'] > self::SESSION_TIMEOUT ) {
-				logmsg( "Session $s[id] timed out ($s[idle_time]).",
-					$sid, $taxi_id  );
+			$taxi_id = $session['driver_id'];
+			if( $session['idle_time'] > self::SESSION_TIMEOUT ) {
+				logmsg( "Session $session[id] timed out ($session[idle_time]).",
+					$taxi_id  );
 			}
 			else {
-				logmsg( "Session $s[id] reached max duration ($s[duration]).",
-					$sid, $taxi_id  );
+				logmsg( "Session $session[id] reached max duration ($session[duration]).",
+					$taxi_id  );
 			}
 			self::close_session( $taxi_id, 0, null );
 		}

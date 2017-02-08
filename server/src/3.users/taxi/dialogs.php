@@ -68,8 +68,7 @@ class taxi_dialogs
 			'importance' => $d->importance
 		));
 
-		logmsg( "Send dialog to #$taxi_id: '$d->text', id=$id, timeout=$d->timeout-$corr, importance=$d->importance (lag=$lag ms)",
-			get_taxi_service( $taxi_id ), $taxi_id );
+		logmsg( "Send dialog to #$taxi_id: '$d->text', id=$id, timeout=$d->timeout-$corr, importance=$d->importance (lag=$lag ms)", $taxi_id );
 
 		if( !send_to_taxi( $taxi_id, $m ) ) {
 			return null;
@@ -85,8 +84,7 @@ class taxi_dialogs
 		if( !isset( self::$callbacks[$id] ) ) {
 			return;
 		}
-		logmsg( "Dialog $id has timed out",
-			get_taxi_service( $taxi_id ), $taxi_id );
+		logmsg( "Dialog $id has timed out", $taxi_id );
 		$c = self::$callbacks[$id];
 		unset( self::$callbacks[$id] );
 		call_user_func( $c, $id, DRESULT_TIMEOUT, $taxi_id );
@@ -97,8 +95,7 @@ class taxi_dialogs
 		$taxi_id = $user->id;
 		$id = $message->data( 'id' );
 		$result = $message->data( 'result' );
-		logmsg( "Dialog result: id=$id, result=$result",
-			$user->sid, $taxi_id );
+		logmsg( "Dialog result: id=$id, result=$result", $taxi_id );
 
 		if( !isset( self::$callbacks[$id] ) ) {
 			warning( "Received dialog-result with unknown id ($id)" );

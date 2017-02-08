@@ -1,7 +1,6 @@
 <?php _header(); ?>
 
 <?php
-$sid = sid();
 $id = argv(1);
 $dispatcher = new taxi_account( $id );
 $login = $dispatcher->login();
@@ -32,8 +31,7 @@ $aurl = aurl( 'save_dispatcher', url_t( 'dispatchers' ), CURRENT_URL );
 					$locs = DB::getRecords( "SELECT
 						loc.loc_id, loc.name
 						FROM taxi_queues q
-						JOIN taxi_locations loc USING (loc_id)
-						WHERE q.service_id = %d", $sid );
+						JOIN taxi_locations loc USING (loc_id)" );
 					$locs = array_column( $locs, 'name', 'loc_id' );
 					echo HTMLSnippets::select( 'loc_id', $locs, $loc_id );
 					?>

@@ -1,8 +1,7 @@
 <?php
 set_page_title( 'Отчёт по объектам' );
 
-$service_id = sid();
-$drivers = taxi::drivers_kv( $service_id );
+$drivers = taxi::drivers_kv();
 
 $t1 = Vars::get( 'time-from' );
 if( $t1 ) $t1 = strtotime( $t1 );
@@ -111,11 +110,10 @@ function create_report_table( $stats )
 	return $table;
 }
 
-function checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id = null )
+function checkpoints_hourly_stats( $t1, $t2, $driver_id = null )
 {
 	$t1 = intval( $t1 );
 	$t2 = intval( $t2 );
-	$service_id = intval( $service_id );
 	$driver_id = intval( $driver_id );
 
 	if( $driver_id ) {
@@ -131,7 +129,7 @@ function checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id = null )
 		COUNT(order_id) AS count
 	FROM
 		-- locations marked for reports
-		(SELECT loc_id, name, service_id
+		(SELECT loc_id, name
 		FROM taxi_locations
 		WHERE deleted = 0
 			AND do_reports = 1
@@ -141,7 +139,6 @@ function checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id = null )
 		(SELECT
 			order_id,
 			src_loc_id AS loc_id,
-			service_id,
 			`status` = 'finished' AS finished,
 			time_created
 		FROM taxi_orders
@@ -150,8 +147,7 @@ function checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id = null )
 			AND src_loc_id IS NOT NULL
 			AND time_created BETWEEN FROM_UNIXTIME($t1) AND FROM_UNIXTIME($t2)
 		) o
-	USING (service_id, loc_id)
-	WHERE service_id = $service_id
+	USING (loc_id)
 	GROUP BY loc_id, loc.name, hour, finished
 	ORDER BY loc.name
 	";
@@ -217,7 +213,7 @@ function checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id = null )
 $act = Vars::get( 'act' );
 if( $act )
 {
-	$stats = checkpoints_hourly_stats( $service_id, $t1, $t2, $driver_id );
+	$stats = checkpoints_hourly_stats( $t1, $t2, $driver_id );
 	$table = create_report_table( $stats );
 
 	if( $act == 'show' ) {

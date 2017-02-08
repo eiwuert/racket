@@ -4,19 +4,14 @@
  */
 class conn_user
 {
-	/*
-	 * User type, user id and service id.
-	 */
 	public $type;
 	public $id;
-	public $sid;
 	public $login;
 
-	function __construct( $type, $id, $sid )
+	function __construct( $type, $id )
 	{
 		$this->type = $type;
 		$this->id = $id;
-		$this->sid = $sid;
 	}
 
 	/*
@@ -34,7 +29,7 @@ class conn_user
 	}
 
 	function __toString() {
-		return '{'."$this->type, #$this->id, $this->sid}";
+		return '{'."$this->type, #$this->id}";
 	}
 }
 ?>

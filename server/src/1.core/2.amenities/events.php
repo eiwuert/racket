@@ -13,15 +13,15 @@ function register_event_type( $type ) {
 /*
  * Add a listener for the given type of events.
  */
-function listen_events( $sid, $type, $func ) {
-	events::add_listener( $sid, $type, $func );
+function listen_events( $type, $func ) {
+	events::add_listener( $type, $func );
 }
 
 /*
  * Call listeners registered for the given type of event.
  */
-function announce_event( $sid, $type, $data = null ) {
-	return events::announce( $sid, $type, $data );
+function announce_event( $type, $data = null ) {
+	return events::announce( $type, $data );
 }
 
 function info_events() {
@@ -35,34 +35,27 @@ function info_events() {
 class event_listener
 {
 	/*
-	 * Service identifier.
-	 */
-	public $sid;
-	/*
 	 * Function to call.
 	 */
 	public $func;
 
-	function __construct( $func, $sid ) {
-		$this->sid = $sid;
+	function __construct( $func ) {
 		$this->func = $func;
 	}
 }
 
 class event
 {
-	public $sid;
 	public $type;
 	public $data;
 
-	function __construct( $sid, $type, $data = null ) {
-		$this->sid = $sid;
+	function __construct( $type, $data = null ) {
 		$this->type = $type;
 		$this->data = $data;
 	}
 
 	function __toString() {
-		return "event '$this->type' (@$this->sid)";
+		return "event '$this->type'";
 	}
 }
 
@@ -91,7 +84,7 @@ class events
 	 * Add a function to be called when an event of the given type is
 	 * announced.
 	 */
-	static function add_listener( $sid, $type, $func )
+	static function add_listener( $type, $func )
 	{
 		if( !is_callable( $func ) ) {
 			error( "$func is not callable" );
@@ -101,7 +94,7 @@ class events
 			error( "Unregistered event type: $type" );
 			return false;
 		}
-		$l = new event_listener( $func, $sid );
+		$l = new event_listener( $func );
 		self::$listeners[$type][] = $l;
 	}
 
@@ -110,23 +103,16 @@ class events
 	 * type of event. $data will be passed to the listeners as a
 	 * parameter.
 	 */
-	static function announce( $sid, $type, $data )
+	static function announce( $type, $data )
 	{
 		if( !isset( self::$listeners[$type] ) ) {
 			warning( "Announcing unregistered event '$type'" );
 			return false;
 		}
 
-		$event = new event( $sid, $type, $data );
+		$event = new event( $type, $data );
 
-		foreach( self::$listeners[$type] as $l )
-		{
-			/*
-			 * Skip if service identifiers are present and don't match.
-			 */
-			if( $sid && $l->sid && $sid != $l->sid ) {
-				continue;
-			}
+		foreach( self::$listeners[$type] as $l ) {
 			call_user_func( $l->func, $event );
 		}
 		return true;
@@ -141,8 +127,7 @@ class events
 			{
 				$a[] = array(
 					'event' => $name,
-					'func' => $l->func,
-					'sid' => $l->sid
+					'func' => $l->func
 				);
 			}
 		}

@@ -22,11 +22,8 @@ add_auth_func( function( $cid, $str )
 		return false;
 	}
 
-	$sid = DB::getValue( "SELECT service_id FROM taxi_accounts
-		WHERE acc_id = %d", $acc_id );
-
 	write_message( $cid, new message( 'auth-ok' ) );
-	$user = new conn_user( T_PHONE, $acc_id, $sid );
+	$user = new conn_user( T_PHONE, $acc_id );
 	$user->data( 'line_id', $line_id );
 	$user->data( 'city', $city );
 	return $user;
@@ -38,7 +35,7 @@ add_cmdfunc( T_PHONE, 'phone-auth', function( $msg, $user ) {
 	));
 });
 
-listen_events( null, EV_LOGOUT, function( $event ) {
+listen_events( EV_LOGOUT, function( $event ) {
 	$user = $event->data['user'];
 	if( $user->type != T_PHONE ) {
 		return;

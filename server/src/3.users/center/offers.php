@@ -4,8 +4,8 @@
  */
 
 $ns = 'master_offers::';
-listen_events( null, EV_ORDER_ASSIGNED, $ns.'ev_order_assigned' );
-listen_events( null, EV_SENDING_FINISHED, $ns.'ev_sending_finished' );
+listen_events( EV_ORDER_ASSIGNED, $ns.'ev_order_assigned' );
+listen_events( EV_SENDING_FINISHED, $ns.'ev_sending_finished' );
 add_cmdfunc( T_CENTER, 'get-car-offers', $ns.'msg_get_car_offers' );
 add_cmdfunc( T_CENTER, 'take-offer', $ns.'msg_take_offer' );
 
@@ -18,7 +18,7 @@ class master_offers
 	{
 		$req_id = $msg->data( 'request_id' );
 		$ref = array( $user->id, $req_id );
-		logmsg( "Offers request", $user->sid, $user->id );
+		logmsg( "Offers request", $user->id );
 
 		$order = self::get_request_order( $msg, $user );
 		$list = self::get_offers_list( $order, $user );
@@ -27,7 +27,7 @@ class master_offers
 			'list' => $list
 		);
 		logmsg( "Returning ".count($list)." offers",
-			$user->sid, $user->id );
+			$user->id );
 		return write_message( $msg->cid, new message( 'car-offers', $data ) );
 	}
 
@@ -44,7 +44,6 @@ class master_offers
 		 */
 		$order = new order();
 		$order->owner_id( $user->id );
-		$order->service_id( $user->sid );
 		$order->latitude( $lat );
 		$order->longitude( $lon );
 		$order->opt_vip( $vip );
@@ -71,12 +70,12 @@ class master_offers
 			$pos = get_taxi_position( $driver_id );
 			if( !$pos || $now - $pos->t > 600 ) {
 				logmsg( "#$driver_id: unknown or invalid position",
-					$user->sid, $user->id );
+					$user->id );
 				continue;
 			}
 
 			logmsg( "Adding #$driver_id to the offers",
-				$user->sid, $user->id );
+				$user->id );
 
 			$offer = new offer( $order, $driver_id, $user );
 			$offer_id = offers::add( $offer );
@@ -109,10 +108,10 @@ class master_offers
 		/*
 		 * Get the offer.
 		 */
-		logmsg( "Center takes offer $off_id", $user->sid, $user->id );
+		logmsg( "Center takes offer $off_id", $user->id );
 		$off = offers::get( $off_id );
 		if( !$off ) {
-			logmsg( "No offer $off_id", $user->sid, $user->id );
+			logmsg( "No offer $off_id", $user->id );
 			return false;
 		}
 
@@ -124,7 +123,7 @@ class master_offers
 		$timeout = $deadline - time() - intval($lag / 1000);
 		if( $timeout < 10 ) {
 			logmsg( "Can't fulfil offer $off_id: not enough time",
-				$user->sid, $user->id );
+				$user->id );
 			return false;
 		}
 
@@ -150,7 +149,7 @@ class master_offers
 		 */
 		$phone = $msg->data( 'customer_phone' );
 		$name = $msg->data( 'customer_name' );
-		$customer_id = get_customer_id( $user->sid, $phone, $name );
+		$customer_id = get_customer_id( $phone, $name );
 		$order->customer_id( $customer_id );
 
 		/*
@@ -161,7 +160,7 @@ class master_offers
 			warning( "Couldn't save center's order" );
 			return false;
 		}
-		service_log( $user->sid, 'Центр: {O}', $order );
+		service_log( 'Центр: {O}', $order );
 
 		offers::assign( $off_id, $order_id );
 

@@ -13,11 +13,7 @@ class proto_disp_imitations
 		$taxi_id = $msg->data( 'taxi_id' );
 		$online = $msg->data( 'online' );
 
-		if( get_taxi_service( $taxi_id ) != $user->sid ) {
-			return disp_error( $msg->cid, "Wrong driver id" );
-		}
-
-		if( service_option( $user->sid, 'sessions' ) )
+		if( service_option( 'sessions' ) )
 		{
 			$err = self::fix_session( $taxi_id, $online, $user );
 			if( $err != null ) {

@@ -6,7 +6,6 @@ require_script( 'res/service/pages.js?page=checkpoint' );
 
 <?php
 $id = argv(1);
-$service_id = sid();
 $qid = DB::getValue( "SELECT queue_id FROM taxi_queues
 	WHERE loc_id = %d", $id );
 if( $id )

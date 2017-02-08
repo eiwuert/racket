@@ -1,13 +1,11 @@
 <?php _header(); ?>
 
 <?php
-$service_id = sid();
-
 $name = vars::get( 'name' );
 $phone = vars::get( 'phone' );
 
 if( $name || $phone ) {
-	$clients = taxi::find_customers( $service_id, $name, $phone, 0, 1e5 );
+	$clients = taxi::find_customers( $name, $phone, 0, 1e5 );
 	$t = clients_table( $clients );
 } else {
 	$t = null;

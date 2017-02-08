@@ -31,12 +31,6 @@ function disp_get_driver_id( $msg, $user )
 		warning( "Missing driver_id" );
 		return null;
 	}
-
-	if( get_taxi_service( $taxi_id ) != $user->sid ) {
-		warning( "Taxi ownership mismatch" );
-		return null;
-	}
-
 	return intval( $taxi_id );
 }
 

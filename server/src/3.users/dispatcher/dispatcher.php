@@ -5,17 +5,14 @@ init( function()
 	add_auth_func( $NS.'auth' );
 	add_cmdfunc( T_DISPATCHER, 'auth-dispatcher', $NS.'msg_auth_dispatcher' );
 	add_cmdfunc( T_DISPATCHER, 'send-text', $NS.'msg_send_text' );
-	listen_events( null, EV_TAXI_POSITION, $NS.'ev_taxi_position' );
-	listen_events( null, EV_TAXI_ALARM_ON, $NS.'ev_taxi_alarm_on' );
-	listen_events( null, EV_TAXI_ALARM_OFF, $NS.'ev_taxi_alarm_off' );
-	listen_events( null, EV_LOGIN, $NS.'ev_loginout' );
-	listen_events( null, EV_LOGOUT, $NS.'ev_loginout' );
-	listen_events( null, EV_TAXI_BUSY, $NS.'ev_taxi_busy' );
+	listen_events( EV_TAXI_POSITION, $NS.'ev_taxi_position' );
+	listen_events( EV_TAXI_ALARM_ON, $NS.'ev_taxi_alarm_on' );
+	listen_events( EV_TAXI_ALARM_OFF, $NS.'ev_taxi_alarm_off' );
+	listen_events( EV_LOGIN, $NS.'ev_loginout' );
+	listen_events( EV_LOGOUT, $NS.'ev_loginout' );
+	listen_events( EV_TAXI_BUSY, $NS.'ev_taxi_busy' );
 
-	$S = DB::getValues( "SELECT service_id FROM taxi_services" );
-	foreach( $S as $sid ) {
-		disp_broadcast( $sid, null, 'sync' );
-	}
+	disp_broadcast( null, 'sync' );
 });
 
 class proto_dispatcher
@@ -36,9 +33,8 @@ class proto_dispatcher
 		}
 
 		// TODO: do authorisation by name and password
-		$sid = $m->data( 'sid' );
 		$id = $m->data( 'id' );
-		$u = new conn_user( T_DISPATCHER, $id, $sid );
+		$u = new conn_user( T_DISPATCHER, $id );
 
 		disp_result( $cid, true );
 		return $u;
@@ -74,13 +70,13 @@ class proto_dispatcher
 			'latitude' => $pos->lat,
 			'longitude' => $pos->lon
 		);
-		disp_broadcast( $event->sid, null, 'driver-position', $data );
+		disp_broadcast( null, 'driver-position', $data );
 	}
 
 	static function ev_taxi_alarm_on( $event )
 	{
 		$taxi_id = $event->data['taxi_id'];
-		disp_broadcast( $event->sid, null, 'driver-alarm-on', array(
+		disp_broadcast( null, 'driver-alarm-on', array(
 			'driver_id' => $taxi_id
 		));
 	}
@@ -88,7 +84,7 @@ class proto_dispatcher
 	static function ev_taxi_alarm_off( $event )
 	{
 		$taxi_id = $event->data['taxi_id'];
-		disp_broadcast( $event->sid, null, 'driver-alarm-off', array(
+		disp_broadcast( null, 'driver-alarm-off', array(
 			'driver_id' => $taxi_id
 		));
 	}
@@ -101,7 +97,7 @@ class proto_dispatcher
 		}
 
 		$online = ($event->type == EV_LOGIN) ? 1 : 0;
-		disp_broadcast( $user->sid, null, 'driver-changed', array(
+		disp_broadcast( null, 'driver-changed', array(
 			'driver_id' => $user->id,
 			'diff' => array(
 				'is_online' => $online
@@ -111,7 +107,7 @@ class proto_dispatcher
 
 	static function ev_taxi_busy( $event )
 	{
-		disp_broadcast( $event->sid, null, 'driver-busy', array(
+		disp_broadcast( null, 'driver-busy', array(
 			'driver_id' => $event->data["taxi_id"],
 			'busy' => $event->data["busy"]
 		));

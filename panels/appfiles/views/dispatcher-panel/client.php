@@ -1,14 +1,9 @@
 <?php _header(); ?>
 <?php
-$sid = sid();
 $customer_id = argv(1);
-$customer = new customer( $customer_id, 'phone, name, blacklist, comments, service_id' );
+$customer = new customer( $customer_id, 'phone, name, blacklist, comments' );
 
-if( $customer->service_id() != $sid ) {
-	error_notfound();
-}
-
-$orders = taxi::customer_orders( $sid, $customer_id );
+$orders = taxi::customer_orders( $customer_id );
 
 $table = new Table();
 foreach( $orders as $order )

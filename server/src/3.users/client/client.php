@@ -43,7 +43,6 @@ function client_register($msg)
 
 	$id = uniqid();
 	DB::insertRecord('taxi_accounts', [
-		'service_id' => 26,
 		'type' => 'client',
 		'login' => $id,
 		'password_hash' => '',
@@ -137,7 +136,6 @@ function client_make_order($msg) {
 	$user_id = client_get_user_id($msg);
 
 	$order = new order();
-	$order->service_id(26);
 	$order->owner_id($user_id);
 	$order->order_uid(uniqid('client', true));
 	$order->src_addr('г. Минск, ул. Казинца, д. 64');
@@ -146,7 +144,7 @@ function client_make_order($msg) {
 	$order_id = save_order($order);
 
 	logmsg("Client order: $order");
-	service_log(26, "Client order: $order");
+	service_log("Client order: $order");
 
 	if (!wait_order($order)) {
 		return client_error('order failed');
@@ -193,11 +191,11 @@ function client_cancel_order($msg)
 	$order = new order($order_id);
 
 	if (cancel_order($order)) {
-		logmsg("Order cancelled: $order", $user->sid);
-		service_log($user->sid, 'Order cancelled: {O}', $order);
+		logmsg("Order cancelled: $order");
+		service_log('Order cancelled: {O}', $order);
 	}
 	else {
-		logmsg("Couldn't cancel order: $order", $user->sid);
+		logmsg("Couldn't cancel order: $order");
 		return client_error('cancel failed');
 	}
 	return client_data('ok');

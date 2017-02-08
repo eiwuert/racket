@@ -12,13 +12,8 @@ function service_login()
 		return false;
 	}
 
-	$acc = new taxi_account( $acc_id, 'service_id' );
-	$service_id = $acc->service_id();
-
 	taxi_logs::log_in( $acc_id, $_SERVER['REMOTE_ADDR'] );
-
 	user::set( 'service', $acc_id, $login );
-	user::set_data( 'service_id', $service_id );
 	redirect( url_t( "service-panel:" ) );
 }
 
@@ -32,12 +27,8 @@ function dispatcher_login()
 		return false;
 	}
 
-	$acc = new taxi_account( $acc_id, 'service_id' );
-	$service_id = $acc->service_id();
-
 	taxi_logs::log_in( $acc_id, $_SERVER['REMOTE_ADDR'] );
 	user::set( 'dispatcher', $acc_id, $login );
-	user::set_data( 'service_id', $service_id );
 	return true;
 }
 

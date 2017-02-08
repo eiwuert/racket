@@ -1,6 +1,4 @@
 <?php
-$service_id = sid();
-
 if( $group_id )
 {
 	$g = new driver_group( $group_id, '*' );
@@ -12,8 +10,7 @@ else
 	?><h1>Новая группа</h1><?php
 }
 
-$Q = DB::getRecords( "SELECT * FROM taxi_queues
-	WHERE service_id = %d", $service_id );
+$Q = DB::getRecords( "SELECT * FROM taxi_queues" );
 $checked_queues = taxi_drivers::get_group_queues( $group_id );
 
 ?>

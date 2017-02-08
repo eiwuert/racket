@@ -5,24 +5,24 @@ register_event_type( EV_CHAT_MESSAGE );
 
 class chat
 {
-	static function phrases( $sid, $type )
+	static function phrases( $type )
 	{
-		$s = service_setting( $sid, 'phrases_driver' );
+		$s = service_setting( 'phrases_driver' );
 		if( !$s ) $s = '';
 		return array_map( 'trim', explode( "\n", $s ) );
 	}
 
-	static function send( $sid, $from, $to, $text ) {
-		return self::add_msg( $sid, $from, $to, null, $text );
+	static function send( $from, $to, $text ) {
+		return self::add_msg( $from, $to, null, $text );
 	}
 
-	static function broadcast( $sid, $from, $to_type, $text ) {
-		return self::add_msg( $sid, $from, null, $to_type, $text );
+	static function broadcast( $from, $to_type, $text ) {
+		return self::add_msg( $from, null, $to_type, $text );
 	}
 
-	private static function add_msg( $sid, $from, $to, $to_type, $text )
+	private static function add_msg( $from, $to, $to_type, $text )
 	{
-		if( !$sid || !$from || !$text ) {
+		if( !$from || !$text ) {
 			warning( "Illegal arguments in add_msg" );
 			return false;
 		}
@@ -31,7 +31,7 @@ class chat
 			return false;
 		}
 
-		$acc1 = new taxi_account( $from, 'service_id, type, call_id, deleted' );
+		$acc1 = new taxi_account( $from, 'type, call_id, deleted' );
 		$acc2 = null;
 
 		if( $acc1->deleted() || strlen( $acc1->call_id() ) == 0 ) {
@@ -41,12 +41,11 @@ class chat
 
 		/*
 		 * If this is a direct message, check that both accounts exist
-		 * and belong to the same service.
 		 */
 		if( $to )
 		{
-			$acc2 = new taxi_account( $to, 'service_id, type, deleted' );
-			if( $acc2->deleted() || $acc2->service_id() != $acc1->service_id() ) {
+			$acc2 = new taxi_account( $to, 'type, deleted' );
+			if( $acc2->deleted() ) {
 				warning( "Illegal chat message from #$from to #$to" );
 				return false;
 			}
@@ -73,7 +72,7 @@ class chat
 		));
 		$time = DB::getValue( "SELECT UNIX_TIMESTAMP(t) FROM taxi_chat
 			WHERE msg_id = %d", $id );
-		announce_event( $sid, EV_CHAT_MESSAGE, array(
+		announce_event( EV_CHAT_MESSAGE, array(
 			'id' => $id,
 			'from' => $from,
 			'to' => $to,
@@ -84,13 +83,12 @@ class chat
 		return true;
 	}
 
-	static function messages( $sid, $acc_id, $since, $until )
+	static function messages( $acc_id, $since, $until )
 	{
-		$sid = intval( $sid );
 		$acc_id = intval( $acc_id );
 		$type = DB::getValue( "SELECT type FROM taxi_accounts
-			WHERE acc_id = %d AND service_id = %d
-			AND deleted = 0", $acc_id, $sid );
+			WHERE acc_id = %d
+			AND deleted = 0", $acc_id );
 		if( !$type ) {
 			return null;
 		}

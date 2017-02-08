@@ -2,10 +2,9 @@
 
 class driver_groups
 {
-	static function get_service_groups_kv( $service_id )
+	static function get_service_groups_kv()
 	{
-		$a = DB::getRecords( "SELECT group_id, name FROM taxi_driver_groups
-		WHERE service_id = %d", $service_id );
+		$a = DB::getRecords( "SELECT group_id, name FROM taxi_driver_groups" );
 		return array_column( $a, 'name', 'group_id' );
 	}
 
@@ -13,15 +12,13 @@ class driver_groups
 	 * Groups cannot belong to more than one service, but we use it
 	 * here to check the ownership.
 	 */
-	static function delete_group( $group_id, $service_id )
+	static function delete_group( $group_id )
 	{
 		$group_id = intval( $group_id );
-		$service_id = intval( $service_id );
-		if( !$group_id || !$service_id ) return false;
+		if( !$group_id ) return false;
 
 		if( !DB::exists( 'taxi_driver_groups', array(
-			'group_id' => $group_id,
-			'service_id' => $service_id
+			'group_id' => $group_id
 		))) {
 			return false;
 		}

@@ -6,28 +6,24 @@ class fares
 	/*
 	 * Used by service panels for fares overview.
 	 */
-	static function get_service_fares( $service_id )
+	static function get_service_fares()
 	{
 		return DB::getValues( "
 			SELECT fare_id
 			FROM taxi_fares
-			WHERE service_id = %d
-			AND deleted = 0",
-			$service_id
+			WHERE deleted = 0"
 		);
 	}
 
 	/*
 	 * Returns key-value pairs for service admin panel.
 	 */
-	static function get_service_fares_kv( $service_id )
+	static function get_service_fares_kv()
 	{
 		$a = DB::getRecords("
 			SELECT fare_id, name
 			FROM taxi_fares
-			WHERE service_id = %d
-			AND deleted = 0",
-			$service_id
+			WHERE deleted = 0"
 		);
 		return array_column( $a, 'name', 'fare_id' );
 	}
@@ -35,7 +31,7 @@ class fares
 	/*
 	 * Returns list of fares associated with the given cars group.
 	 */
-	static function get_car_group_fares( $group_id, $service_id )
+	static function get_car_group_fares( $group_id )
 	{
 		$a = DB::getValues( "SELECT fare_id
 			FROM taxi_car_group_fares
@@ -127,17 +123,15 @@ class fares
 		DB::exec( "COMMIT" );
 	}
 
-	static function delete_fare( $fare_id, $service_id )
+	static function delete_fare( $fare_id )
 	{
 		DB::exec( "DELETE FROM taxi_car_group_fares
 			WHERE fare_id = %d", $fare_id );
 
 		return DB::updateRecord( 'taxi_fares',
 			array( 'deleted' => 1 ),
-			array(
-			'fare_id' => $fare_id,
-			'service_id' => $service_id
-		));
+			array( 'fare_id' => $fare_id )
+		);
 	}
 }
 

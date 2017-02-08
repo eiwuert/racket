@@ -5,7 +5,7 @@ class service_logs
 	 * Returns messages (as arrays) for given service, for given time
 	 * period.
 	 */
-	static function get_messages( $service_id, $from, $to = null )
+	static function get_messages( $from, $to = null )
 	{
 		if( !$to ) $to = time();
 		return DB::getRecords( "
@@ -14,16 +14,15 @@ class service_logs
 				UNIX_TIMESTAMP(t) AS t,
 				text
 			FROM taxi_logs L
-			WHERE service_id = %d
-			AND L.t BETWEEN FROM_UNIXTIME(%d) AND FROM_UNIXTIME(%d)
-			ORDER BY t", $service_id, $from, $to
+			WHERE L.t BETWEEN FROM_UNIXTIME(%d) AND FROM_UNIXTIME(%d)
+			ORDER BY t", $from, $to
 		);
 	}
 
 	/*
 	 * Returns last $n messages for the given service.
 	 */
-	static function get_last_messages( $service_id, $n = 100 )
+	static function get_last_messages( $n = 100 )
 	{
 		return DB::getRecords("
 			SELECT * FROM (
@@ -31,37 +30,34 @@ class service_logs
 					UNIX_TIMESTAMP(t) AS t,
 					text
 				FROM taxi_logs L
-				WHERE service_id = %d
 				ORDER BY L.t DESC
 				LIMIT %d) rev
 			ORDER BY t
-		", $service_id, $n );
+		", $n );
 	}
 
 	/*
 	 * Returns service messages after the message with the given id.
 	 */
-	static function get_messages_after( $service_id, $id )
+	static function get_messages_after( $id )
 	{
 		return DB::getRecords("
 			SELECT message_id,
 				UNIX_TIMESTAMP(t) AS t,
 				text
 			FROM taxi_logs L
-			WHERE service_id = %d
-			AND message_id > %d
+			WHERE message_id > %d
 			ORDER BY L.t
-		", $service_id, $id );
+		", $id );
 	}
 
 	/*
 	 * Adds a message to the log with given service id and current
 	 * timestamp.
 	 */
-	static function add_message( $service_id, $text )
+	static function add_message( $text )
 	{
 		return DB::insertRecord( 'taxi_logs', array(
-			'service_id' => $service_id,
 			'text' => $text
 		));
 	}

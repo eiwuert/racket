@@ -10,8 +10,7 @@ class disp_search
 		/*
 		 * Run the search and get the "squad".
 		 */
-		$sid = $order->service_id();
-		logmsg( "Searching cars for $order", $sid );
+		logmsg( "Searching cars for $order" );
 
 		$squad = new cars_squad( $order->id() );
 
@@ -21,29 +20,27 @@ class disp_search
 		 */
 		$loc_id = $order->src_loc_id();
 		if( $loc_id ) {
-			logmsg( "Location-specific search", $sid );
+			logmsg( "Location-specific search" );
 			self::loc_search( $order, $squad, $loc_id );
 		}
 		else {
-			logmsg( "Non-location search", $sid );
+			logmsg( "Non-location search" );
 			self::nonloc_search( $order, $squad );
 		}
 
 		/*
 		 * Pile nearby cars on top of what has been found.
 		 */
-		logmsg( "Nearby search", $sid );
+		logmsg( "Nearby search" );
 		area_search( $order, $squad );
 
 		$n = $squad->get_cars_number();
-		logmsg( "Cars found: $n", $sid );
+		logmsg( "Cars found: $n" );
 		return $squad;
 	}
 
 	private static function loc_search( $order, $squad, $loc_id )
 	{
-		$sid = $order->service_id();
-
 		/*
 		 * If there is a special queue, use it first.
 		 */
@@ -51,7 +48,7 @@ class disp_search
 			WHERE loc_id = %d", $loc_id );
 		if( $qid )
 		{
-			logmsg( "Using special queue #$qid", $sid );
+			logmsg( "Using special queue #$qid" );
 			/*
 			 * If the queue is a part of a queue group, use group mode.
 			 * Otherwise use the reqular queue mode.
@@ -73,16 +70,15 @@ class disp_search
 
 	private static function nonloc_search( $order, $squad )
 	{
-		$sid = $order->service_id();
 		$qid = self::address_queue( $order );
 		if( !$qid ) {
 			$qid = self::nearby_queue( $order );
 		}
 		if( !$qid ) {
-			logmsg( "No queue for order #" . $order->id(), $sid );
+			logmsg( "No queue for order #" . $order->id() );
 			return;
 		}
-		logmsg( "Using queue $qid for order #" . $order->id(), $sid );
+		logmsg( "Using queue $qid for order #" . $order->id() );
 		self::use_queue( $order, $squad, $qid );
 	}
 
@@ -93,7 +89,6 @@ class disp_search
 	 */
 	private static function address_queue( $order )
 	{
-		$sid = $order->service_id();
 		$addr = parse_address( $order->src_addr() );
 		if( !$addr ) {
 			warning( "Could not parse order address: ".$order->src_addr() );
@@ -103,8 +98,7 @@ class disp_search
 		$street = $addr['street'];
 		$house_int = intval( $addr['house'] );
 		if( !$house_int ) {
-			logmsg( "No house number given, can't find by address ranges",
-				$sid );
+			logmsg( "No house number given, can't find by address ranges" );
 		}
 
 		/*
@@ -120,8 +114,6 @@ class disp_search
 				taxi_queue_addresses a
 				JOIN taxi_queues q USING (queue_id)
 			WHERE
-				q.service_id = %d
-
 				-- same city and street
 				AND a.city = '%s'
 				AND a.street = '%s'
@@ -131,7 +123,7 @@ class disp_search
 					AND (a.parity = 'none' OR a.parity = '$parity')
 				)
 				",
-			$sid, $place, $street, $house_int
+			$place, $street, $house_int
 		);
 	}
 
@@ -150,14 +142,11 @@ class disp_search
 		$lat = $order->latitude();
 		$lon = $order->longitude();
 
-		$sid = $order->service_id();
-
 		$near = array();
 		$Q = DB::getRecords(
 			"SELECT queue_id, latitude, longitude, radius
 			FROM taxi_queues
-			WHERE service_id = %d
-			AND radius > 0", $sid );
+			WHERE radius > 0" );
 		foreach( $Q as $i => $q )
 		{
 			$d = haversine_distance( $q['latitude'], $q['longitude'], $lat, $lon );
@@ -185,13 +174,11 @@ class disp_search
 
 	private static function use_queue( $order, $squad, $qid )
 	{
-		$sid = $order->service_id();
-
 		/*
 		 * Get no more than N cars sequentially, where N is a service
 		 * setting.
 		 */
-		$n = intval( service_setting( $sid, 'queue_drivers' ) );
+		$n = intval( service_setting( 'queue_drivers' ) );
 		if( !$n ) return;
 
 		$except = $squad->get_cars_list();
@@ -201,7 +188,7 @@ class disp_search
 		/*
 		 * Add the cars sequentially, setting importance to 1.
 		 */
-		$timeout = service_setting( $sid, 'accept_timeout' );
+		$timeout = service_setting( 'accept_timeout' );
 		foreach( $cars as $car ) {
 			$car['importance'] = 1;
 			$squad->add_car( $car, $timeout );
@@ -238,8 +225,6 @@ class disp_search
 
 	private static function use_queue_group( $order, $squad, $upstream, $qid )
 	{
-		$sid = $order->service_id();
-
 		/*
 		 * Get all queues in the group.
 		 */
@@ -265,10 +250,10 @@ class disp_search
 			array_unshift( $group, $qid );
 		}
 
-		logmsg( "Group queues: " . implode( ',', $group ), $sid );
+		logmsg( "Group queues: " . implode( ',', $group ) );
 
-		$timeout = service_setting( $sid, 'accept_timeout' );
-		$n = intval( service_setting( $sid, 'queue_drivers' ) );
+		$timeout = service_setting( 'accept_timeout' );
+		$n = intval( service_setting( 'queue_drivers' ) );
 		foreach( $group as $qid )
 		{
 			debmsg( "Trying queue #$qid" );

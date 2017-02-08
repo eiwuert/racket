@@ -24,24 +24,23 @@ class channels
 	 * Returns messages with id greater than $start_message_id.
 	 * If $start_message_id is null, an "init" message is returned.
 	 */
-	static function get_messages( $service_id, $acc_id, $start_message_id = null )
+	static function get_messages( $acc_id, $start_message_id = null )
 	{
 		/*
 		 * If no sequence number is given, return init message with
 		 */
 		if( $start_message_id === null ) {
 			return array(
-				'message_id' => self::seq( $service_id, $acc_id ),
+				'message_id' => self::seq( $acc_id ),
 				'type' => 'init'
 			);
 		}
 
-		$service_id = intval( $service_id );
 		$acc_id = intval( $acc_id );
 		$start_message_id = intval( $start_message_id );
 
 		$where = "message_id > $start_message_id";
-		$filter = self::filter( $service_id, $acc_id );
+		$filter = self::filter( $acc_id );
 		if( $filter ) {
 			$where .= " AND " . $filter;
 		}
@@ -62,9 +61,9 @@ class channels
 		return $messages;
 	}
 
-	static function seq( $service_id, $acc_id )
+	static function seq( $acc_id )
 	{
-		$where = self::filter( $service_id, $acc_id );
+		$where = self::filter( $acc_id );
 		if( $where == '' ) {
 			trigger_error( "Empty filter" );
 			return 0;
@@ -76,15 +75,12 @@ class channels
 		return $id;
 	}
 
-	private static function filter( $service_id, $acc_id )
+	private static function filter( $acc_id )
 	{
 		$loc_id = DB::getValue( "SELECT loc_id FROM taxi_dispatchers
 			WHERE acc_id = %d", $acc_id );
 
 		$filter = array();
-		if( $service_id ) {
-			$filter[] = "channel_id IS NULL OR channel_id = $service_id";
-		}
 		if( $acc_id ) {
 			$filter[] = "acc_id IS NULL OR acc_id = $acc_id";
 		}

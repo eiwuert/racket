@@ -2,7 +2,7 @@
 
 init( function() {
 	$ns = 'disp_proto_chat::';
-	listen_events( null, EV_CHAT_MESSAGE, $ns.'ev_chat_message' );
+	listen_events( EV_CHAT_MESSAGE, $ns.'ev_chat_message' );
 	add_cmdfunc( T_DISPATCHER, 'send-chat-message', $ns.'msg_send_chat_message' );
 	add_cmdfunc( T_DISPATCHER, 'broadcast-chat', $ns.'msg_broadcast_chat' );
 });
@@ -18,7 +18,7 @@ class disp_proto_chat
 		$to = $event->data['to'];
 		$to = $to ? intval( $to ) : null;
 
-		disp_broadcast( $event->sid, null, 'chat-message', array(
+		disp_broadcast( null, 'chat-message', array(
 			'id' => intval( $event->data['id'] ),
 			'from' => intval( $event->data['from'] ),
 			'to' => $to,
@@ -57,14 +57,10 @@ class disp_proto_chat
 		$text = $msg->data( 'text' );
 		$to_type = $msg->data( 'to_type' );
 
-		if( $to && get_taxi_service( $to ) != $user->sid ) {
-			return disp_error( $msg->cid, "Invalid chat destination" );
-		}
-
 		if( $to ) {
-			$ok = chat::send( $user->sid, $user->id, $to, $text );
+			$ok = chat::send( $user->id, $to, $text );
 		} else {
-			$ok = chat::broadcast( $user->sid, $user->id, $to_type, $text );
+			$ok = chat::broadcast( $user->id, $to_type, $text );
 		}
 		return disp_result( $msg->cid, $ok );
 	}
@@ -82,7 +78,7 @@ class disp_proto_chat
 			/*
 			 * The chat::send function checks service identifiers itself.
 			 */
-			chat::send( $user->sid, $user->id, $driver_id, $text );
+			chat::send( $user->id, $driver_id, $text );
 		}
 
 		return disp_result( $msg->cid, true );

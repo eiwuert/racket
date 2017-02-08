@@ -6,10 +6,9 @@ class dispatcher_client extends server_client
 {
 	private $err = null;
 
-	function login( $id, $sid )
+	function login( $id )
 	{
 		$this->send_message( 'auth-dispatcher', array(
-			'sid' => $sid,
 			'id' => $id
 		));
 		return $this->check_error();

@@ -6,14 +6,14 @@ init( function()
 	add_cmdfunc( T_TAXI, 'get-chat-phrases', $NS.'msg_get_chat_phrases' );
 	add_cmdfunc( T_TAXI, 'get-chat-messages', $NS.'msg_get_chat_messages' );
 	add_cmdfunc( T_TAXI, 'send-chat-message', $NS.'msg_send_chat_message' );
-	listen_events( null, EV_CHAT_MESSAGE, $NS.'ev_chat_message' );
+	listen_events( EV_CHAT_MESSAGE, $NS.'ev_chat_message' );
 });
 
 class taxi_chat
 {
 	static function msg_get_chat_phrases( $msg, $user )
 	{
-		$phrases = chat::phrases( $user->sid, "driver" );
+		$phrases = chat::phrases( "driver" );
 		$m = new message( 'chat-phrases', $phrases );
 		return write_message( $msg->cid, $m );
 	}
@@ -31,7 +31,7 @@ class taxi_chat
 			return false;
 		}
 
-		$messages = chat::messages( $user->sid, $user->id, $t1, $t2 );
+		$messages = chat::messages( $user->id, $t1, $t2 );
 		if( $messages === null ) {
 			warning( "Couldn't get messages for $user" );
 			return false;
@@ -86,7 +86,7 @@ class taxi_chat
 			return false;
 		}
 
-		return chat::broadcast( $user->sid, $user->id, $type, $text );
+		return chat::broadcast( $user->id, $type, $text );
 	}
 
 	/*
@@ -118,7 +118,7 @@ class taxi_chat
 		 */
 		if( $event->data['to_type'] == "driver" ) {
 			$m = self::format_message( $event );
-			taxi_broadcast( $event->sid, $m );
+			taxi_broadcast( $m );
 			return;
 		}
 	}

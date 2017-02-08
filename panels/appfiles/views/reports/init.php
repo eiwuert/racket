@@ -29,9 +29,9 @@ function time_selector( $range )
 	<?php
 }
 
-function show_positions( $service_id, $driver_id, $t1, $t2 )
+function show_positions( $driver_id, $t1, $t2 )
 {
-	$states = taxi_tracks::get_positions_report( $service_id, $driver_id, $t1, $t2 );
+	$states = taxi_tracks::get_positions_report( $driver_id, $t1, $t2 );
 	if( empty( $states ) ) {
 		?><p>Нет записей</p><?php
 		return;

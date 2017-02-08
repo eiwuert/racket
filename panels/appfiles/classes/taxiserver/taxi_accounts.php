@@ -88,12 +88,6 @@ class taxi_accounts
 		return null;
 	}
 
-	static function service_id( $acc_id )
-	{
-		return DB::getValue( "SELECT service_id FROM ".self::T."
-			WHERE acc_id = %d", $acc_id );
-	}
-
 	/*
 	 * Returns acc_id or null.
 	 */

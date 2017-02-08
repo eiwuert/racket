@@ -23,7 +23,7 @@ class dx_driver
 				UNIX_TIMESTAMP(exp_assignment_time) AS assignment_time,
 				UNIX_TIMESTAMP(exp_arrival_time) AS arrival_time
 			FROM taxi_accounts acc
-			JOIN taxi_orders o USING (service_id)
+			JOIN taxi_orders o
 			LEFT JOIN taxi_customers cust USING (customer_id)
 			WHERE acc_id = $driver_id
 				AND acc.type = 'driver'

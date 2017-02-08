@@ -3,8 +3,6 @@
 <?php
 require_script( 'res/lib/html5-forms.js' );
 
-$service_id = sid();
-
 $t1 = Vars::get( 'time-from' );
 if( $t1 ) $t1 = strtotime( $t1 );
 else $t1 = time() - 3600;
@@ -29,7 +27,7 @@ set_page_title( 'Архив журнала' );
 </form>
 
 <?php
-$messages = service_logs::get_messages( $service_id, $t1, $t2 );
+$messages = service_logs::get_messages( $t1, $t2 );
 echo '<p>', implode( '</p><p>', array_column( $messages, 'text' ) ), '</p>';
 ?>
 

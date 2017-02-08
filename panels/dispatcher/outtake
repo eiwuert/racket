@@ -1,0 +1,123 @@
+// driver id => marker name
+	//var driverClasses = {};
+	
+	/*
+		var options = {
+			title: driver.call_id,
+			icon: L.icon({
+				iconUrl: driverIconUrl( driver ),
+				iconSize: [25, 27],
+				iconAnchor: [12, 27]
+			})
+		};
+*/
+/*
+		var m = map.setMarker( "taxi_" + driver.id,
+			coords[0], coords[1], options );
+		m.bindLabel( driver.call_id, { noHide: true } ).showLabel();
+*/	
+
+
+function initAlerts( disp, mapWidget )
+{
+	/*
+	 * Display alarms that are currently on.
+	 */
+	disp.driverAlarms().forEach( function( alarm ) {
+		/*
+		 * Add a highlight to the driver's marker on the map.
+		 */
+		mapWidget.setClass( alarm.driverId, "alarm" );
+	});
+
+	/*
+	 * When a driver sends an alarm command, highlight their
+	 * icon on the map.
+	 */
+	disp.on( "driver-alarm-on", function( event )
+	{
+		/*
+		 * Add a highlight to the driver's marker on the map.
+		 */
+		var driver = event.data.driver;
+		mapWidget.setClass( driver.id, "alarm" );
+		/*
+		 * Center the map on the driver.
+		 */
+		mapWidget.setPosition( driver.coords() );
+		mapWidget.setZoom( 13 );
+	});
+
+	disp.on( "driver-alarm-off", function( event )
+	{
+		/*
+		 * Restore the driver's normal marker.
+		 */
+		var driver = event.data.driver;
+		mapWidget.removeClass( driver.id, "alarm" );
+	});
+}
+
+
+
+this.setPosition = function( coords ) {
+		var b = s.bounds;
+		var center = [
+			(b.min_lat + b.max_lat)/2,
+			(b.min_lon + b.max_lon)/2
+		];
+		var dLat = coords[0] - center[0];
+		var dLon = coords[1] - center[1];
+		
+		b.min_lat += dLat;
+		b.max_lat += dLat;
+		b.min_lon += dLon;
+		b.max_lon += dLon;
+		selectArea(b);
+
+
+	};
+
+	this.setZoom = function( level ) {
+		console.warn("No setZoom");
+		//map.setZoom( level );
+	};
+
+
+this.setClass = function( driverId, className ) {
+		//driverClasses[driverId] = className;
+		//refreshDrivers();
+	};
+
+	this.removeClass = function( driverId, className ) {
+		//delete driverClasses[driverId];
+		//updateMarker( driverId );
+	};
+
+
+function driverIconUrl( driver )
+{
+	var pref = "/res/dispatcher/images/map-icon-";
+
+	if( driver.id in driverClasses ) {
+		return pref + driverClasses[driver.id] + ".gif";
+	}
+
+	var car = disp.getDriverCar( driver.id );
+	var body = car ? car.body_type : "none";
+	var carClass;
+	switch( body )
+	{
+		case 'estate':
+		case 'minivan':
+			carClass = car.body_type;
+			break;
+		default:
+			carClass = 'ordinary';
+	}
+
+	var url = pref + carClass;
+	if( car && car['class'] == 'vip' ) url += "-vip";
+	url += ".png";
+	return url;
+}

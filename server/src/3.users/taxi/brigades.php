@@ -2,9 +2,9 @@
 
 init( function() {
 	$ns = 'taxi_proto_brigs::';
-	listen_events( null, EV_TAXI_POSITION, $ns.'ev_taxi_position' );
+	listen_events( EV_TAXI_POSITION, $ns.'ev_taxi_position' );
 	add_cmdfunc( T_TAXI, 'taxi-login', $ns.'msg_taxi_login' );
-	listen_events( null, EV_LOGOUT, $ns.'ev_logout' );
+	listen_events( EV_LOGOUT, $ns.'ev_logout' );
 });
 
 class taxi_proto_brigs

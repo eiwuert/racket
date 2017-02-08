@@ -2,8 +2,7 @@
 
 <?php
 
-$service_id = sid();
-$fares = fares::get_service_fares( $service_id );
+$fares = fares::get_service_fares();
 $t = new table(array(
 	'name' => 'Название',
 	'start' => 'Посадка',

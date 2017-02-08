@@ -43,9 +43,7 @@ class conn_imitations
 
 	function _add_connection( $taxi_id )
 	{
-		$sid = get_taxi_service( $taxi_id );
-
-		logmsg( "Connect fake: #$taxi_id", $sid, $taxi_id );
+		logmsg( "Connect fake: #$taxi_id", $taxi_id );
 
 		$cid = $this->taxi_cid( $taxi_id );
 		if( isset( $this->imitations[$cid] ) ) {
@@ -61,9 +59,9 @@ class conn_imitations
 		 * value directly.
 		 */
 		$client = call_user_func( $this->on_connect, $this->iid, $cid );
-		$client->user = new conn_user( T_TAXI, $taxi_id, $sid );
+		$client->user = new conn_user( T_TAXI, $taxi_id );
 		$client->mode = 'msg';
-		announce_event( $sid, EV_LOGIN, array( 'user' => $client->user ) );
+		announce_event( EV_LOGIN, array( 'user' => $client->user ) );
 		/*
 		 * Set 't' far in future to avoid autocleaning.
 		 */
@@ -73,8 +71,7 @@ class conn_imitations
 
 	function _disconnect( $taxi_id )
 	{
-		$sid = get_taxi_service( $taxi_id );
-		logmsg( "Disconnect fake: #$taxi_id", $sid, $taxi_id );
+		logmsg( "Disconnect fake: #$taxi_id", $taxi_id );
 		$cid = $this->taxi_cid( $taxi_id );
 		if( !isset( $this->imitations[$cid] ) ) {
 			warning( "No taxi_id #$taxi_id in imitations" );

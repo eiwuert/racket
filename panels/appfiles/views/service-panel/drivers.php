@@ -3,8 +3,6 @@
 <h1>Водители</h1>
 
 <?php
-$service_id = sid();
-
 $drivers = DB::getRecords("
 	SELECT
 	acc.acc_id,
@@ -40,11 +38,10 @@ $drivers = DB::getRecords("
 	LEFT JOIN taxi_cars c USING (car_id)
 	LEFT JOIN taxi_car_groups g
 		ON g.group_id = c.group_id
-	WHERE acc.service_id = %d
-	AND d.deleted = 0
-	ORDER BY is_brig DESC, call_id", $service_id );
+	WHERE d.deleted = 0
+	ORDER BY is_brig DESC, call_id" );
 
-$groups = taxi_drivers::groups( $service_id );
+$groups = taxi_drivers::groups();
 foreach( $groups as $i => $name ) {
 	$groups[$i]['table'] = new_table();
 }

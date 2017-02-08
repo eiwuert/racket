@@ -1,8 +1,6 @@
 <?php _header(); ?>
 
 <?php
-$service_id = sid();
-
 $r = DB::getRecords( "
 SELECT
 	queue_id, upstream, priority, name, sublist, addr, `order`,
@@ -22,10 +20,9 @@ FROM (
 		taxi_queues p
 		LEFT JOIN taxi_queues c
 		ON c.parent_id = p.queue_id
-	WHERE p.service_id = %d
 	GROUP BY p.queue_id
 	ORDER BY p.order
-	) a", $service_id );
+	) a" );
 
 $table = new Table(array(
 	'num' => '№',

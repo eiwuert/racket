@@ -115,12 +115,11 @@ class orders
 	/*
 	 * Mark given order as deleted.
 	 */
-	static function delete_order( $service_id, $order_id )
+	static function delete_order( $order_id )
 	{
 		return DB::updateRecord( 'taxi_orders',
 			array( 'deleted' => 1 ),
-			array( 'service_id' => $service_id,
-				'order_id' => $order_id )
+			array( 'order_id' => $order_id )
 		);
 	}
 
@@ -163,9 +162,8 @@ class orders
 			'o.opt_vip, o.opt_terminal, o.opt_car_class' )
 	);
 
-	static function table( $service_id, $t1, $t2, $columns, $filter = array() )
+	static function table( $t1, $t2, $columns, $filter = array() )
 	{
-		$service_id = intval( $service_id );
 		$t1 = intval( $t1 );
 		$t2 = intval( $t2 );
 		$dispatcher_id = array_alt( $filter, 'dispatcher_id', null );
@@ -183,8 +181,7 @@ class orders
 		}
 
 		$where = array(
-			"UNIX_TIMESTAMP(o.time_created) BETWEEN $t1 AND $t2",
-			"o.service_id = $service_id"
+			"UNIX_TIMESTAMP(o.time_created) BETWEEN $t1 AND $t2"
 		);
 		$where[] = 'o.deleted = 0';
 		if( $dispatcher_id ) {

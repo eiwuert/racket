@@ -3,7 +3,7 @@
 require_script( "res/service/pages.js?page=settings" );
 ?>
 <?php
-$S = service_settings::get_settings( sid() );
+$S = service_settings::get_settings();
 ?>
 
 <h1>Настройки</h1>

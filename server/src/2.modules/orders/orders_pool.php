@@ -11,8 +11,6 @@ class orders_pool
 {
 	static function publish( $order, $callback )
 	{
-		$sid = $order->service_id();
-
 		if( !self::can_publish( $order ) ) {
 			$callback( $order );
 			return;
@@ -21,12 +19,12 @@ class orders_pool
 		/*
 		 * Publish and broadcast to drivers.
 		 */
-		$time = intval( service_setting( $sid, 'publish_duration' ) );
+		$time = intval( service_setting( 'publish_duration' ) );
 		if( $time < 5 ) {
 			warning( "Publish duration is too small ($time), increasing." );
 			$time = 5;
 		}
-		logmsg( "Publishing the order $order", $sid );
+		logmsg( "Publishing the order $order" );
 		$order->utc( 'exp_assignment_time', time() + $time );
 		$order->published(1);
 		$order->save();
@@ -46,19 +44,17 @@ class orders_pool
 	 */
 	private static function can_publish( $order )
 	{
-		$sid = $order->service_id();
-
 		$loc_id = $order->src_loc_id();
 		if( $loc_id ) $qid = DB::getValue( "SELECT queue_id FROM taxi_queues
 			WHERE loc_id = %d", $loc_id );
 		else $qid = 0;
 
-		if( $loc_id && $qid && !service_setting( $sid, 'pool_enabled_queues' ) ) {
+		if( $loc_id && $qid && !service_setting( 'pool_enabled_queues' ) ) {
 			debmsg( "The pool is disabled for queues." );
 			return false;
 		}
 
-		if( !$loc_id && !service_setting( $sid, 'pool_enabled_city' ) ) {
+		if( !$loc_id && !service_setting( 'pool_enabled_city' ) ) {
 			debmsg( "The pool is disabled for city orders." );
 			return false;
 		}
@@ -80,8 +76,7 @@ class orders_pool
 	{
 		self::log_order( $order, 'broadcasting the pool event' );
 		$m = new message( 'new-pool-order' );
-		$sid = $order->service_id();
-		$R = conn::find_users( T_TAXI, $sid );
+		$R = conn::find_users( T_TAXI );
 		foreach( $R as $r ) {
 			write_message( $r->cid, $m );
 		}

@@ -1,8 +1,7 @@
 <?php
 
-$service_id = sid();
-$fares = fares::get_service_fares_kv( $service_id );
-$selected_fares = fares::get_car_group_fares( $group_id, $service_id );
+$fares = fares::get_service_fares_kv();
+$selected_fares = fares::get_car_group_fares( $group_id );
 $action = aurl( 'save_car_group', url_t( 'cars' ), CURRENT_URL );
 
 if( $group_id )

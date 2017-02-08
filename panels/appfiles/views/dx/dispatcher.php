@@ -24,19 +24,18 @@ dx::init( function()
 		return dx::error( "Unknown request" );
 	}
 
-	$sid = sid();
 	$type = user::get_type();
-	if( !$sid || $type != 'dispatcher' ) {
+	if( $type != 'dispatcher' ) {
 		return dx::error( "Unauthorised" );
 	}
 	$arg = str_replace( '-', '_', $arg );
 	$func = "q_$arg";
-	dx::output( $func( $sid ) );
+	dx::output( $func() );
 });
 
 //--
 
-function q_chat_messages( $sid )
+function q_chat_messages()
 {
 	$from = vars::get( 'from' );
 	$to = vars::get( 'to' );
@@ -44,15 +43,15 @@ function q_chat_messages( $sid )
 	if( !$from || !$to || !$driver_id ) {
 		return dx::error( "`from`, `to` and `driver_id` arguments are required" );
 	}
-	return dx_disp::chat_messages( $sid, $driver_id, $from, $to );
+	return dx_disp::chat_messages( $driver_id, $from, $to );
 }
 
-function q_cmd( $sid )
+function q_cmd()
 {
 	$id = user::get_id();
 	$type = user::get_type();
 
-	if( !$sid || $type != 'dispatcher' ) {
+	if( $type != 'dispatcher' ) {
 		return dx::error( 'Forbidden' );
 	}
 
@@ -63,13 +62,13 @@ function q_cmd( $sid )
 	}
 	$data = json_decode( $datastr, true );
 
-	if( !disp_cmd( $id, $sid, $cmd, $data, $err ) ) {
+	if( !disp_cmd( $id, $cmd, $data, $err ) ) {
 		return dx::error( $err );
 	}
 	return null; // ok
 }
 
-function q_route( $sid )
+function q_route()
 {
 	$from = vars::get( 'from' );
 	$to = vars::get( 'to' );
@@ -95,17 +94,17 @@ function q_route( $sid )
 
 
 
-function q_locations( $sid )
+function q_locations()
 {
 	$term = vars::get( 'term' );
-	return dx_disp::locations( $sid, $term );
+	return dx_disp::locations( $term );
 }
 
 /*
  * When starting, the dispatcher client will have to receive much data
  * to work with.
  */
-function q_init( $service_id )
+function q_init()
 {
 	$acc_id = intval( user::get_id() );
 	$init = array();
@@ -124,24 +123,23 @@ function q_init( $service_id )
 	/*
 	 * Channel sequence and current time.
 	 */
-	$init["seq"] = channels::seq( $service_id, $acc_id );
+	$init["seq"] = channels::seq( $acc_id );
 	$init["now"] = time();
 	/*
 	 * Service fares.
 	 */
-	$init['fares'] = dx_disp::fares( $service_id );
+	$init['fares'] = dx_disp::fares();
 	/*
 	 * Drivers and cars lists.
 	 */
-	$init["drivers"] = dx_disp::drivers( $service_id );
-	$init["cars"] = dx_disp::cars( $service_id );
+	$init["drivers"] = dx_disp::drivers();
+	$init["cars"] = dx_disp::cars();
 
 	/*
 	 * Driver groups
 	 */
 	$groups = DB::getRecords( "SELECT group_id, name
-		FROM taxi_driver_groups
-		WHERE service_id = %d", $service_id );
+		FROM taxi_driver_groups" );
 	$groups_map = array();
 	foreach( $groups as $g ) {
 		$id = $g['group_id'];
@@ -162,8 +160,7 @@ function q_init( $service_id )
 		JOIN taxi_queues q USING (queue_id)
 		LEFT JOIN taxi_queues q2
 			ON q2.queue_id = q.queue_id
-			OR q2.queue_id = q.parent_id
-		WHERE gr.service_id = %d", $service_id );
+			OR q2.queue_id = q.parent_id" );
 	$group_queues = array();
 	foreach( $r as $row )
 	{
@@ -180,8 +177,7 @@ function q_init( $service_id )
 	 * Driver types
 	 */
 	$init["driver_types"] = DB::getRecords( "SELECT type_id, name
-		FROM taxi_driver_types
-		WHERE service_id = %d", $service_id );
+		FROM taxi_driver_types" );
 	cast::table( $init["driver_types"], array(
 		'int type_id',
 		'str name'
@@ -190,32 +186,34 @@ function q_init( $service_id )
 	/*
 	 * Driver queues
 	 */
-	$init["queues"] = dx_disp::queues( $service_id, $acc_id );
+	$init["queues"] = dx_disp::queues( $acc_id );
 
 	/*
 	 * Current queues assignments
 	 */
-	$init['queues_snapshot'] = q_queues_snapshot( $service_id );
+	$init['queues_snapshot'] = q_queues_snapshot();
 
 	/*
 	 * Recent orders.
 	 */
-	$init["recent_orders"] = dx_disp::recent_orders( $service_id, $acc_id );
+	$init["recent_orders"] = dx_disp::recent_orders( $acc_id );
 
 	/*
 	 * Locations associated with queues.
 	 */
-	$init["queue_locations"] = dx_disp::queue_locations( $service_id, $acc_id );
+	$init["queue_locations"] = dx_disp::queue_locations( $acc_id );
 
 	$areas = DB::getRecords( "
 		SELECT name, min_lat, max_lat, min_lon, max_lon
-		FROM taxi_service_areas
-		WHERE service_id = %d", $service_id );
+		FROM taxi_service_areas" );
 
-	$options = service_settings::get_settings( $service_id );
-	$options_add = DB::getRecord( "SELECT sessions, imitations,
-		service_logs, gps_tracking
-		FROM taxi_services WHERE service_id = %d", $service_id );
+	$options = service_settings::get_settings();
+	$options_add = [
+		'session' => true,
+		'imitations' => true,
+		'service_logs' => true,
+		'gps_tracking' => true
+	];
 	$options = array_merge( $options, $options_add );
 
 	/*
@@ -224,15 +222,13 @@ function q_init( $service_id )
 	$init['driver_alarms'] = DB::getRecords("
 		SELECT acc_id AS driver_id
 		FROM taxi_drivers JOIN taxi_accounts USING (acc_id)
-		WHERE service_id = %d
-		AND alarm_time IS NOT NULL
-	", $service_id );
+		WHERE alarm_time IS NOT NULL" );
 
 
 	$init = array_merge( $init, array(
 		'map_areas' => $areas,
 		'service_options' => $options,
-		'sessions' => service_sessions::get_open_sessions_r( $service_id )
+		'sessions' => service_sessions::get_open_sessions_r()
 	));
 
 	return $init;
@@ -241,7 +237,7 @@ function q_init( $service_id )
 /*
  * Get order stats and name of given customer
  */
-function q_customer_info( $sid )
+function q_customer_info()
 {
 	$phone = Vars::get( 'phone' );
 	$info = DB::getRecord( "
@@ -250,8 +246,8 @@ function q_customer_info( $sid )
 			name,
 			blacklist
 		FROM taxi_customers
-		WHERE service_id = %d AND phone = '%s'",
-		$sid, $phone
+		WHERE phone = '%s'",
+		$phone
 	);
 
 	if( isset( $info['customer_id'] ) )
@@ -261,11 +257,10 @@ function q_customer_info( $sid )
 			SELECT DISTINCT
 				o.src_addr
 			FROM taxi_orders o
-			WHERE service_id = %d
-			AND customer_id = %d
+			WHERE customer_id = %d
 			ORDER BY o.time_created DESC
 			LIMIT 5",
-			$sid, $info['customer_id']
+			$info['customer_id']
 		);
 		$addresses = array();
 		foreach( $orders as $i => $r ) {
@@ -284,7 +279,7 @@ function q_ping()
 	);
 }
 
-function q_prefs( $sid )
+function q_prefs()
 {
 	if( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
 		return dx::error( "Must be POST" );
@@ -297,48 +292,47 @@ function q_prefs( $sid )
 		WHERE acc_id = %d", $prefs, $id );
 }
 
-function q_channel_updates( $sid )
+function q_channel_updates()
 {
 	$acc_id = user::get_id();
 	$seq = Vars::get( 'last-message-id' );
-	$messages = channels::get_messages( $sid, $acc_id, $seq );
+	$messages = channels::get_messages( $acc_id, $seq );
 	return $messages;
 }
 
 /*
  * GET queues-snapshot.
  */
-function q_queues_snapshot( $sid )
+function q_queues_snapshot()
 {
 	$acc_id = user::get_id();
-	return dx_disp::queues_snapshot( $sid, $acc_id );
+	return dx_disp::queues_snapshot( $acc_id );
 }
 
 /*
  * Get last $n messages from the server log.
  */
-function q_service_log( $sid )
+function q_service_log()
 {
 	$n = Vars::get( 'n' );
-	return service_logs::get_last_messages( $sid, $n );
+	return service_logs::get_last_messages( $n );
 }
 /*
  * Get server log updates.
  */
-function q_service_log_update( $sid )
+function q_service_log_update()
 {
 	$id = Vars::get( 'id' );
-	return service_logs::get_messages_after( $sid, $id );
+	return service_logs::get_messages_after( $id );
 }
 
-function q_car_position( $sid )
+function q_car_position()
 {
 	$driver_id = vars::get( 'car_id' );
 	$r = DB::getRecord( "SELECT latitude, longitude
 		FROM taxi_accounts JOIN taxi_drivers USING (acc_id)
-		WHERE acc_id = %d
-		AND service_id = %d",
-		$driver_id, $sid );
+		WHERE acc_id = %d",
+		$driver_id );
 	if( !$r ) {
 		return array();
 	}

@@ -118,13 +118,11 @@ class ext_bans
 		taxi_drivers::block( $taxi_id, $t, $reason );
 		self::$block_times[$taxi_id] = $t;
 
-		$sid = get_taxi_service( $taxi_id );
 		$until = date( "d.m.Y H:i:s", $t );
-		logmsg( "#$taxi_id blocked until $until: '$reason'",
-			$sid, $taxi_id );
-		service_log( $sid, '{t} заблокирован ({?})', $taxi_id, $reason );
+		logmsg( "#$taxi_id blocked until $until: '$reason'", $taxi_id );
+		service_log( '{t} заблокирован ({?})', $taxi_id, $reason );
 
-		announce_event( $sid, EV_TAXI_BANNED, array(
+		announce_event( EV_TAXI_BANNED, array(
 			'taxi_id' => $taxi_id,
 			'until' => $t,
 			'reason' => $reason
@@ -143,14 +141,13 @@ class ext_bans
 			warning( "unban_taxi: the taxi is not banned" );
 			return false;
 		}
-		$sid = get_taxi_service( $taxi_id );
 
-		logmsg( "#$taxi_id unblocked", $sid, $taxi_id );
-		service_log( $sid, '{t} разблокирован', $taxi_id );
+		logmsg( "#$taxi_id unblocked", $taxi_id );
+		service_log( '{t} разблокирован', $taxi_id );
 
 		taxi_drivers::unblock( $taxi_id );
 		self::$block_times[$taxi_id] = 0;
-		announce_event( $sid, EV_TAXI_UNBANNED, array(
+		announce_event( EV_TAXI_UNBANNED, array(
 			'taxi_id' => $taxi_id
 		));
 
@@ -167,8 +164,7 @@ class ext_bans
 	 */
 	static function warn( $taxi_id )
 	{
-		logmsg( "#$taxi_id: ban warning",
-			get_taxi_service( $taxi_id ), $taxi_id );
+		logmsg( "#$taxi_id: ban warning", $taxi_id );
 
 		$remaining = taxi_drivers::add_warning( $taxi_id );
 		if( $remaining <= 0 ) {

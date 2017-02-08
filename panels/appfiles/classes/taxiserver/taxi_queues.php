@@ -77,7 +77,7 @@ class taxi_queues
 	 * Returns information about ranges that overlap with the given
 	 * range.
 	 */
-	static function get_overlapping_ranges( $sid, $range )
+	static function get_overlapping_ranges( $range )
 	{
 		$min = intval( $range->min_house() );
 		$max = intval( $range->max_house() );
@@ -86,7 +86,6 @@ class taxi_queues
 			$parity = 'none';
 		}
 		$rid = intval( $range->id() );
-		$sid = intval( $sid );
 
 		/*
 		 * Two address ranges overlap if they belong to the same
@@ -119,8 +118,7 @@ class taxi_queues
 		JOIN taxi_queues q
 		WHERE
 			-- ranges with the same city and street
-			q.service_id = $sid
-			AND r.city = '%s' AND r.street = '%s'
+			r.city = '%s' AND r.street = '%s'
 			AND r.range_id <> $rid
 
 			-- house numbers overlap: negate non-overlapping
@@ -135,16 +133,8 @@ class taxi_queues
 		);
 	}
 
-	static function delete_qaddr_range( $sid, $range_id )
+	static function delete_qaddr_range( $range_id )
 	{
-		$qsid = DB::getValue( "SELECT service_id
-			FROM taxi_queue_addresses
-			JOIN taxi_queues USING (queue_id)
-			WHERE range_id = %d", $range_id );
-		if( $qsid != $sid ) {
-			warning( "Qaddr range ownership mismatch" );
-			return false;
-		}
 		return DB::deleteRecord( 'taxi_queue_addresses', array(
 			'range_id' => $range_id
 		));

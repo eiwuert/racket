@@ -1,8 +1,6 @@
 <?php _header(); ?>
 
 <?php
-$sid = sid();
-
 $table = new table( array(
 	'name' => 'Название',
 	'addr' => 'Адрес',
@@ -20,9 +18,8 @@ $locations = DB::getRecords(
 	FROM taxi_locations loc
 	LEFT JOIN taxi_queues q
 		ON q.loc_id = loc.loc_id
-	WHERE loc.service_id = %d
-	AND loc.deleted = 0
-	ORDER BY is_cp DESC, loc.name", $sid );
+	WHERE loc.deleted = 0
+	ORDER BY is_cp DESC, loc.name" );
 
 foreach( $locations as $loc )
 {

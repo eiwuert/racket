@@ -32,20 +32,20 @@ class taxi_chat_prev
 	const KEEP_TIME = 7200;
 
 	/*
-	 * Array of arrays of messages, indexed by service id.
+	 * Array of messages
 	 */
 	private static $msg = array();
 
 	private static function clean()
 	{
 		$now = time();
-		foreach( self::$msg as $sid => $list )
+		foreach( self::$msg as $list )
 		{
 			$n = count( $list );
 			while( $n > 0 &&
-				($now - self::$msg[$sid][0]->time > self::KEEP_TIME ) )
+				($now - self::$msg[0]->time > self::KEEP_TIME ) )
 			{
-				array_shift( self::$msg[$sid] );
+				array_shift( self::$msg );
 				$n--;
 			}
 		}
@@ -53,43 +53,31 @@ class taxi_chat_prev
 
 	static function msg_get_road_messages( $msg, $user )
 	{
-		$sid = $user->sid;
 		$list = array();
-		if( isset( self::$msg[$sid] ) )
+		self::clean();
+		foreach( self::$msg as $cm )
 		{
-			self::clean();
-			foreach( self::$msg[$sid] as $cm )
-			{
-				$list[] = array(
-					'message_id' => $cm->id,
-					'author' => $cm->author,
-					'text' => $cm->text,
-					'timestamp' => $cm->time
-				);
-			}
+			$list[] = array(
+				'message_id' => $cm->id,
+				'author' => $cm->author,
+				'text' => $cm->text,
+				'timestamp' => $cm->time
+			);
 		}
-
 		$m = new message( 'road-messages', array( 'list' => $list ) );
 		return send_to_taxi( $user->id, $m );
 	}
 
 	static function msg_road_message( $msg, $user )
 	{
-		$sid = $user->sid;
-		if( !isset( self::$msg[$sid] ) ) {
-			self::$msg[$sid] = array();
-		}
-		else {
-			self::clean();
-		}
-
+		self::clean();
 		/*
 		 * Add the message to the history.
 		 */
 		$text = $msg->data( 'text' );
 		$author = get_taxi_call_id( $user->id );
 		$cm = new chat_message( $author, $text );
-		self::$msg[$sid][] = $cm;
+		self::$msg[] = $cm;
 
 		/*
 		 * Retranslate the message.
@@ -100,7 +88,7 @@ class taxi_chat_prev
 			'author' => $author,
 			'text' => $text
 		));
-		taxi_broadcast( $sid, $m );
+		taxi_broadcast( $m );
 	}
 
 }

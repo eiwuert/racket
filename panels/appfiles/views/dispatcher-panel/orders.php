@@ -3,8 +3,6 @@
 <?php
 require_script( 'res/lib/html5-forms.js' );
 
-$service_id = sid();
-
 $t1 = Vars::get( 'time-from' );
 if( $t1 ) $t1 = strtotime( $t1 );
 else $t1 = time() - 36000;
@@ -15,9 +13,8 @@ else $t2 = time();
 
 set_page_title( 'Архив заказов' );
 
-function service_orders_table( $service_id, $t1, $t2 )
+function service_orders_table( $t1, $t2 )
 {
-	$sid = intval( $service_id );
 	$t1 = intval( $t1 );
 	$t2 = intval( $t2 );
 
@@ -59,8 +56,7 @@ function service_orders_table( $service_id, $t1, $t2 )
 			ON o.src_loc_id = loc.loc_id
 		LEFT JOIN taxi_customers cust
 			ON cust.customer_id = o.customer_id
-		WHERE o.service_id = $service_id
-		AND o.deleted = 0
+		WHERE o.deleted = 0
 		AND UNIX_TIMESTAMP(o.time_created) BETWEEN $t1 AND $t2
 		ORDER BY o.time_created DESC"
 	);
@@ -141,6 +137,6 @@ function service_orders_table( $service_id, $t1, $t2 )
 <button type="submit">Показать</button>
 </form>
 
-<?= service_orders_table( $service_id, $t1, $t2 ) ?>
+<?= service_orders_table( $t1, $t2 ) ?>
 
 <?php _footer(); ?>

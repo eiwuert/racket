@@ -18,8 +18,8 @@ function receive_message( $c, $msg )
 		}
 		$user = $c->user;
 		$cid = $c->cid;
-		logmsg( "Login: $user from $cid", $user->sid, $user->id );
-		announce_event( $user->sid, EV_LOGIN, array( 'user' => $user ) );
+		logmsg( "Login: $user from $cid", $user->id );
+		announce_event( EV_LOGIN, array( 'user' => $user ) );
 		$first_message = true;
 		/*
 		 * Allow this message to be processed too.
@@ -47,7 +47,7 @@ function receive_message( $c, $msg )
 		 */
 		if( abs( $delta ) > 60 ) {
 			logmsg( "Time difference for #$user->id is too big: $delta s",
-				$user->sid, $user->id );
+				$user->id );
 		}
 		$step = 60;
 		$delta = $step * round( $delta / $step );

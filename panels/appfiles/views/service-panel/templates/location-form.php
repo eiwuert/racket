@@ -4,7 +4,7 @@ if( $loc->latitude() && $loc->longitude() ) {
 }
 else {
 	$a = new address();
-	$a->place = service_settings::get_value( sid(), 'default_city' );
+	$a->place = service_settings::get_value( 'default_city' );
 }
 ?>
 <section>
@@ -81,18 +81,12 @@ else {
 	$queues = DB::getRecords("
 		SELECT queue_id, name
 		FROM taxi_queues
-		WHERE service_id = %d
-		AND upstream = 0",
-		sid()
-	);
+		WHERE upstream = 0" );
 	$queues = array_column( $queues, 'name', 'queue_id' );
 
 	$brigs = DB::getRecords( "
 		SELECT group_id, name
-		FROM taxi_driver_groups
-		WHERE service_id = %d",
-		sid()
-	);
+		FROM taxi_driver_groups" );
 	$brigs = array_column( $brigs, 'name', 'group_id' );
 
 	$stages = DB::getRecords( "

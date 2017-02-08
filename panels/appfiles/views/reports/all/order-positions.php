@@ -1,15 +1,13 @@
 <?php
 set_page_title( "Маршрут заказа" );
 $order_id = intval( vars::get( 'order_id' ) );
-$service_id = sid();
 
 if( $order_id )
 {
-	$order = new order( $order_id, 'service_id, `status`, taxi_id,
+	$order = new order( $order_id, '`status`, taxi_id,
 		time_created, time_finished' );
 
-	if( $order->service_id() != $service_id
-		|| $order->status() != 'finished'
+	if( $order->status() != 'finished'
 		|| $order->taxi_id() == null
 		|| $order->time_finished() == null )
 	{
@@ -23,7 +21,7 @@ if( $order_id )
 
 show_form( $order_id );
 if( $order_id ) {
-	show_positions( $service_id, $driver_id, $t1, $t2 );
+	show_positions( $driver_id, $t1, $t2 );
 }
 
 function show_form( $order_id )

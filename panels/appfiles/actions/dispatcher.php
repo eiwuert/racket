@@ -5,9 +5,7 @@ set_actions_access( 'dispatcher' );
 function send_dispatcher_message()
 {
 	$dispatcher_id = user::get_id();
-	$service_id = sid();
-
-	if( !$dispatcher_id || !$service_id ) {
+	if( !$dispatcher_id ) {
 		return false;
 	}
 
@@ -24,7 +22,7 @@ function send_dispatcher_message()
 	if( !$ok ) {
 		return "Не удалось соединиться с сервером.";
 	}
-	if( !$client->login( $dispatcher_id, $service_id ) ) {
+	if( !$client->login( $dispatcher_id ) ) {
 		return "Не удалось авторизоваться на сервере.";
 	}
 
@@ -36,8 +34,6 @@ function send_dispatcher_message()
 
 function save_customer()
 {
-	$service_id = sid();
-
 	$id = Vars::post( 'customer_id' );
 	if( !$id ) return false;
 

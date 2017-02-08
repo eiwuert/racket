@@ -8,13 +8,12 @@ require_script( 'res/dispatcher/car.js' );
 
 <?php
 $dispatcher_id = user::get_id();
-$service_id = sid();
 $car_id = argv(1);
 
 $driver = DB::getRecord( "SELECT call_id
 	FROM taxi_accounts acc JOIN taxi_drivers USING (acc_id)
-	WHERE acc_id = %d AND service_id = %d
-	AND acc.deleted = 0", $car_id, $service_id );
+	WHERE acc_id = %d
+	AND acc.deleted = 0", $car_id );
 if( !$driver ) {
 	error_notfound();
 }

@@ -94,7 +94,7 @@ class taxi_base_pos
 		 * Update the database.
 		 */
 		taxi_drivers::update_position( $taxi_id, $lat, $lon );
-		if( service_option( $user->sid, 'gps_tracking' ) ) {
+		if( service_option( 'gps_tracking' ) ) {
 			taxi_logs::save_driver_pos( $taxi_id, $lat, $lon, $t );
 		}
 
@@ -102,7 +102,7 @@ class taxi_base_pos
 			'pos' => $pos,
 			'taxi_id' => intval( $taxi_id )
 		);
-		announce_event( $user->sid, EV_TAXI_POSITION, $data );
+		announce_event( EV_TAXI_POSITION, $data );
 	}
 
 	private static function calc_speed( $next, $prev )

@@ -3,7 +3,7 @@
 <label>Тариф</label>
 <?= HTMLSnippets::select( array(
 	'id' => 'i-calc-group'
-), fares::get_service_fares_kv( $service_id ), null, null ) ?>
+), fares::get_service_fares_kv(), null, null ) ?>
 <div class="columns">
 	<div>
 		<fieldset>

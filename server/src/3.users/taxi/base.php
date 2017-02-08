@@ -19,10 +19,10 @@ init( function()
 	add_cmdfunc( T_TAXI, 'get-ban-info', $ns.'msg_get_ban_info' );
 	add_cmdfunc_first( T_TAXI, '*', $ns.'msg_check_command' );
 
-	listen_events( null, EV_LOGIN, $ns.'ev_loginout' );
-	listen_events( null, EV_LOGOUT, $ns.'ev_loginout' );
-	listen_events( null, EV_TAXI_BANNED, $ns.'ev_taxi_ban' );
-	listen_events( null, EV_TAXI_UNBANNED, $ns.'ev_taxi_ban' );
+	listen_events( EV_LOGIN, $ns.'ev_loginout' );
+	listen_events( EV_LOGOUT, $ns.'ev_loginout' );
+	listen_events( EV_TAXI_BANNED, $ns.'ev_taxi_ban' );
+	listen_events( EV_TAXI_UNBANNED, $ns.'ev_taxi_ban' );
 });
 
 
@@ -59,7 +59,7 @@ class taxi_base
 		$password = $message->data( "password" );
 
 		$acc_id = taxi_accounts::check( 'driver', $login, $password );
-		$r = DB::getRecord( "SELECT driver_id, call_id, service_id
+		$r = DB::getRecord( "SELECT driver_id, call_id
 			FROM taxi_accounts JOIN taxi_drivers USING (acc_id)
 			WHERE acc_id = %d AND is_fake = 0", $acc_id );
 
@@ -71,7 +71,6 @@ class taxi_base
 
 		$taxi_id = $acc_id;
 		$call_id = $r['call_id'];
-		$sid = $r['service_id'];
 
 		/*
 		 * Write login event to the log.
@@ -91,7 +90,7 @@ class taxi_base
 		/*
 		 * Check if this driver has an abandoned connection.
 		 */
-		$user = new conn_user( T_TAXI, $taxi_id, $sid );
+		$user = new conn_user( T_TAXI, $taxi_id );
 		self::check_old_connections( $user, $cid );
 		return $user;
 	}
@@ -109,7 +108,7 @@ class taxi_base
 		 * This is such a common situation that we don't even send a
 		 * warning anymore.
 		 */
-		$clients = conn::find_users( $user->type, $user->sid, $user->id );
+		$clients = conn::find_users( $user->type, $user->id );
 		foreach( $clients as $client )
 		{
 			$old_cid = $client->cid;
@@ -117,7 +116,7 @@ class taxi_base
 				continue;
 			}
 			logmsg( "#$user->id switched connection from $old_cid to $new_cid",
-				$user->sid, $user->id );
+				$user->id );
 			conn_close( $old_cid, "Switched connection" );
 		}
 	}
@@ -172,7 +171,7 @@ class taxi_base
 	{
 		$taxi_id = $user->id;
 		conn_close( $message->cid, "Taxi logout" );
-		service_log( $user->sid, '{t} завершил работу.', $user->id );
+		service_log( '{t} завершил работу.', $user->id );
 	}
 
 	/*
@@ -298,7 +297,7 @@ class taxi_base
 		 */
 		if( !in_array( $cmd, self::$allowed_commands ) ) {
 			logmsg( "Blocked command $cmd from #$taxi_id",
-				$user->sid, $user->id );
+				$user->id );
 			return false;
 		}
 
@@ -317,7 +316,7 @@ class taxi_base
 			SET is_online = %d
 			WHERE acc_id = %d", $online, $user->id );
 		$msg = $online ? '{t} подключился к серверу.' : '{t} отключился от сервера.';
-		service_log( $user->sid, $msg, $user->id );
+		service_log( $msg, $user->id );
 	}
 }
 

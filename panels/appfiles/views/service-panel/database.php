@@ -1,8 +1,6 @@
 <?php _header(); ?>
 
 <?php
-$service_id = sid();
-
 function tocsv( $value )
 {
 	$value = preg_replace( '/\r?\n/', '; ', $value );
@@ -23,7 +21,7 @@ function get_dump_file( $query, $header )
 	return $path;
 }
 
-function dump_dispatchers( $service_id )
+function dump_dispatchers()
 {
 	$query = "SELECT
 		acc_id AS dispatcher_id,
@@ -32,43 +30,38 @@ function dump_dispatchers( $service_id )
 		photo,
 		birth_date
 		FROM taxi_accounts
-		WHERE service_id = $service_id
-		AND deleted = 0";
+		WHERE deleted = 0";
 
 	$header = array( 'id', 'login', 'name', 'photo', 'birth_date' );
 	return get_dump_file( $query, $header );
 }
 
-function dump_dispatchers_orders( $service_id )
+function dump_dispatchers_orders()
 {
 	$query = "SELECT
 		o.order_id
 		o.owner_id AS dispatcher_id,
 		FROM taxi_orders o
 		JOIN taxi_accounts d
-			ON d.service_id = o.service_id
-			AND d.acc_id = o.owner_id
+			ON d.acc_id = o.owner_id
 			AND d.type = 'dispatcher'
-		WHERE o.service_id = $service_id
-		AND d.deleted = 0
+		WHERE d.deleted = 0
 		AND o.deleted = 0";
 
 	$header = array( 'dispatcher_id', 'order_id' );
 	return get_dump_file( $query, $header );
 }
 
-function dump_dispatchers_finished_orders( $service_id )
+function dump_dispatchers_finished_orders()
 {
 	$query = "SELECT
 		o.order_id,
 		o.owner_id AS dispatcher_id
 		FROM taxi_orders o
 		JOIN taxi_accounts d
-			ON d.service_id = o.service_id
-			AND d.acc_id = o.owner_id
+			ON d.acc_id = o.owner_id
 			AND d.type = 'dispatcher'
-		WHERE o.service_id = $service_id
-		AND o.`status` = 'finished'
+		WHERE o.`status` = 'finished'
 		AND d.deleted = 0
 		AND o.deleted = 0";
 
@@ -76,7 +69,7 @@ function dump_dispatchers_finished_orders( $service_id )
 	return get_dump_file( $query, $header );
 }
 
-function dump_orders( $service_id )
+function dump_orders()
 {
 	$query = "
 	SELECT
@@ -121,8 +114,7 @@ function dump_orders( $service_id )
 		LEFT JOIN taxi_fares f USING (fare_id)
 		LEFT JOIN taxi_accounts owner
 			ON owner.acc_id = o.owner_id
-		WHERE o.service_id = $service_id
-		AND o.deleted = 0
+		WHERE o.deleted = 0
 		GROUP BY order_id";
 	$header = array( 'id', 'Состояние', 'Причина отмены', 'Тип',
 		'Тип кузова', 'dispatcher_id', 'customer_id', 'driver_id',
@@ -139,7 +131,7 @@ function dump_orders( $service_id )
 	return get_dump_file( $query, $header );
 }
 
-function dump_cars( $service_id )
+function dump_cars()
 {
 	$query = "SELECT
 		car_id,
@@ -159,8 +151,7 @@ function dump_cars( $service_id )
 		odometer
 	FROM taxi_cars c
 	JOIN taxi_car_groups g USING (group_id)
-	WHERE c.deleted = 0
-	AND c.service_id = $service_id";
+	WHERE c.deleted = 0";
 
 	$header = array( 'id', 'Группа', 'Тип кузова',
 		'Марка', 'Цвет', 'Госномер',
@@ -176,20 +167,19 @@ function dump_cars( $service_id )
 	return get_dump_file( $query, $header );
 }
 
-function dump_cars_orders( $service_id )
+function dump_cars_orders()
 {
 	$q = "SELECT car_id, order_id
 		FROM taxi_orders o
-		JOIN taxi_cars c USING (service_id, car_id)
-		WHERE service_id = $service_id
-		AND c.deleted = 0
+		JOIN taxi_cars c USING (car_id)
+		WHERE c.deleted = 0
 		AND o.deleted = 0";
 
 	$header = array( 'car_id', 'order_id' );
 	return get_dump_file( $q, $header );
 }
 
-function dump_customers( $service_id )
+function dump_customers()
 {
 	$q = "SELECT
 		c.customer_id,
@@ -214,8 +204,7 @@ function dump_customers( $service_id )
 		) AS last_order_address,
 		c.discount,
 		c.comments
-	FROM taxi_customers c
-	WHERE service_id = $service_id";
+	FROM taxi_customers c";
 
 	$header = array(
 		'id',
@@ -239,12 +228,11 @@ function dump_customers( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_customers_orders( $service_id )
+function dump_customers_orders()
 {
 	$q = "SELECT customer_id, order_id
 	FROM taxi_orders
-	WHERE service_id = $service_id
-	AND deleted = 0
+	WHERE deleted = 0
 	AND customer_id IS NOT NULL";
 
 	$header = array( 'customer_id', 'order_id' );
@@ -252,12 +240,11 @@ function dump_customers_orders( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_customers_finished_orders( $service_id )
+function dump_customers_finished_orders()
 {
 	$q = "SELECT customer_id, order_id
 	FROM taxi_orders
-	WHERE service_id = $service_id
-	AND deleted = 0
+	WHERE deleted = 0
 	AND customer_id IS NOT NULL
 	AND `status` = 'finished'";
 
@@ -266,7 +253,7 @@ function dump_customers_finished_orders( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_checkpoints( $service_id )
+function dump_checkpoints()
 {
 	$rows = DB::getRecords("
 	SELECT cp.checkpoint_id,
@@ -282,8 +269,7 @@ function dump_checkpoints( $service_id )
 	LEFT JOIN taxi_locations loc
 		ON loc.loc_id = cp.client_loc_id
 	LEFT JOIN taxi_queues USING (queue_id)
-	WHERE cp.deleted = 0
-	AND cp.service_id = $service_id" );
+	WHERE cp.deleted = 0" );
 
 	$t = array();
 
@@ -321,33 +307,31 @@ function dump_checkpoints( $service_id )
 	return $path;
 }
 
-function dump_checkpoints_orders( $service_id )
+function dump_checkpoints_orders()
 {
 	$q = "SELECT checkpoint_id, order_id
 	FROM taxi_orders o
-	JOIN taxi_checkpoints cp USING (service_id, checkpoint_id)
-	WHERE service_id = $service_id
-	AND o.deleted = 0
+	JOIN taxi_checkpoints cp USING (checkpoint_id)
+	WHERE o.deleted = 0
 	AND cp.deleted = 0
 	";
 	$header = array( 'checkpoint_id', 'order_id' );
 	return get_dump_file( $q, $header );
 }
 
-function dump_checkpoints_finished_orders( $service_id )
+function dump_checkpoints_finished_orders()
 {
 	$q = "SELECT checkpoint_id, order_id
 	FROM taxi_orders o
-	JOIN taxi_checkpoints cp USING (service_id, checkpoint_id)
-	WHERE service_id = $service_id
-	AND cp.deleted = 0
+	JOIN taxi_checkpoints cp USING (checkpoint_id)
+	WHERE cp.deleted = 0
 	AND o.deleted = 0
 	AND `status` = 'finished'";
 	$header = array( 'checkpoint_id', 'order_id' );
 	return get_dump_file( $q, $header );
 }
 
-function dump_sessions( $service_id )
+function dump_sessions()
 {
 	$q = "SELECT
 		id,
@@ -383,30 +367,28 @@ function dump_sessions( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_sessions_all_orders( $service_id )
+function dump_sessions_all_orders()
 {
 	$q = "SELECT work_id, order_id
 	FROM taxi_works w
 	JOIN taxi_drivers d USING (driver_id)
 	JOIN taxi_work_orders wo ON w.id = wo.work_id
 	JOIN taxi_orders o USING (order_id)
-	WHERE o.service_id = $service_id
-	AND o.deleted = 0
+	WHERE o.deleted = 0
 	AND d.deleted = 0";
 
 	$header = array( 'session_id', 'order_id' );
 	return get_dump_file( $q, $header );
 }
 
-function dump_sessions_accepted_orders( $service_id )
+function dump_sessions_accepted_orders()
 {
 	$q = "SELECT work_id, order_id
 	FROM taxi_works w
 	JOIN taxi_drivers d USING (driver_id)
 	JOIN taxi_work_orders wo ON w.id = wo.work_id
 	JOIN taxi_orders o USING (order_id)
-	WHERE o.service_id = $service_id
-	AND o.deleted = 0
+	WHERE o.deleted = 0
 	AND d.deleted = 0
 	AND o.taxi_id = d.driver_id";
 
@@ -414,15 +396,14 @@ function dump_sessions_accepted_orders( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_sessions_finished_orders( $service_id )
+function dump_sessions_finished_orders()
 {
 	$q = "SELECT work_id, order_id
 	FROM taxi_works w
 	JOIN taxi_drivers d USING (driver_id)
 	JOIN taxi_work_orders wo ON w.id = wo.work_id
 	JOIN taxi_orders o USING (order_id)
-	WHERE o.service_id = $service_id
-	AND o.deleted = 0
+	WHERE o.deleted = 0
 	AND d.deleted = 0
 	AND o.taxi_id = d.driver_id
 	AND o.`status` = 'finished'";
@@ -431,7 +412,7 @@ function dump_sessions_finished_orders( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_sessions_positions( $service_id )
+function dump_sessions_positions()
 {
 	$q = "SELECT
 		w.id AS session_id,
@@ -450,7 +431,7 @@ function dump_sessions_positions( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_fares( $service_id )
+function dump_fares()
 {
 	$q = "SELECT
 		fare_id,
@@ -463,8 +444,7 @@ function dump_fares( $service_id )
 		hour_price,
 		day_price
 	FROM taxi_fares
-	WHERE service_id = $service_id
-	AND deleted = 0";
+	WHERE deleted = 0";
 
 	$header = array(
 		'id',
@@ -481,7 +461,7 @@ function dump_fares( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_drivers( $service_id )
+function dump_drivers()
 {
 	$q = "SELECT
 		driver_id,
@@ -504,8 +484,7 @@ function dump_drivers( $service_id )
 		birth_date
 	FROM taxi_drivers d
 	JOIN taxi_driver_groups g USING (group_id)
-	WHERE deleted = 0
-	AND d.service_id = $service_id";
+	WHERE deleted = 0";
 
 	$header = array(
 		'id',
@@ -531,31 +510,27 @@ function dump_drivers( $service_id )
 	return get_dump_file( $q, $header );
 }
 
-function dump_drivers_orders( $service_id )
+function dump_drivers_orders()
 {
 	$q = "SELECT driver_id, order_id
 	FROM taxi_orders o
 	JOIN taxi_drivers d
 	ON o.taxi_id = d.driver_id
-	AND o.service_id = d.service_id
 	WHERE d.deleted = 0
-	AND o.deleted = 0
-	AND d.service_id = $service_id";
+	AND o.deleted = 0";
 
 	$header = array( 'driver_id', 'order_id' );
 	return get_dump_file( $q, $header );
 }
 
-function dump_drivers_finished_orders( $service_id )
+function dump_drivers_finished_orders()
 {
 	$q = "SELECT driver_id, order_id
 	FROM taxi_orders o
 	JOIN taxi_drivers d
 	ON o.taxi_id = d.driver_id
-	AND o.service_id = d.service_id
 	WHERE d.deleted = 0
 	AND o.deleted = 0
-	AND d.service_id = $service_id
 	AND status = 'finished'";
 
 	$header = array( 'driver_id', 'order_id' );
@@ -603,7 +578,7 @@ if( !empty( $D ) )
 		$fname = "$dump.csv";
 
 		$f = 'dump_'.str_replace( '-', '_', $dump );
-		$path = $f( $service_id );
+		$path = $f();
 		$z->addFile( $path, $fname );
 
 		$tmps[] = $path;

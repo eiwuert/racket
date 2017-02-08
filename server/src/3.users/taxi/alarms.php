@@ -51,12 +51,12 @@ class driver_proto_alarm
 	static function msg_alarm( $msg, $user )
 	{
 		$driver_id = $user->id;
-		service_log( $user->sid, '{t} отправил сигнал тревоги', $driver_id );
+		service_log( '{t} отправил сигнал тревоги', $driver_id );
 		DB::exec( "UPDATE taxi_drivers
 			SET alarm_time = NOW()
 			WHERE acc_id = %d",
 			$driver_id );
-		announce_event( $user->sid, EV_TAXI_ALARM_ON, array(
+		announce_event( EV_TAXI_ALARM_ON, array(
 			'taxi_id' => $driver_id
 		));
 
@@ -99,10 +99,9 @@ class driver_proto_alarm
 	private static function clear_alarm( $driver_id )
 	{
 		unset( self::$timeouts[$driver_id] );
-		$sid = get_taxi_service( $driver_id );
 		DB::exec( "UPDATE taxi_drivers SET alarm_time = NULL
 			WHERE acc_id = %d", $driver_id );
-		announce_event( $sid, EV_TAXI_ALARM_OFF, array(
+		announce_event( EV_TAXI_ALARM_OFF, array(
 			'taxi_id' => $driver_id
 		));
 	}

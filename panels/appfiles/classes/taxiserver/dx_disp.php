@@ -3,16 +3,14 @@ class dx_disp
 {
 	const OFFLINE_TIMEOUT = 60;
 
-	static function chat_messages( $sid, $driver_id, $from, $to )
+	static function chat_messages( $driver_id, $from, $to )
 	{
 		$since = intval( $from );
 		$until = intval( $to );
 		$driver_id = intval( $driver_id );
-		$sid = intval( $sid );
 
 		if( !DB::getValue( "SELECT
-			acc.type = 'driver' AND
-			acc.service_id = $sid
+			acc.type = 'driver'
 			FROM taxi_accounts acc WHERE acc_id = $driver_id" ) ) {
 			warning( "dx_disp::chat_messages: invalid driver id: $driver_id" );
 			return null;
@@ -55,13 +53,12 @@ class dx_disp
 		return $r;
 	}
 
-	static function fares( $sid )
+	static function fares()
 	{
 		$arr = DB::getRecords( "SELECT name, start_price, minimal_price,
 			kilometer_price, slow_hour_price
 			FROM taxi_fares
-			WHERE service_id = %d
-			AND deleted = 0", $sid );
+			WHERE deleted = 0" );
 		cast::table( $arr, array(
 			'str name',
 			'int start_price',
@@ -72,10 +69,8 @@ class dx_disp
 		return $arr;
 	}
 
-	static function get_online_service_taxis_r( $service_id )
+	static function get_online_service_taxis_r()
 	{
-		$service_id = intval( $service_id );
-
 		$q = "SELECT
 			acc.acc_id AS taxi_id,
 			acc.call_id,
@@ -100,15 +95,14 @@ class dx_disp
 			FROM taxi_drivers t
 			JOIN taxi_cars c USING (car_id)
 			JOIN taxi_accounts acc USING (acc_id)
-			WHERE acc.service_id = $service_id
-			AND is_fake = 0
+			WHERE is_fake = 0
 			AND (TIMESTAMPDIFF( SECOND, last_ping_time, NOW() ) < ".self::OFFLINE_TIMEOUT." )
 			AND t.deleted = 0";
 
 		return DB::getRecords( $q );
 	}
 
-	static function drivers( $service_id )
+	static function drivers()
 	{
 		$drivers = DB::getRecords("
 			SELECT
@@ -129,9 +123,8 @@ class dx_disp
 				d.accept_new_orders = 0 AS is_busy
 			FROM taxi_drivers d
 			LEFT JOIN taxi_accounts acc USING (acc_id)
-			WHERE acc.service_id = %d
-			AND acc.deleted = 0
-		", $service_id );
+			WHERE acc.deleted = 0
+		" );
 		cast::table( $drivers, array(
 			'int driver_id',
 			'int group_id',
@@ -148,9 +141,9 @@ class dx_disp
 		return $drivers;
 	}
 
-	static function cars( $service_id )
+	static function cars()
 	{
-		$cars = taxi::cars_r( $service_id );
+		$cars = taxi::cars_r();
 		cast::table( $cars, array(
 			'int car_id',
 			'str name',
@@ -161,7 +154,7 @@ class dx_disp
 		return $cars;
 	}
 
-	static function queues( $service_id, $acc_id )
+	static function queues( $acc_id )
 	{
 		$qlist = self::allowed_qlist( $acc_id );
 		$queues = DB::getRecords( "
@@ -209,9 +202,8 @@ class dx_disp
 		return $queues;
 	}
 
-	static function recent_orders( $service_id, $acc_id )
+	static function recent_orders( $acc_id )
 	{
-		$service_id = intval( $service_id );
 		$acc_id = intval( $acc_id );
 		$loc_id = intval( DB::getValue( "SELECT loc_id FROM taxi_dispatchers
 			WHERE acc_id = %d", $acc_id ) );
@@ -246,8 +238,7 @@ class dx_disp
 			LEFT JOIN taxi_accounts disp
 				ON o.owner_id = disp.acc_id
 				AND disp.type = 'dispatcher'
-			WHERE o.service_id = $service_id
-			AND o.deleted = 0
+			WHERE o.deleted = 0
 			AND (
 				(o.`status` IN ('postponed', 'waiting', 'assigned', 'arrived', 'started'))
 				OR TIMESTAMPDIFF(HOUR, o.time_created, NOW()) <= 24
@@ -295,14 +286,13 @@ class dx_disp
 		return $orders;
 	}
 
-	static function queues_snapshot( $sid, $acc_id )
+	static function queues_snapshot( $acc_id )
 	{
 		$q = "
 			SELECT queue_id, driver_id, pos
 			FROM taxi_queues q
 			LEFT JOIN taxi_queue_drivers a
-			USING (queue_id)
-			WHERE q.service_id = $sid";
+			USING (queue_id)";
 		$loc_id = self::acc_loc_id( $acc_id );
 		if( $loc_id ) {
 			$q .= " AND q.loc_id = $loc_id";
@@ -334,7 +324,7 @@ class dx_disp
 			WHERE acc_id = %d", $acc_id );
 	}
 
-	static function queue_locations( $sid )
+	static function queue_locations()
 	{
 		$locations = DB::getRecords( "
 			SELECT
@@ -347,12 +337,11 @@ class dx_disp
 				loc.contact_name,
 				q.queue_id
 			FROM taxi_queues q
-			JOIN taxi_locations loc USING (loc_id)
-			WHERE q.service_id = $sid" );
+			JOIN taxi_locations loc USING (loc_id)" );
 		return self::format_locations( $locations );
 	}
 
-	static function locations( $sid, $term )
+	static function locations( $term )
 	{
 		$arr = DB::getRecords(
 			"SELECT
@@ -365,16 +354,14 @@ class dx_disp
 				address,
 				NULL AS queue_id
 			FROM taxi_locations loc
-			WHERE service_id = %d
-			AND loc.deleted = 0
+			WHERE loc.deleted = 0
 			AND name LIKE '%s%%'
 			AND loc_id NOT IN (
 				SELECT loc_id
 				FROM taxi_queues
-				WHERE service_id = %d
-				AND loc_id IS NOT NULL)
+				WHERE loc_id IS NOT NULL)
 			ORDER BY loc.name
-			LIMIT 10", $sid, $term, $sid );
+			LIMIT 10", $term );
 		return self::format_locations( $arr );
 	}
 
@@ -410,7 +397,7 @@ class dx_disp
 			SELECT q.queue_id
 			FROM taxi_accounts acc
 			LEFT JOIN taxi_dispatchers d USING (acc_id)
-			JOIN taxi_queues q USING (service_id)
+			JOIN taxi_queues q
 			WHERE acc_id = $acc_id
 				AND (q.loc_id = d.loc_id OR d.loc_id IS NULL)" );
 /*
@@ -421,7 +408,7 @@ class dx_disp
 				SELECT q.queue_id, q.parent_id
 				FROM taxi_accounts acc
 				LEFT JOIN taxi_dispatchers d USING (acc_id)
-				JOIN taxi_queues q USING (service_id)
+				JOIN taxi_queues q
 				WHERE acc_id = $acc_id
 					AND (q.loc_id = d.loc_id OR d.loc_id IS NULL)
 			) qloc

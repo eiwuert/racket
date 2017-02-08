@@ -8,35 +8,11 @@ register_event_type( EV_TAXI_BUSY );
 create_cache( 'taxi_service' );
 
 /*
- * Returns service id for the given taxi.
- */
-function get_taxi_service( $driver_id )
-{
-	if( !$driver_id ) {
-		return null;
-	}
-
-	$sid = get_cache( 'taxi_service', $driver_id );
-	if( $sid ) {
-		return $sid;
-	}
-
-	$sid = DB::getValue( "SELECT service_id
-		FROM taxi_accounts
-		WHERE acc_id = %d AND `type` = 'driver'", $driver_id );
-	if( !$sid ) {
-		return null;
-	}
-
-	set_cache( 'taxi_service', $driver_id, $sid );
-	return $sid;
-}
-
-/*
  * Returns true if the given account identifier belongs to a driver.
  */
 function is_driver( $acc_id ) {
-	return get_taxi_service( $acc_id ) != null;
+	return DB::getValue("SELECT `type` FROM taxi_accounts
+		WHERE acc_id = %d", $acc_id) == 'driver';
 }
 
 function get_taxi_call_id( $taxi_id ) {
@@ -62,9 +38,9 @@ function send_to_taxi( $taxi_id, $message, $important = false ) {
 /*
  * Broadcast a message to all online drivers of a given service.
  */
-function taxi_broadcast( $sid, $message ) {
+function taxi_broadcast( $message ) {
 	$c = 0;
-	$R = conn::find_users( T_TAXI, $sid );
+	$R = conn::find_users( T_TAXI );
 	foreach( $R as $r ) {
 		if( write_message( $r->cid, $message )) {
 			$c++;
@@ -91,12 +67,11 @@ function set_driver_busy( $driver_id, $busy )
 		SET accept_new_orders = %d
 		WHERE acc_id = %d", $busy? 0 : 1, $driver_id );
 
-	$sid = get_taxi_service( $driver_id );
 	$data = array(
 		"taxi_id" => $driver_id,
 		"busy" => $busy
 	);
-	announce_event( $sid, EV_TAXI_BUSY, $data );
+	announce_event( EV_TAXI_BUSY, $data );
 }
 
 function driver_error( $cid, $msg ) {

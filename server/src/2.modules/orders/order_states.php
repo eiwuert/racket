@@ -181,17 +181,12 @@ class order_states
 			return false;
 		}
 
-		logmsg( "Saved order $order", $order->service_id() );
+		logmsg( "Saved order $order" );
 		return $order->id();
 	}
 
 	private static function fill_missing_data( $order )
 	{
-		if( !$order->service_id() ) {
-			warning( "Missing service_id in the order" );
-			return false;
-		}
-
 		if( !self::check_coords( $order ) ) {
 			warning( "Could not determine coordinates" );
 			return false;
@@ -301,7 +296,7 @@ class order_states
 		if( !self::transition( $order, self::S_DROPPED ) ) {
 			return false;
 		}
-		logmsg( "Dropping the order $order", $order->service_id() );
+		logmsg( "Dropping the order $order" );
 
 		self::cancel_drop( $order );
 		send_machine::cancel_job( $order->id() );
@@ -314,7 +309,7 @@ class order_states
 			return false;
 		}
 		logmsg( "Assigning order $order to #".$order->taxi_id(),
-			$order->service_id(), $order->taxi_id() );
+			$order->taxi_id() );
 
 		self::cancel_drop( $order );
 		send_machine::cancel_job( $order->id() );
@@ -359,8 +354,7 @@ class order_states
 		if( !self::transition( $order, self::S_FINISHED ) ) {
 			return false;
 		}
-		logmsg( "Finishing order $order",
-			$order->service_id(), $order->taxi_id() );
+		logmsg( "Finishing order $order", $order->taxi_id() );
 		$order_id = $order->id();
 		$order->utc( 'time_finished', time() );
 		$order->save();
@@ -369,15 +363,14 @@ class order_states
 
 	/*
 	 * Cancels given order and sends notifications to the taxi, the user and
-	 * service channel (when needed).
+	 * dispatchers
 	 */
 	static function cancel( $order )
 	{
 		if( !self::transition( $order, self::S_CANCELLED ) ) {
 			return false;
 		}
-		logmsg( "Cancelling order $order",
-			$order->service_id(), $order->taxi_id() );
+		logmsg( "Cancelling order $order", $order->taxi_id() );
 		send_machine::cancel_job( $order->id() );
 		return true;
 	}
@@ -396,7 +389,7 @@ class order_states
 	 * Broadcast a transition event.
 	 */
 	private static function event( $e, $order ) {
-		announce_event( $order->service_id(), $e, array( 'order' => $order ) );
+		announce_event( $e, array( 'order' => $order ) );
 	}
 
 	/*

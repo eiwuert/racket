@@ -4,8 +4,8 @@ init( function()
 	$NS = 'disp_proto_bans::';
 	add_cmdfunc( T_DISPATCHER, 'ban-taxi', $NS.'msg_ban_taxi' );
 	add_cmdfunc( T_DISPATCHER, 'unban-taxi', $NS.'msg_unban_taxi' );
-	listen_events( null, EV_TAXI_BANNED, $NS.'ev_taxi_banned' );
-	listen_events( null, EV_TAXI_UNBANNED, $NS.'ev_taxi_unbanned' );
+	listen_events( EV_TAXI_BANNED, $NS.'ev_taxi_banned' );
+	listen_events( EV_TAXI_UNBANNED, $NS.'ev_taxi_unbanned' );
 });
 
 class disp_proto_bans
@@ -34,7 +34,7 @@ class disp_proto_bans
 			'until' => $event->data['until'],
 			'reason' => $event->data['reason']
 		);
-		disp_broadcast( $event->sid, null, 'driver-blocked', $data );
+		disp_broadcast( null, 'driver-blocked', $data );
 	}
 
 	static function ev_taxi_unbanned( $event )
@@ -42,7 +42,7 @@ class disp_proto_bans
 		$data = array(
 			'driver_id' => $event->data['taxi_id']
 		);
-		disp_broadcast( $event->sid, null, 'driver-unblocked', $data );
+		disp_broadcast( null, 'driver-unblocked', $data );
 	}
 }
 

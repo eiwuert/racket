@@ -5,8 +5,6 @@
 <a href="<?= url( 'dispatcher' ) ?>" class="button">Добавить диспетчера</a>
 
 <?php
-$service_id = intval( sid() );
-
 $t = new Table(array(
 	'call_id' => 'Позывной',
 	'login' => 'Системное имя',
@@ -17,8 +15,7 @@ $r = DB::getRecords( "
 	SELECT acc_id, call_id, name, login
 	FROM taxi_accounts acc
 	WHERE acc.type = 'dispatcher'
-	AND acc.deleted = 0
-	AND acc.service_id = $service_id" );
+	AND acc.deleted = 0" );
 
 foreach( $r as $d )
 {

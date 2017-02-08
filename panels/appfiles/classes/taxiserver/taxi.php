@@ -19,28 +19,26 @@ class taxi
 	/*
 	 * Returns cars that can be assigned to the given driver.
 	 */
-	static function driverless_cars_kv( $service_id, $driver_id )
+	static function driverless_cars_kv( $driver_id )
 	{
 		$a = DB::getRecords( "
 		SELECT c.car_id,
 			CONCAT( c.name, ' (', c.plate, ')' ) AS display_name
 			FROM taxi_cars c
 				LEFT JOIN taxi_drivers d ON c.car_id = d.car_id
-			WHERE c.service_id = %d
-				AND (d.driver_id IS NULL OR d.driver_id = %d)
+			WHERE (d.driver_id IS NULL OR d.driver_id = %d)
 				AND c.deleted = 0
-		", $service_id, $driver_id );
+		", $driver_id );
 		return array_column( $a, 'display_name', 'car_id' );
 	}
 
-	static function parks( $service_id )
+	static function parks()
 	{
 		$R = DB::getRecords(
 			"SELECT g.group_id, g.name
 			FROM taxi_car_groups g
-			WHERE g.service_id = %d
 			GROUP BY group_id, g.name
-			", $service_id
+			"
 		);
 		$map = array();
 		foreach( $R as $r ) {
@@ -52,7 +50,7 @@ class taxi
 	/*
 	 * Returns a table of service cars.
 	 */
-	static function cars_r( $service_id )
+	static function cars_r()
 	{
 		return DB::getRecords("
 			SELECT
@@ -66,22 +64,20 @@ class taxi
 				acc.call_id AS driver_call_id,
 				g.name AS group_name
 			FROM taxi_cars c
-			JOIN taxi_car_groups g USING (service_id, group_id)
+			JOIN taxi_car_groups g USING (group_id)
 			LEFT JOIN taxi_drivers d ON c.car_id = d.car_id
 			LEFT JOIN taxi_accounts acc USING (acc_id)
-			WHERE c.service_id = %d
-			AND c.deleted = 0
-			ORDER BY c.name", $service_id
+			WHERE c.deleted = 0
+			ORDER BY c.name"
 		);
 	}
 
-	static function delete_car( $service_id, $car_id )
+	static function delete_car( $car_id )
 	{
 		DB::exec( "START TRANSACTION" );
 		DB::exec( "UPDATE taxi_cars
 			SET deleted = 1
-			WHERE car_id = %d
-			AND service_id = %d", $car_id, $service_id
+			WHERE car_id = %d", $car_id
 		);
 		/*
 		 * Detach the driver from the car, if there is one.
@@ -89,11 +85,11 @@ class taxi
 		DB::exec( "UPDATE taxi_drivers
 			SET car_id = NULL
 			WHERE car_id = %d",
-			$car_id, $service_id );
+			$car_id );
 		DB::exec( "COMMIT" );
 	}
 
-	static function delete_taxi( $service_id, $taxi_id )
+	static function delete_taxi( $taxi_id )
 	{
 		$set = array( 'deleted' => 1, 'acc_id' => null,
 			'car_id' => null );
@@ -104,56 +100,51 @@ class taxi
 	/*
 	 * Returns a map of service drivers which don't have a car assigned.
 	 */
-	static function unseated_drivers_kv( $service_id, $car_id )
+	static function unseated_drivers_kv( $car_id )
 	{
 		$a = DB::getRecords("
 			SELECT d.driver_id,
 				CONCAT(acc.call_id, ' - ', acc.name ) AS display_name
 			FROM taxi_drivers d
 			JOIN taxi_accounts acc USING (acc_id)
-			WHERE acc.service_id = %d
-				AND d.deleted = 0
+			WHERE d.deleted = 0
 				AND (d.car_id IS NULL OR d.car_id = %d)
 				AND acc.deleted = 0
 			ORDER BY acc.call_id
-		", $service_id, $car_id );
+		", $car_id );
 		return array_column( $a, 'display_name', 'driver_id' );
 	}
 
 	/*
 	 * Returns a map of service drivers.
 	 */
-	static function drivers_kv( $service_id )
+	static function drivers_kv()
 	{
 		$a = DB::getRecords("
 			SELECT
 				acc_id,
 				CONCAT(call_id, ' - ', name) AS display_name
 			FROM taxi_accounts
-			WHERE service_id = %d
-				AND deleted = 0
+			WHERE deleted = 0
 				AND `type` = 'driver'
 			ORDER BY call_id
-		", $service_id );
+		" );
 		return array_column( $a, 'display_name', 'acc_id' );
 	}
 
-	static function parks_kv( $service_id )
+	static function parks_kv()
 	{
-		$a = DB::getRecords( "SELECT group_id, name FROM taxi_car_groups
-		WHERE service_id = %d", $service_id );
+		$a = DB::getRecords( "SELECT group_id, name FROM taxi_car_groups" );
 		return array_column( $a, 'name', 'group_id' );
 	}
 
-	static function delete_park( $service_id, $group_id )
+	static function delete_park( $group_id )
 	{
 		$group_id = intval( $group_id );
-		$service_id = intval( $service_id );
-		if( !$group_id || !$service_id ) return false;
+		if( !$group_id ) return false;
 
 		if( !DB::exists( 'taxi_car_groups', array(
-			'group_id' => $group_id,
-			'service_id' => $service_id
+			'group_id' => $group_id
 		))) {
 			return false;
 		}
@@ -164,8 +155,7 @@ class taxi
 		DB::exec( "UPDATE taxi_cars
 			SET group_id = NULL
 			WHERE group_id = %d
-				AND service_id = %d
-			AND deleted = 1", $group_id, $service_id );
+			AND deleted = 1", $group_id );
 
 		// Remove associations from car_groups->fares relations.
 		DB::exec( "DELETE FROM taxi_car_group_fares
@@ -173,25 +163,20 @@ class taxi
 
 		// Remove the group
 		DB::exec( "DELETE FROM taxi_car_groups
-			WHERE group_id = %d
-			AND service_id = %d",
-			$group_id, $service_id );
+			WHERE group_id = %d", $group_id );
 
 		DB::exec( "COMMIT" );
 	}
 
-	static function find_customers( $service_id, $name, $phone, $skip = 0, $count = 100 )
+	static function find_customers( $name, $phone, $skip = 0, $count = 100 )
 	{
-		$service_id = intval( $service_id );
-
-		$where = "service_id = $service_id";
 		if( $name ) {
 			$name = DB::escape( $name );
-			$where .= " AND name LIKE '%%$name%%'";
+			$where = "name LIKE '%%$name%%'";
 		}
 		if( $phone ) {
 			$phone = DB::escape( $phone );
-			$where .= " AND phone LIKE '%%$phone%%'";
+			$where = "phone LIKE '%%$phone%%'";
 		}
 
 		return DB::getRecords("
@@ -206,7 +191,7 @@ class taxi
 	/*
 	 * Returns orders of the given customer.
 	 */
-	static function customer_orders( $service_id, $customer_id, $skip = 0, $count = 100 )
+	static function customer_orders( $customer_id, $skip = 0, $count = 100 )
 	{
 		return DB::getRecords( "SELECT
 			o.src_addr,
@@ -215,10 +200,9 @@ class taxi
 			o.cancel_reason
 			FROM taxi_orders o
 			WHERE o.customer_id = %d
-				AND o.service_id = %d
 			ORDER BY o.time_created DESC
 			LIMIT %d, %d",
-			$customer_id, $service_id,
+			$customer_id,
 			$skip, $count
 		);
 	}

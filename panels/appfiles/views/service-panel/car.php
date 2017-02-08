@@ -1,7 +1,6 @@
 <?php _header(); ?>
 
 <?php
-$service_id = sid();
 $car_id = argv(1);
 
 if( $car_id )
@@ -15,7 +14,7 @@ else
 	$driver_id = null;
 }
 
-$groups = taxi::parks_kv( $service_id );
+$groups = taxi::parks_kv();
 $gid = $car->group_id();
 if( !$gid && !empty( $groups ) ) {
 	$keys = array_keys( $groups );
@@ -76,7 +75,7 @@ if( !$gid && !empty( $groups ) ) {
 				</tr>
 				<tr>
 					<td><label>Водитель</label></td>
-					<td><?= HTMLSnippets::select( 'driver-id', taxi::unseated_drivers_kv( $service_id, $car_id ), $driver_id, 'Нет' ) ?></td>
+					<td><?= HTMLSnippets::select( 'driver-id', taxi::unseated_drivers_kv( $car_id ), $driver_id, 'Нет' ) ?></td>
 				</tr>
 				<tr>
 					<td><label>Автопарк</label></td>

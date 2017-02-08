@@ -2,18 +2,11 @@
 lib( 'geo' );
 class taxi_tracks
 {
-	static function get_positions_report( $service_id, $taxi_id, $t1, $t2 )
+	static function get_positions_report( $taxi_id, $t1, $t2 )
 	{
-		$service_id = intval( $service_id );
 		$taxi_id = intval( $taxi_id );
 		$t1 = intval( $t1 );
 		$t2 = intval( $t2 );
-
-		$sid = DB::getValue( "SELECT service_id FROM taxi_accounts
-			where acc_id = $taxi_id" );
-		if( $sid != $service_id ) {
-			return null;
-		}
 
 		$P = DB::getRecords("
 			SELECT UNIX_TIMESTAMP(t) AS t,

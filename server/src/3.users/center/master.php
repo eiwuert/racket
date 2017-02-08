@@ -25,8 +25,7 @@ class master_proto
 		$data = array( 'options' => array( 'vip', 'type' ) );
 		write_message( $cid, new message( 'auth-ok', $data ) );
 
-		$sid = taxi_accounts::service_id( $acc_id );
-		return new conn_user( T_CENTER, $acc_id, $sid );
+		return new conn_user( T_CENTER, $acc_id );
 	}
 
 	static function msg_auth_center( $msg, $user )
@@ -57,7 +56,7 @@ class master_proto
 		foreach( $keys as $k ) {
 			$bounds[$k] = $msg->data( $k );
 		}
-		$cars = self::free_cars( $user->sid, $bounds );
+		$cars = self::free_cars( $bounds );
 
 		$data = array(
 			'request_id' => $msg->data( 'request_id' ),
@@ -66,9 +65,8 @@ class master_proto
 		return write_message( $msg->cid, new message( 'free-cars', $data ) );
 	}
 
-	private static function free_cars( $sid, $bounds, $max = 20 )
+	private static function free_cars( $bounds, $max = 20 )
 	{
-		$sid = intval( $sid );
 		$max = intval( $max );
 
 		$keys = array( 'min_lat', 'max_lat', 'min_lon', 'max_lon' );
@@ -86,10 +84,9 @@ class master_proto
 			driver.longitude AS lon
 		FROM taxi_drivers driver
 		JOIN taxi_accounts acc USING (acc_id)
-		JOIN taxi_cars car USING (car_id, service_id)
+		JOIN taxi_cars car USING (car_id)
 		WHERE driver.deleted = 0
 		AND driver.block_until < NOW()
-		AND acc.service_id = $sid
 		AND driver.is_online
 		AND TIMESTAMPDIFF( SECOND, driver.last_ping_time, NOW() ) < 20
 		AND (NOT EXISTS (SELECT order_id

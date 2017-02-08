@@ -1,7 +1,6 @@
 <?php
 set_page_title( 'Перемещения водителя' );
 
-$service_id = sid();
 $driver_id = intval( vars::get( 'driver-id' ) );
 $dt_ranges = array(
 	'1800' => '30 минут',
@@ -10,7 +9,7 @@ $dt_ranges = array(
 );
 $dt = 1800;
 $t = time() - $dt;
-$drivers = taxi::drivers_kv( $service_id );
+$drivers = taxi::drivers_kv();
 if( $driver_id )
 {
 	if( !isset( $drivers[$driver_id] ) ) {
@@ -49,6 +48,6 @@ if( $driver_id )
 
 <?php
 if( $driver_id ) {
-	show_positions( $service_id, $driver_id, $t, $t + $dt );
+	show_positions( $driver_id, $t, $t + $dt );
 }
 ?>

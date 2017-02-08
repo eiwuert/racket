@@ -4,7 +4,6 @@ class disp_search_loc
 {
 	static function search( $order, $squad, $loc_id )
 	{
-		$sid = $order->service_id();
 		/*
 		 * Apply dispatch rules specific to the location.
 		 */
@@ -22,7 +21,7 @@ class disp_search_loc
 			$id = $st['ref_id'];
 			$imp = $st['importance'];
 			$mode = $st['mode'];
-			logmsg( "Stage $i: $type($id), mode=$mode, imp=$imp", $sid );
+			logmsg( "Stage $i: $type($id), mode=$mode, imp=$imp" );
 			switch( $type )
 			{
 				case 'queue':
@@ -38,13 +37,12 @@ class disp_search_loc
 					warning( "Unknown dispatch type: $type" );
 			}
 		}
-		logmsg( "Stages done", $sid );
+		logmsg( "Stages done" );
 	}
 
 	private static function use_queue( $order, $squad, $qid, $mode, $imp )
 	{
-		$sid = $order->service_id();
-		$timeout = service_setting( $sid, 'accept_timeout' );
+		$timeout = service_setting( 'accept_timeout' );
 
 		/*
 		 * Get cars from the queue.
@@ -53,7 +51,7 @@ class disp_search_loc
 		$n = ($mode == 'first' ? 1 : 100);
 		$cars = $qs->get_cars( $n );
 		$n = count( $cars );
-		logmsg( "Adding $n cars", $sid );
+		logmsg( "Adding $n cars" );
 
 		/*
 		 * Add importance flag if needed.
@@ -90,8 +88,7 @@ class disp_search_loc
 
 	private static function use_brigade( $order, $squad, $brig_id, $imp )
 	{
-		$sid = $order->service_id();
-		$timeout = service_setting( $sid, 'accept_timeout' );
+		$timeout = service_setting( 'accept_timeout' );
 		$brig_id = intval( $brig_id );
 
 		$cond = taxi_search::order_conditions( $order );
@@ -114,14 +111,13 @@ class disp_search_loc
 			$cars[] = $car;
 		}
 		$n = count( $cars );
-		logmsg( "Adding $n cars", $sid );
+		logmsg( "Adding $n cars" );
 		$squad->add_group( $cars, $timeout );
 	}
 
 	private static function use_all( $order, $squad, $imp )
 	{
-		$sid = $order->service_id();
-		$timeout = service_setting( $sid, 'accept_timeout' );
+		$timeout = service_setting( 'accept_timeout' );
 
 		$cond = taxi_search::order_conditions( $order );
 		$S = DB::getRecords( "
@@ -142,7 +138,7 @@ class disp_search_loc
 			$cars[] = $car;
 		}
 		$n = count( $cars );
-		logmsg( "Adding $n cars", $sid );
+		logmsg( "Adding $n cars" );
 		$squad->add_group( $cars, $timeout );
 	}
 }

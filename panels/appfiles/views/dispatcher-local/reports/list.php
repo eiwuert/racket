@@ -13,14 +13,10 @@ lib( 'russian' );
 
 function driver_selector()
 {
-	$sid = sid();
 	$drivers = array_column( DB::getRecords(
 		"SELECT acc_id, call_id FROM taxi_accounts
 		WHERE type = 'driver'
-		AND service_id = %d
-		AND deleted = 0",
-		$sid
-	), 'call_id', 'acc_id' );
+		AND deleted = 0" ), 'call_id', 'acc_id' );
 	$driver_id = intval( vars::get( 'driver-id' ) );
 	?>
 	<label>Водитель</label>
@@ -34,7 +30,6 @@ if( $range )
 	$t1 = $range[0];
 	$t2 = $range[1];
 	$driver_id = intval( vars::get( 'driver-id' ) );
-	$sid = sid();
 
 	$cols = array(
 		'order_id',
@@ -52,7 +47,7 @@ if( $range )
 		'driver_id' => $driver_id,
 		'src_loc_id' => loc_id()
 	);
-	$table = orders::table( $sid, $t1, $t2, $cols, $filter );
+	$table = orders::table( $t1, $t2, $cols, $filter );
 
 	switch( vars::get( 'act' ) )
 	{

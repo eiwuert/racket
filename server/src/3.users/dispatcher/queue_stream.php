@@ -47,7 +47,6 @@ class queue_stream
 
 	function get_car()
 	{
-		$sid = $this->order->service_id();
 		while( !empty( $this->cars ) )
 		{
 			$car = array_shift( $this->cars );
@@ -55,16 +54,16 @@ class queue_stream
 			$taxi_id = $car['acc_id'];
 
 			if( get_taxi_lag( $taxi_id ) === null ) {
-				logmsg( "#$taxi_id is offline", $sid, $taxi_id );
+				logmsg( "#$taxi_id is offline", $taxi_id );
 				continue;
 			}
 
 			if( session_needed( $taxi_id ) ) {
-				logmsg( "#$taxi_id needs a session", $sid, $taxi_id );
+				logmsg( "#$taxi_id needs a session", $taxi_id );
 				continue;
 			}
 
-			logmsg( "Adding #$taxi_id to the squad", $sid, $taxi_id );
+			logmsg( "Adding #$taxi_id to the squad", $taxi_id );
 			$car = array( 'taxi_id' => $taxi_id );
 			return $car;
 		}

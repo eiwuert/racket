@@ -1,20 +1,16 @@
 <?php
 
-function service_log( $sid, $template, $_args_ = null )
+function service_log( $template, $_args_ = null )
 {
 	$args = func_get_args();
 	$args = array_slice( $args, 2 );
-	service_logs::msg( $sid, $template, $args );
+	service_logs::msg( $template, $args );
 }
 
 class service_logs
 {
-	static function msg( $sid, $template, $args = array() )
+	static function msg( $template, $args = array() )
 	{
-		if( !service_option( $sid, 'service_logs' ) ) {
-			return;
-		}
-
 		preg_match_all( '/{([^}]+)}/', $template, $m );
 		$str = $template;
 		foreach( $m[1] as $i => $var )
@@ -33,10 +29,9 @@ class service_logs
 		$text = date( 'H:i:s' ).': '.$str;
 
 		DB::insertRecord( 'taxi_logs', array(
-			'service_id' => $sid,
 			'text' => $text
 		));
-		disp_broadcast( $sid, null, 'service-log', array(
+		disp_broadcast( null, 'service-log', array(
 			'text' => $text
 		));
 	}

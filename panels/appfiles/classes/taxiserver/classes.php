@@ -5,11 +5,6 @@ class car extends BaseItem {
 	protected $table_key = 'car_id';
 }
 
-class Service extends BaseItem {
-	protected $table_name = 'taxi_services';
-	protected $table_key = 'service_id';
-}
-
 class taxi_account extends BaseItem {
 	protected $table_name = 'taxi_accounts';
 	protected $table_key = 'acc_id';

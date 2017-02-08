@@ -6,10 +6,10 @@ init( function()
 {
 	$NS = 'proto_taxi_sessions::';
 
-	listen_events( null, EV_SESSION_OPENED, $NS.'ev_session_opened' );
-	listen_events( null, EV_SESSION_CLOSED, $NS.'ev_session_closed' );
-	listen_events( null, EV_ORDER_STARTED, $NS.'ev_order_started' );
-	listen_events( null, EV_TAXI_POSITION, $NS.'ev_taxi_position' );
+	listen_events( EV_SESSION_OPENED, $NS.'ev_session_opened' );
+	listen_events( EV_SESSION_CLOSED, $NS.'ev_session_closed' );
+	listen_events( EV_ORDER_STARTED, $NS.'ev_order_started' );
+	listen_events( EV_TAXI_POSITION, $NS.'ev_taxi_position' );
 
 	add_cmdfunc( T_TAXI, 'open-session', $NS.'msg_open_session' );
 	add_cmdfunc( T_TAXI, 'close-session', $NS.'msg_close_session' );
@@ -56,7 +56,7 @@ class proto_taxi_sessions
 	{
 		$taxi_id = $user->id;
 		$odometer = $msg->data( 'odometer' );
-		logmsg( "Driver closes session", $user->sid, $user->id );
+		logmsg( "Driver closes session", $user->id );
 		close_157_session( $taxi_id, $odometer );
 	}
 
@@ -66,7 +66,7 @@ class proto_taxi_sessions
 	static function msg_taxi_login( $msg, $user )
 	{
 		$taxi_id = $user->id;
-		if( !service_option( $user->sid, 'sessions' ) ) {
+		if( !service_option( 'sessions' ) ) {
 			return;
 		}
 
@@ -105,16 +105,16 @@ class proto_taxi_sessions
 
 		// TODO: get_taxi_session which checks service option first.
 		// and then uses caching.
-		$sid = service_sessions::get_taxi_session( $taxi_id );
-		if( !$sid ) {
+		$session_id = service_sessions::get_taxi_session( $taxi_id );
+		if( !$session_id ) {
 			return;
 		}
-		service_sessions::increment_distance( $sid, $pos->dr );
+		service_sessions::increment_distance( $session_id, $pos->dr );
 	}
 
 	static function ev_order_started( $event )
 	{
-		if( !service_option( $event->sid, 'sessions' ) ) {
+		if( !service_option( 'sessions' ) ) {
 			return;
 		}
 		$order = $event->data['order'];

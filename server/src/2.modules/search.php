@@ -15,11 +15,10 @@ function nearby_cars( $order, $r, $n, $except = array() ) {
 
 function area_search( $order, $squad )
 {
-	$sid = $order->service_id();
 	$order_id = $order->id();
 
-	$R = intval( service_setting( $sid, 'search_radius' ) );
-	$N = intval( service_setting( $sid, 'search_number' ) );
+	$R = intval( service_setting( 'search_radius' ) );
+	$N = intval( service_setting( 'search_number' ) );
 	if( !$R || !$N ) {
 		debmsg( "Area search disabled: R=$R, N=$N" );
 		return;
@@ -28,13 +27,13 @@ function area_search( $order, $squad )
 	$except = $squad->get_cars_list();
 	$cars = nearby_cars( $order, $R, $N, $except );
 	if( empty( $cars ) ) {
-		logmsg( "No cars near order #$order_id", $sid );
+		logmsg( "No cars near order #$order_id" );
 		return;
 	}
 
-	logmsg( count( $cars ) . " cars near order #$order_id", $sid );
+	logmsg( count( $cars ) . " cars near order #$order_id" );
 
-	$timeout = intval( service_setting( $sid, 'accept_timeout' ) );
+	$timeout = intval( service_setting( 'accept_timeout' ) );
 	// TODO: define minimum timeout for drivers.
 	if( $timeout < 4 ) {
 		warning( "accept_timeout is too small ($timeout), increasing to 4" );
@@ -111,7 +110,6 @@ class taxi_search
 	 */
 	static function order_conditions( $order )
 	{
-		$sid = intval( $order->service_id() );
 		$where = array(
 			/*
 			 * Online
@@ -131,11 +129,7 @@ class taxi_search
 			/*
 			 * Not blocked
 			 */
-			'driver.block_until < NOW()',
-			/*
-			 * Service
-			 */
-			"acc.service_id = $sid"
+			'driver.block_until < NOW()'
 		);
 
 		/*

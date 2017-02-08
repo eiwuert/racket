@@ -104,7 +104,7 @@ class conn
 		$user = $c->user;
 
 		if( $user ) {
-			logmsg( "$cid $user disconnected ($reason)", $user->sid, $user->id );
+			logmsg( "$cid $user disconnected ($reason)", $user->id );
 		}
 		else {
 			logmsg( "$cid disconnected ($reason)" );
@@ -115,7 +115,7 @@ class conn
 		}
 
 		if( $user ) {
-			announce_event( $user->sid, EV_LOGOUT, array( 'user' => $user ) );
+			announce_event( EV_LOGOUT, array( 'user' => $user ) );
 		}
 		unset( self::$clients[$cid] );
 	}
@@ -153,20 +153,18 @@ class conn
 			 */
 			if( $user->type && $user->type != $u2->type ) continue;
 			if( $user->id && $user->id != $u2->id ) continue;
-			if( $user->sid && $user->sid != $u2->sid ) continue;
 			return $client;
 		}
 		return null;
 	}
 
-	static function find_users( $type, $sid, $id = null )
+	static function find_users( $type, $id = null )
 	{
 		$list = array();
 		foreach( self::$clients as $client )
 		{
 			$user = $client->user;
 			if( !$user ) continue;
-			if( $sid && $user->sid != $sid ) continue;
 			if( $type && $user->type != $type ) continue;
 			if( $id && $user->id != $id ) continue;
 			$list[] = $client;

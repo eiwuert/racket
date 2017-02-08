@@ -3,8 +3,7 @@
 <?php require_script( 'res/dispatcher/cars.js' ); ?>
 
 <?php
-$service_id = sid();
-$taxis = dx_disp::get_online_service_taxis_r( $service_id );
+$taxis = dx_disp::get_online_service_taxis_r();
 
 $t = new Table( array(
 	'call_id' => 'Позывной',

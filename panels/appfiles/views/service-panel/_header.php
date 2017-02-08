@@ -13,10 +13,6 @@
 </head>
 <body>
 
-<?php
-$service_id = sid();
-?>
-
 <header>
 	<nav>
 		<h1><?= user::get_login() ?></h1>

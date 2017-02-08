@@ -9,13 +9,13 @@ init( function()
 	add_cmdfunc( T_DISPATCHER, 'save-order', $NS.'msg_save_order' );
 	add_cmdfunc( T_DISPATCHER, 'send-order', $NS.'msg_send_order' );
 	add_cmdfunc( T_DISPATCHER, 'cancel-order', $NS.'msg_cancel_order' );
-	listen_events( null, EV_ORDER_SAVED, $NS.'ev_order_saved' );
-	listen_events( null, EV_ORDER_DROPPED, $NS.'ev_order_dropped' );
-	listen_events( null, EV_ORDER_ASSIGNED, $NS.'ev_order_assigned' );
-	listen_events( null, EV_ORDER_ARRIVED, $NS.'ev_taxi_arrived' );
-	listen_events( null, EV_ORDER_STARTED, $NS.'ev_order_started' );
-	listen_events( null, EV_ORDER_FINISHED, $NS.'ev_order_finished' );
-	listen_events( null, EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
+	listen_events( EV_ORDER_SAVED, $NS.'ev_order_saved' );
+	listen_events( EV_ORDER_DROPPED, $NS.'ev_order_dropped' );
+	listen_events( EV_ORDER_ASSIGNED, $NS.'ev_order_assigned' );
+	listen_events( EV_ORDER_ARRIVED, $NS.'ev_taxi_arrived' );
+	listen_events( EV_ORDER_STARTED, $NS.'ev_order_started' );
+	listen_events( EV_ORDER_FINISHED, $NS.'ev_order_finished' );
+	listen_events( EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
 });
 
 class dispatcher_orders
@@ -52,7 +52,6 @@ class dispatcher_orders
 	private static function create_order( $msg, $user )
 	{
 		$order = new order();
-		$order->service_id( $user->sid );
 		$order->owner_id( $user->id );
 		self::append_data( $order, $msg, $user );
 
@@ -91,8 +90,7 @@ class dispatcher_orders
 		 */
 		$phone = $msg->data( 'customer_phone' );
 		$name = $msg->data( 'customer_name' );
-		$customer_id = get_customer_id(
-			$order->service_id(), $phone, $name );
+		$customer_id = get_customer_id( $phone, $name );
 		$order->customer_id( $customer_id );
 
 		$order->utc( 'reminder_time', $msg->data( 'reminder_time' ) );
@@ -149,15 +147,15 @@ class dispatcher_orders
 		if( $driver_id )
 		{
 			logmsg( "Sending direct order $order to #$driver_id",
-				$user->sid, $driver_id );
-			service_log( $user->sid, '{d} отправил {O} {t`ю}',
+				$driver_id );
+			service_log('{d} отправил {O} {t`ю}',
 				$user->id, $order, $driver_id );
 			$ok = self::send_order_to_driver( $order, $driver_id );
 		}
 		else
 		{
-			logmsg( "Sending auto order $order", $user->sid );
-			service_log( $user->sid, '{d} отправил {O}',
+			logmsg( "Sending auto order $order");
+			service_log('{d} отправил {O}',
 				$user->id, $order );
 			$ok = self::send_order_auto( $order );
 		}
@@ -171,14 +169,9 @@ class dispatcher_orders
 
 	private static function send_order_to_driver( $order, $driver_id )
 	{
-		if( get_taxi_service( $driver_id ) != $order->service_id() ) {
-			warning( "Taxi ownership mismatch" );
-			return false;
-		}
-
 		if( session_needed( $driver_id ) ) {
 			logmsg( "Can't send to #$driver_id: session needed",
-				$order->service_id(), $driver_id );
+				$driver_id );
 			return false;
 		}
 
@@ -192,7 +185,7 @@ class dispatcher_orders
 			'taxi_id' => $driver_id,
 			'importance' => 2
 		);
-		$timeout = service_setting( $order->service_id(), 'accept_timeout' );
+		$timeout = service_setting( 'accept_timeout' );
 		if( !$timeout || $timeout < self::MIN_TIMEOUT ) {
 			warning( "Invalid accept_timeout value ($timeout)" );
 			$timeout = self::MIN_TIMEOUT;
@@ -237,7 +230,7 @@ class dispatcher_orders
 
 		if( cancel_order( $order ) ) {
 			$err = null;
-			service_log( $user->sid, '{d} отменил {o}', $user->id, $order->id() );
+			service_log('{d} отменил {o}', $user->id, $order->id() );
 		}
 		else {
 			$err = "Could not cancel order";
@@ -250,8 +243,7 @@ class dispatcher_orders
 		$uid = $msg->data( 'order_uid' );
 		$order_id = DB::getValue( "SELECT order_id
 			FROM taxi_orders
-			WHERE order_uid = '%s'
-			AND service_id = %d", $uid, $user->sid );
+			WHERE order_uid = '%s'", $uid );
 		if( !$order_id ) {
 			warning( "Unknown order (uid=$uid)" );
 			return null;
@@ -319,7 +311,7 @@ class dispatcher_orders
 			'opt_terminal' => 'int'
 		));
 
-		disp_broadcast( $order->service_id(), $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-created', $data );
 		return true;
 	}
@@ -330,7 +322,7 @@ class dispatcher_orders
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $order->service_id(), $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-dropped', $data );
 	}
 
@@ -344,52 +336,48 @@ class dispatcher_orders
 			'est_arrival_time' => $order->utc( 'est_arrival_time' )
 		);
 
-		disp_broadcast( $order->service_id(), $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-accepted', $data );
 	}
 
 	static function ev_taxi_arrived( $event )
 	{
 		$order = $event->data['order'];
-		$channel_id = $order->service_id();
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $channel_id, $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'taxi-arrived', $data );
 	}
 
 	static function ev_order_started( $event )
 	{
 		$order = $event->data['order'];
-		$channel_id = $order->service_id();
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $channel_id, $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-started', $data );
 	}
 
 	static function ev_order_finished( $event )
 	{
 		$order = $event->data['order'];
-		$channel_id = $order->service_id();
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $channel_id, $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-finished', $data );
 	}
 
 	static function ev_order_cancelled( $event )
 	{
 		$order = $event->data['order'];
-		$channel_id = $order->service_id();
 		$data = array(
 			'order_uid' => $order->order_uid(),
 			'reason' => $order->cancel_reason()
 		);
-		disp_broadcast( $channel_id, $order->src_loc_id(),
+		disp_broadcast( $order->src_loc_id(),
 			'order-cancelled', $data );
 	}
 }

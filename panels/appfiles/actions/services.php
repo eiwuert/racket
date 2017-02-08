@@ -4,7 +4,6 @@ set_actions_access( 'service' );
 
 function save_driver()
 {
-	$service_id = sid();
 	$driver_id = Vars::post( 'id' );
 	$pass = Vars::post( 'password' );
 
@@ -21,7 +20,6 @@ function save_driver()
 		}
 
 		$acc = new taxi_account( $acc_id );
-		$acc->service_id( $service_id );
 
 		$driver = new driver();
 		$driver->acc_id( $acc_id );
@@ -30,14 +28,11 @@ function save_driver()
 	{
 		$driver = new driver( $driver_id, 'acc_id' );
 		$acc_id = $driver->acc_id();
-		$acc = new taxi_account( $acc_id, 'service_id' );
-		if( $service_id != $acc->service_id() ) {
-			return false;
-		}
+		$acc = new taxi_account( $acc_id );
 
 		if( vars::post( 'set-password' ) )
 		{
-			log_message( "$service_id\tNew password for #$driver_id",
+			log_message( "New password for #$driver_id",
 				'service_actions' );
 			taxi_accounts::change_password( $acc_id, $pass );
 		}
@@ -67,7 +62,6 @@ function save_driver()
 	 */
 	if( $group_id == -1 ) {
 		$g = new driver_group();
-		$g->service_id( $service_id );
 		$g->name( '№' );
 		$group_id = $g->save();
 		$g->name( '№ '.$group_id );
@@ -122,7 +116,7 @@ function save_driver()
 				'seconds' => $time,
 				'reason' => $reason
 			);
-			disp_cmd( 0, $service_id, 'ban-taxi', $data, $err );
+			disp_cmd( 0, 'ban-taxi', $data, $err );
 			if( $err ) {
 				return $err;
 			}
@@ -136,7 +130,7 @@ function save_driver()
 			$data = array(
 				'driver_id' => $acc_id
 			);
-			disp_cmd( 0, $service_id, 'unban-taxi', $data, $err );
+			disp_cmd( 0, 'unban-taxi', $data, $err );
 			if( $err ) return $err;
 		}
 	}
@@ -145,9 +139,8 @@ function save_driver()
 function delete_driver()
 {
 	$id = argv(1);
-	$service_id = sid();
-	if( !$id || !$service_id ) {
-		warning( "delete_driver: missing driver id or service id" );
+	if( !$id ) {
+		warning( "delete_driver: missing driver id" );
 		return false;
 	}
 
@@ -157,27 +150,18 @@ function delete_driver()
 		return false;
 	}
 
-	$acc = new taxi_account( $driver->acc_id(), 'service_id' );
-	if( $service_id != $acc->service_id() ) {
-		warning( "delete_driver: service id mismatch" );
-		return false;
-	}
-
-	taxi::delete_taxi( $service_id, $id );
+	taxi::delete_taxi( $id );
 	taxi_accounts::delete( $driver->acc_id() );
 }
 
 function save_car()
 {
-	$service_id = sid();
-
 	$id = Vars::post( 'car-id' );
 
 	if( $id ) {
 		$car = new car( $id );
 	} else {
 		$car = new car();
-		$car->service_id( $service_id );
 	}
 	$car->name( Vars::post( 'car-name' ) );
 	$car->class( vars::post( 'class' ) );
@@ -190,7 +174,6 @@ function save_car()
 	$gid = Vars::post( 'group-id' );
 	if( !$gid ) {
 		$group = new car_group();
-		$group->service_id( $service_id );
 		$group->name( 'Обычная' );
 		$gid = $group->save();
 	}
@@ -240,19 +223,17 @@ function save_car()
 
 function delete_car()
 {
-	$service_id = sid();
 	$car_id = argv(1);
 
 	$driver_id = taxi_drivers::get_by_car( $car_id );
 	if( $driver_id ) {
 		return "У автомобиля назначен водитель.";
 	}
-	taxi::delete_car( $service_id, $car_id );
+	taxi::delete_car( $car_id );
 }
 
 function save_dispatcher()
 {
-	$service_id = sid();
 	$acc_id = vars::post( 'id' );
 
 	$name = vars::post( 'i-name' );
@@ -268,7 +249,6 @@ function save_dispatcher()
 		}
 		$acc_id = taxi_accounts::create( 'dispatcher', $login, $pass );
 		$acc = new taxi_account( $acc_id );
-		$acc->service_id( $service_id );
 	}
 	else
 	{
@@ -338,12 +318,10 @@ function change_service_password()
 
 function save_car_group()
 {
-	$service_id = sid();
 	$id = alt( Vars::post( 'group-id' ), null );
 
 	$g = new car_group( $id );
 	$g->name( Vars::post( 'group-name' ) );
-	$g->service_id( $service_id );
 	$id = intval( $g->save() );
 
 	$fares = alt( Vars::post( 'fare-id' ), array() );
@@ -353,18 +331,15 @@ function save_car_group()
 function delete_car_group()
 {
 	$id = argv(1);
-	$service_id = sid();
-	return taxi::delete_park( $service_id, $id );
+	return taxi::delete_park( $id );
 }
 
 function save_driver_group()
 {
-	$service_id = sid();
 	$id = intval( Vars::post( 'group-id' ) );
 
 	$g = new driver_group( $id );
 	$g->name( Vars::post( 'group-name' ) );
-	$g->service_id( $service_id );
 	$id = $g->save();
 
 	$Q = alt( vars::post( 'queues' ), array() );
@@ -374,13 +349,11 @@ function save_driver_group()
 function delete_driver_group()
 {
 	$id = argv(1);
-	$service_id = sid();
-	return driver_groups::delete_group( $id, $service_id );
+	return driver_groups::delete_group( $id );
 }
 
 function save_checkpoint()
 {
-	$service_id = sid();
 	$name = Vars::post( 'name' );
 
 	// Point coordinates
@@ -403,10 +376,8 @@ function save_checkpoint()
 	if( !$cpid )
 	{
 		$loc = new taxi_location();
-		$loc->service_id( $service_id );
 
 		$q = new taxi_queue();
-		$q->service_id( $service_id );
 	}
 	else
 	{
@@ -438,7 +409,6 @@ function save_checkpoint()
 
 function save_location()
 {
-	$service_id = sid();
 	$id = intval( vars::post( 'id' ) );
 	$name = vars::post( 'name' );
 	if( !$name ) {
@@ -455,7 +425,6 @@ function save_location()
 
 	$loc = new taxi_location( $id );
 	$loc->name( vars::post( 'name' ) );
-	$loc->service_id( $service_id );
 	$loc->latitude( $lat );
 	$loc->longitude( $lon );
 	$loc->address( write_address( $addr ) );
@@ -512,7 +481,6 @@ function save_location_dispatch( $loc_id )
 
 function delete_location()
 {
-	$service_id = sid();
 	$loc_id = argv(1);
 	/*
 	 * If the location is a "checkpoint", delete the related queue.
@@ -524,7 +492,6 @@ function delete_location()
 
 function save_service_settings()
 {
-	$sid = sid();
 	$settings = service_settings::$defaults;
 	foreach( service_settings::$defaults as $k => $default ) {
 		$v = vars::post( 's-'.$k );
@@ -533,13 +500,12 @@ function save_service_settings()
 		}
 		$settings[$k] = $v;
 	}
-	service_settings::save( $sid, $settings );
+	service_settings::save( $settings );
 }
 
 function save_fare()
 {
 	$id = Vars::post( 'id' );
-	$service_id = sid();
 	$name = Vars::post( 'name' );
 
 	/*
@@ -552,7 +518,6 @@ function save_fare()
 	// TODO: remove fare if there are no links to it.
 	$f = new fare();
 	$f->name( $name );
-	$f->service_id( $service_id );
 
 	// TODO: rethink city/town
 	$f->location_type( 'city' );
@@ -588,10 +553,9 @@ function save_fare()
 
 function delete_fare()
 {
-	$service_id = sid();
 	$fare_id = argv(1);
 
-	return fares::delete_fare( $fare_id, $service_id );
+	return fares::delete_fare( $fare_id );
 }
 
 
@@ -622,10 +586,9 @@ function save_service_customer()
 
 function delete_order()
 {
-	$service_id = sid();
 	$order_id = argv(1);
 
-	return orders::delete_order( $service_id, $order_id );
+	return orders::delete_order( $order_id );
 }
 
 function save_queue()
@@ -634,7 +597,6 @@ function save_queue()
 	$q = new taxi_queue( $id );
 
 	$q->name( vars::post( 'name' ) );
-	$q->service_id( sid() );
 	$q->order( intval( vars::post( 'order' ) ) );
 	$q->min( intval( vars::post( 'min' ) ) );
 
@@ -719,16 +681,11 @@ function save_queue()
 
 function delete_queue()
 {
-	$sid = sid();
 	$qid = argv(1);
 
-	$r = DB::getRecord( "SELECT service_id, loc_id FROM taxi_queues
+	$r = DB::getRecord( "SELECT loc_id FROM taxi_queues
 		WHERE queue_id = %d", $qid );
 	if( !$r ) {
-		return 'Not found';
-	}
-	if( $r['service_id'] != $sid ) {
-		warning( "Service mismatch" );
 		return 'Not found';
 	}
 	if( $r['loc_id'] ) {
@@ -739,7 +696,6 @@ function delete_queue()
 
 function save_qaddr()
 {
-	$sid = sid();
 	$qid = vars::post( 'qid' );
 	$range_id = vars::post( 'id' );
 
@@ -783,7 +739,7 @@ function save_qaddr()
 	$range->max_house( $max );
 	$range->parity( $parity );
 
-	$ranges = taxi_queues::get_overlapping_ranges( $sid, $range );
+	$ranges = taxi_queues::get_overlapping_ranges( $range );
 	foreach( $ranges as $r )
 	{
 		/*
@@ -804,34 +760,31 @@ function save_qaddr()
 
 function delete_qaddr()
 {
-	$sid = sid();
 	$range_id = argv(1);
-	taxi_queues::delete_qaddr_range( $sid, $range_id );
+	taxi_queues::delete_qaddr_range( $range_id );
 }
 
 function delete_driver_type()
 {
 	$id = argv(1);
 	return DB::deleteRecord( 'taxi_driver_types', array(
-		'service_id' => sid(),
 		'type_id' => $id
 	));
 }
 
 function save_driver_type()
 {
-	$sid = sid();
 	$id = vars::post( 'id' );
 	$name = vars::post( 'name' );
 	if( $id ) {
 		return DB::updateRecord( 'taxi_driver_types',
 			array( 'name' => $name ),
-			array( 'service_id' => $sid, 'type_id' => $id )
+			array( 'type_id' => $id )
 		);
 	}
 	else {
 		return DB::insertRecord( 'taxi_driver_types',
-			array( 'service_id' => $sid, 'name' => $name )
+			array( 'name' => $name )
 		);
 	}
 }

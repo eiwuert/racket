@@ -3,7 +3,6 @@
 <?php
 require_script( 'res/service/pages.js?page=driver' );
 
-$service_id = sid();
 $driver_id = argv(1);
 if( $driver_id )
 {
@@ -11,9 +10,6 @@ if( $driver_id )
 	$acc_id = $driver->acc_id();
 	if( !$acc_id ) error_notfound();
 	$acc = new taxi_account( $acc_id, '*' );
-	if( $acc->service_id() != $service_id ) {
-		error_forbidden();
-	}
 }
 else
 {
@@ -31,8 +27,8 @@ if( $block_time < $now ) {
 } else {
 	$is_blocked = true;
 }
-$cars = taxi::driverless_cars_kv( $service_id, $driver_id );
-$groups = driver_groups::get_service_groups_kv( $service_id );
+$cars = taxi::driverless_cars_kv( $driver_id );
+$groups = driver_groups::get_service_groups_kv();
 ?>
 
 <?php if( $driver_id ) {
@@ -70,8 +66,7 @@ $action = aurl( 'save_driver', url_t( 'drivers' ), CURRENT_URL );
 				</tr>
 				<?php
 				$types = DB::getRecords( "SELECT type_id, name
-					FROM taxi_driver_types
-					WHERE service_id = %d", $service_id );
+					FROM taxi_driver_types" );
 				$types = array_column( $types, 'name', 'type_id' );
 				if( !empty( $types ) ): ?>
 				<tr>
@@ -85,7 +80,7 @@ $action = aurl( 'save_driver', url_t( 'drivers' ), CURRENT_URL );
 					$driver->car_id(), 'Нет' ) ?></td>
 				</tr>
 				<?php
-				if( service_settings::config( $service_id, 'imitations' ) ):
+				if( service_settings::config( 'imitations' ) ):
 				?>
 				<tr>
 					<td><label for="cb-fake">Без смартфона (имитация)</label></td>

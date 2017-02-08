@@ -6,7 +6,6 @@ require_script( 'res/service/pages.js?page=queue' );
 
 <?php
 $qid = argv(1);
-$service_id = sid();
 if( $qid )
 {
 	$queue = new taxi_queue( $qid, '*' );
@@ -17,7 +16,7 @@ if( $qid )
 
 	if( !$addr ) {
 		$addr = new address();
-		$addr->place = service_settings::get_value( $service_id, 'default_city' );
+		$addr->place = service_settings::get_value( 'default_city' );
 	}
 	if( $upstream ) {
 		?><h1>Общая очередь &laquo;<?= $queue->name(); ?>&raquo;</h1><?php
@@ -29,7 +28,7 @@ else
 {
 	$upstream = vars::get( 'upstream' ) ? '1' : '0';
 	$addr = new address();
-	$addr->place = service_settings::get_value( $service_id, 'default_city' );
+	$addr->place = service_settings::get_value( 'default_city' );
 	$queue = new taxi_queue();
 	if( $upstream ) {
 		?><h1>Новая общая очередь</h1><?php
@@ -72,8 +71,7 @@ else
 						WHERE queue_id = %d", $queue->id() );
 
 					$groups = DB::getRecords( "SELECT group_id, name
-						FROM taxi_driver_groups
-						WHERE service_id = %d", $service_id );
+						FROM taxi_driver_groups" );
 
 					foreach( $groups as $g )
 					{
@@ -169,10 +167,7 @@ else
 				$queues = DB::getRecords("
 					SELECT queue_id, name
 					FROM taxi_queues
-					WHERE service_id = %d
-					AND upstream = 0",
-					$service_id
-				);
+					WHERE upstream = 0" );
 				$subqueues = DB::getValues("
 					SELECT queue_id
 					FROM taxi_queues
@@ -207,8 +202,7 @@ else
 				if( $priority === null ) $priority = 9;
 				$upstreams = DB::getRecords( "SELECT queue_id, name
 					FROM taxi_queues
-					WHERE upstream = 1
-					AND service_id = %d", $service_id );
+					WHERE upstream = 1" );
 				$upstreams = array_column( $upstreams, 'name', 'queue_id' );
 				if( count( $upstreams ) > 0 ) {
 					?>

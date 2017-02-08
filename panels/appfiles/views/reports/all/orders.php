@@ -73,7 +73,6 @@ function get_table( $columns )
 	$table = new Table( $header );
 
 	$range = get_time();
-	$service_id = sid();
 	$dispatcher_id = intval( vars::get( 'dispatcher-id' ) );
 	$driver_id = intval( vars::get( 'driver-id' ) );
 	$status = vars::get( 'status' );
@@ -87,8 +86,7 @@ function get_table( $columns )
 	$t1 = $range[0];
 	$t2 = $range[1];
 	$where = array(
-		"o.time_created BETWEEN FROM_UNIXTIME($t1) AND FROM_UNIXTIME($t2)",
-		"o.service_id = $service_id"
+		"o.time_created BETWEEN FROM_UNIXTIME($t1) AND FROM_UNIXTIME($t2)"
 	);
 	$where[] = 'o.deleted = 0';
 	if( $dispatcher_id ) {
@@ -251,7 +249,6 @@ function columns_selector( $columns )
 function filter_controls( $columns )
 {
 	$range = get_time();
-	$service_id = sid();
 	$dispatcher_id = intval( vars::get( 'dispatcher-id' ) );
 	$driver_id = intval( vars::get( 'driver-id' ) );
 	$status = vars::get( 'status' );
@@ -259,12 +256,9 @@ function filter_controls( $columns )
 	$dispatchers = array_column( DB::getRecords(
 		"SELECT acc_id, call_id FROM taxi_accounts
 		WHERE type = 'dispatcher'
-		AND service_id = %d
-		AND deleted = 0",
-		$service_id
-	), 'call_id', 'acc_id' );
+		AND deleted = 0" ), 'call_id', 'acc_id' );
 
-	$drivers = taxi::drivers_kv( $service_id );
+	$drivers = taxi::drivers_kv();
 	$statuses = array(
 		'finished' => 'Завершён',
 		'started' => 'Выполняется',

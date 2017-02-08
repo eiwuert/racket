@@ -62,10 +62,6 @@ class proto_dispatcher_queues
 		$driver_id = $msg->data( 'driver_id' );
 		$gid = $msg->data( 'group_id' );
 
-		if( get_taxi_service( $driver_id ) != $user->sid ) {
-			return disp_error( $msg->cid, "Wrong driver id" );
-		}
-
 		$current = DB::getValue( "SELECT group_id FROM taxi_drivers
 			WHERE acc_id = %d", $driver_id );
 		if( $gid == $current ) {
@@ -75,7 +71,7 @@ class proto_dispatcher_queues
 
 		$r = DB::getRecord( "SELECT name
 			FROM taxi_driver_groups
-			WHERE service_id = %d AND group_id = %d", $user->sid, $gid );
+			WHERE group_id = %d", $gid );
 
 		if( !$r ) {
 			return disp_error( $msg->cid, "Wrong group id" );
@@ -84,7 +80,7 @@ class proto_dispatcher_queues
 		/*
 		 * Remove from current queues and change group.
 		 */
-		service_log( $user->sid, '{d} перевёл {t`я} в группу «{?}»',
+		service_log('{d} перевёл {t`я} в группу «{?}»',
 			$user->id, $driver_id, $r['name'] );
 		queue_remove( $driver_id );
 		queue_unsave( $driver_id );
@@ -98,7 +94,7 @@ class proto_dispatcher_queues
 		update_driver_queues( $driver_id );
 		send_text_to_taxi( $driver_id, "Вы переведены в группу «$r[name]»." );
 
-		disp_broadcast( $user->sid, null, 'driver-changed', array(
+		disp_broadcast( null, 'driver-changed', array(
 			'driver_id' => $driver_id,
 			'diff' => array(
 				'group_id' => $gid
@@ -116,8 +112,7 @@ class proto_dispatcher_queues
 
 		$q = DB::getRecord( "SELECT parent_id, loc_id
 			FROM taxi_queues
-			WHERE queue_id = %d
-			AND service_id = %d", $qid, $user->sid );
+			WHERE queue_id = %d", $qid );
 		if( !$q ) {
 			return disp_error( $msg->cid, "Wrong queue id" );
 		}
@@ -129,7 +124,7 @@ class proto_dispatcher_queues
 
 		DB::exec( "UPDATE taxi_queues SET priority = %d, `min` = %d
 			WHERE queue_id = %d", $priority, $min, $qid );
-		disp_broadcast( $user->sid, $q['loc_id'], 'queue-changed', array(
+		disp_broadcast( $q['loc_id'], 'queue-changed', array(
 			'queue_id' => $qid,
 			'min' => $min,
 			'priority' => $priority
@@ -154,7 +149,7 @@ class proto_dispatcher_queues
 		$pos = $msg->data( 'pos' );
 		$text = 'Переместитесь в очередь «'.$name.'»';
 		$str = '{d} отправил сообщение {t`ю}: {?}';
-		service_log( $user->sid, $str, $user->id, $taxi_id, $text );
+		service_log( $str, $user->id, $taxi_id, $text );
 
 		return disp_result( $msg->cid, true);
 	}
@@ -162,12 +157,11 @@ class proto_dispatcher_queues
 	static function make_suggestion( $taxi_id, $cpid, $pos )
 	{
 		$name = queue_name( $cpid );
-		$sid = get_taxi_service( $taxi_id );
 
 		logmsg( "Sending suggestion (q$cpid, $pos) to #$taxi_id",
-			$sid, $taxi_id );
+			$taxi_id );
 
-		$timeout = intval( service_setting( $sid, 'queue_dialog_time', 30 ) );
+		$timeout = intval( service_setting( 'queue_dialog_time', 30 ) );
 
 		$d = new mod_dialog();
 		$d->title = 'Назначение от диспетчера';

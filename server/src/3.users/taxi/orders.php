@@ -8,11 +8,11 @@ init( function()
 	$NS = 'taxi_orders::';
 
 	add_cmdfunc( T_TAXI, 'create-order', $NS.'msg_create_order' );
-	listen_events( null, EV_ORDER_SQUAD, $NS.'ev_order_squad' );
+	listen_events( EV_ORDER_SQUAD, $NS.'ev_order_squad' );
 	add_cmdfunc( T_TAXI, 'taxi-login', $NS.'msg_taxi_login' );
 	add_cmdfunc( T_TAXI, 'accept-order', $NS.'msg_accept_order' );
 	add_cmdfunc( T_TAXI, 'cancel-order', $NS.'msg_cancel_order' );
-	listen_events( null, EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
+	listen_events( EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
 	add_cmdfunc( T_TAXI, 'decline-order', $NS.'msg_decline_order' );
 	add_cmdfunc( T_TAXI, 'notify-user', $NS.'msg_notify_user' );
 	add_cmdfunc( T_TAXI, 'order-started', $NS.'msg_order_started' );
@@ -138,7 +138,7 @@ class taxi_orders
 		$order_id = $message->data( 'order_id' );
 		$reason = $message->data( 'reason' );
 
-		logmsg( "#$taxi_id declines order #$order_id ($reason)", $user->sid, $user->id );
+		logmsg( "#$taxi_id declines order #$order_id ($reason)", $user->id );
 
 		if( !$order_id ) {
 			driver_error( $message->cid, "Missing `order_id` field in decline-order" );
@@ -166,7 +166,7 @@ class taxi_orders
 			default:
 				$log = "{t} отказался от {o`а} (код: $reason)";
 		}
-		service_log( $user->sid, $log, $taxi_id, $order_id );
+		service_log( $log, $taxi_id, $order_id );
 
 		/*
 		 * Remove the "busy" flag since the driver has dismissed the
@@ -210,9 +210,7 @@ class taxi_orders
 		}
 
 		$taxi_id = $job_car->taxi_id;
-		$sid = get_taxi_service( $taxi_id );
-		logmsg( "Removing #$taxi_id from queues: important order declined.",
-			$sid, $taxi_id );
+		logmsg( "Removing #$taxi_id from queues: important order declined.", $taxi_id );
 		queue_remove( $taxi_id );
 		queue_unsave( $taxi_id );
 		self::warn_for_decline( $taxi_id );
@@ -249,7 +247,7 @@ class taxi_orders
 		$order_id = $message->data( 'order_id' );
 		$arrival_time = $message->data( 'arrival_time_m' );
 
-		logmsg( "#$taxi_id accepts order #$order_id", $user->sid, $user->id );
+		logmsg( "#$taxi_id accepts order #$order_id", $user->id );
 
 		if( !$order_id ) {
 			driver_error( $message->cid, "missing `order_id` field in accept-order" );
@@ -270,16 +268,16 @@ class taxi_orders
 		$message_data = array( 'order_id' => $order_id );
 		if( !self::assign( $taxi_id, $order_id, $arrival_time ) )
 		{
-			debmsg( "Could not assign order #$order_id to taxi #$taxi_id", $user->sid, $user->id );
+			debmsg( "Could not assign order #$order_id to taxi #$taxi_id", $user->id );
 			$m = new message( 'order-gone', $message_data );
 		}
 		else
 		{
-			logmsg( "Order #$order_id has been assigned to #$taxi_id", $user->sid, $user->id );
+			logmsg( "Order #$order_id has been assigned to #$taxi_id", $user->id );
 			$m = new message( 'order-accepted', $message_data );
 		}
 
-		service_log( $user->sid, '{t} принял {o}', $user->id, $order_id );
+		service_log( '{t} принял {o}', $user->id, $order_id );
 		return send_to_taxi( $taxi_id, $m );
 	}
 
@@ -304,7 +302,7 @@ class taxi_orders
 		 */
 		if( $order->taxi_id() )
 		{
-			debmsg( "Order #$order_id is already assigned to taxi #". $order->taxi_id(), $order->service_id(), $taxi_id );
+			debmsg( "Order #$order_id is already assigned to taxi #". $order->taxi_id(), $taxi_id );
 			return false;
 		}
 
@@ -330,7 +328,7 @@ class taxi_orders
 		$taxi_id = $user->id;
 		$order_id = $message->data( 'order_id' );
 
-		logmsg( "#$taxi_id has arrived for order #$order_id", $user->sid, $user->id );
+		logmsg( "#$taxi_id has arrived for order #$order_id", $user->id );
 		if( !self::driver_has_order( $taxi_id, $order_id ) ) {
 			driver_error( $message->cid, "#$taxi_id doesn't have order #$order_id" );
 			return false;
@@ -345,7 +343,7 @@ class taxi_orders
 		$taxi_id = $user->id;
 		$order_id = $message->data( 'order_id' );
 
-		logmsg( "#$taxi_id starts order #$order_id", $user->sid, $user->id );
+		logmsg( "#$taxi_id starts order #$order_id", $user->id );
 		if( !$order_id ) {
 			return false;
 		}
@@ -361,7 +359,7 @@ class taxi_orders
 			return false;
 		}
 
-		service_log( $user->sid, '{t} начал {o}, GPS: {p}',
+		service_log( '{t} начал {o}, GPS: {p}',
 			$user->id, $order_id, $user->id );
 		return true;
 	}
@@ -373,7 +371,7 @@ class taxi_orders
 		$price = $message->data('price');
 		$stats = $message->data( 'stats' );
 
-		logmsg( "#$taxi_id finishes order #$order_id", $user->sid, $user->id );
+		logmsg( "#$taxi_id finishes order #$order_id", $user->id );
 		if( !$order_id ) {
 			return false;
 		}
@@ -390,13 +388,13 @@ class taxi_orders
 			return false;
 		}
 
-		service_log( $user->sid, '{t} завершил {o}, {p}, цена {?} руб.',
+		service_log( '{t} завершил {o}, {p}, цена {?} руб.',
 			$user->id, $order_id, $user->id, $price );
 
 		/*
 		 * Mark customer as valid.
 		 */
-		if( service_setting( $user->sid, 'mark_customers' ) )
+		if( service_setting( 'mark_customers' ) )
 		{
 			$cid = $order->customer_id();
 			if( $cid ) {
@@ -463,7 +461,7 @@ class taxi_orders
 		$order_id = $message->data( 'order_id' );
 		$reason = alt( $message->data( 'reason' ), 'driver_cancel' );
 
-		logmsg( "#$taxi_id cancels order #$order_id (reason=$reason)", $user->sid, $user->id );
+		logmsg( "#$taxi_id cancels order #$order_id (reason=$reason)", $user->id );
 		if( !self::driver_has_order( $taxi_id, $order_id ) ) {
 			driver_error( $message->cid, "Taxi #$taxi_id doesn't have order #$order_id" );
 			return false;
@@ -476,7 +474,7 @@ class taxi_orders
 		 * it again.
 		 */
 		if( $order->published() && self::is_postponed( $order ) ) {
-			logmsg( "#$taxi_id returns postponed order #$order_id", $user->sid, $user->id );
+			logmsg( "#$taxi_id returns postponed order #$order_id", $user->id );
 			return self::return_postponed_order( $order, $taxi_id );
 		}
 
@@ -492,7 +490,7 @@ class taxi_orders
 		else if( $reason == 'bad_customer' ) {
 			$reason = 'неадекватный клиент';
 		}
-		service_log( $user->sid, '{t} отменил {o} ({?})',
+		service_log( '{t} отменил {o} ({?})',
 			$user->id, $order_id, $reason );
 
 		return true;
@@ -533,12 +531,12 @@ class taxi_orders
 		$started = $msg->data( 'started' );
 		$taxi_id = $user->id;
 
-		logmsg( "#$taxi_id creates a new order", $user->sid, $user->id );
+		logmsg( "#$taxi_id creates a new order", $user->id );
 
 		$error = '';
 		$order = self::create_taxi_order( $taxi_id, $started, $error );
 		if( !$order ) {
-			logmsg( "Order for #$taxi_id not created: $error", $user->sid, $user->id );
+			logmsg( "Order for #$taxi_id not created: $error", $user->id );
 			write_message( $msg->cid, new message( 'order-failed', array(
 				'req_id' => $req_id,
 				'reason' => $error
@@ -546,7 +544,7 @@ class taxi_orders
 			return false;
 		}
 
-		service_log( $user->sid, '{t} создал {O}', $taxi_id, $order );
+		service_log( '{t} создал {O}', $taxi_id, $order );
 
 		write_message( $msg->cid, new message( 'order-created', array(
 			'req_id' => $req_id,
@@ -560,9 +558,7 @@ class taxi_orders
 	 */
 	private static function create_taxi_order( $taxi_id, $start, &$error )
 	{
-		$sid = get_taxi_service( $taxi_id );
-
-		if( !service_setting( $sid, 'driver_orders' ) ) {
+		if( !service_setting( 'driver_orders' ) ) {
 			$error = 'disabled';
 			return null;
 		}
@@ -583,7 +579,6 @@ class taxi_orders
 		$car_id = driver_car_id( $taxi_id );
 
 		$order = new order();
-		$order->service_id( $sid );
 		$order->owner_id( $taxi_id );
 		$order->taxi_id( $taxi_id );
 		$order->car_id( $car_id );
@@ -612,7 +607,7 @@ class taxi_orders
 
 		if( !save_order( $order ) )
 		{
-			logmsg( "#$taxi_id: could not create the order", $user->sid, $taxi_id );
+			logmsg( "#$taxi_id: could not create the order", $taxi_id );
 			return null;
 		}
 
@@ -661,7 +656,6 @@ class taxi_orders
 	{
 		$taxi_id = $car->taxi_id;
 		$order_id = $order->id();
-		$sid = $order->service_id();
 
 		/*
 		 * Check that the driver will have enough time to decide.
@@ -669,7 +663,7 @@ class taxi_orders
 		$lag = get_taxi_lag( $taxi_id );
 		$lag = ceil( $lag / 1000 );
 		if( $timeout - $lag < 4 ) {
-			logmsg( "#$taxi_id has too big lag", $sid, $taxi_id );
+			logmsg( "#$taxi_id has too big lag", $taxi_id );
 			skip_taxi_sending( $order_id, $taxi_id, SKIP_OFFLINE );
 			return;
 		}
@@ -677,17 +671,17 @@ class taxi_orders
 		$importance = alt( $car->get_data( 'importance' ), 0 );
 		$distance = self::order_distance( $order, $taxi_id );
 		if( !$distance ) {
-			logmsg( "Could not get distance for #$taxi_id", $sid, $taxi_id );
+			logmsg( "Could not get distance for #$taxi_id", $taxi_id );
 		}
 
-		logmsg( "Sending order $order to #$taxi_id (lag=$lag ms, importance=$importance)", $sid, $taxi_id );
+		logmsg( "Sending order $order to #$taxi_id (lag=$lag ms, importance=$importance)", $taxi_id );
 
 		$msg->data( 'distance', $distance );
 		$msg->data( 'timeout', $timeout - $lag );
 		$msg->data( 'importance', $importance );
 
 		if( !send_to_taxi( $taxi_id, $msg ) ) {
-			logmsg( "Could not send to #$taxi_id", $sid, $taxi_id );
+			logmsg( "Could not send to #$taxi_id", $taxi_id );
 			skip_taxi_sending( $order_id, $taxi_id, SKIP_OFFLINE );
 			return;
 		}
@@ -704,8 +698,7 @@ class taxi_orders
 	{
 		$pos = get_taxi_position( $driver_id );
 		if( !$pos ) {
-			$sid = get_taxi_service( $driver_id );
-			logmsg( "No fresh position for #$driver_id", $sid, $driver_id );
+			logmsg( "No fresh position for #$driver_id", $driver_id );
 			return 0;
 		}
 

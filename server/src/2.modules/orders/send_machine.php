@@ -93,7 +93,7 @@ class send_machine
 		 */
 		$group = $squad->groups[ ++$squad->current_group ];
 		$group->finish_time = time() + $group->timeout;
-		announce_event( null, EV_ORDER_SQUAD,
+		announce_event( EV_ORDER_SQUAD,
 			array( 'job' => $squad ) );
 
 		/*
@@ -180,7 +180,7 @@ class send_machine
 		/*
 		 * Announce the event and remove the job
 		 */
-		announce_event( null, EV_SENDING_FINISHED,
+		announce_event( EV_SENDING_FINISHED,
 			array( 'job' => $job->squad ) );
 		$f = $job->finish_callback;
 		$f( $job->order );

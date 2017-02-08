@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', 'on');
 define( 'APPLICATION_PATH', __DIR__ );
 define( "LIBS_DIR", APPLICATION_PATH."/libs/" );
 
@@ -21,11 +22,7 @@ lib( 'str' );
 
 require __DIR__.'/vendor/autoload.php';
 
-function sid() {
-	return user::get_data( 'service_id' );
-}
-
-function disp_cmd( $disp_id, $sid, $cmd, $data, &$err )
+function disp_cmd( $disp_id, $cmd, $data, &$err )
 {
 	$err = null;
 
@@ -36,7 +33,7 @@ function disp_cmd( $disp_id, $sid, $cmd, $data, &$err )
 		$err = 'Could not connect';
 		return false;
 	}
-	if( !$client->login( $disp_id, $sid ) ) {
+	if( !$client->login( $disp_id ) ) {
 		$err = 'Could not login';
 		return false;
 	}

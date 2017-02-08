@@ -20,11 +20,10 @@ class service_settings
 		'phrases_dispatcher' => ''
 	);
 
-	static function get_settings( $service_id )
+	static function get_settings()
 	{
 		$a = DB::getRecords( "SELECT name, value
-			FROM taxi_service_settings
-			WHERE service_id = %d", $service_id );
+			FROM taxi_service_settings" );
 		$s = array_column( $a, 'value', 'name' );
 		foreach( self::$defaults as $k => $v ) {
 			if( !array_key_exists( $k, $s ) ) {
@@ -34,13 +33,11 @@ class service_settings
 		return $s;
 	}
 
-	static function get_value( $service_id, $key )
+	static function get_value( $key )
 	{
 		$val = DB::getValue( "SELECT value
 			FROM taxi_service_settings
-			WHERE service_id = %d
-				AND name = '%s'",
-			$service_id, $key
+			WHERE name = '%s'", $key
 		);
 		if( $val === null && isset( self::$defaults[$key] ) ) {
 			$val = self::$defaults[$key];
@@ -48,28 +45,24 @@ class service_settings
 		return $val;
 	}
 
-	static function set_value( $service_id, $key, $value )
+	static function set_value( $key, $value )
 	{
 		DB::exec( "START TRANSACTION" );
 		DB::exec( "DELETE FROM taxi_service_settings
-			WHERE service_id = %d
-			AND name = '%s'", $service_id, $key );
+			WHERE name = '%s'", $key );
 		DB::insertRecord( 'taxi_service_settings', array(
-			'service_id' => $service_id,
 			'name' => $key,
 			'value' => $value
 		));
 		DB::exec( "COMMIT" );
 	}
 
-	static function save( $service_id, $settings )
+	static function save( $settings )
 	{
 		DB::exec( "START TRANSACTION" );
-		DB::exec( "DELETE FROM taxi_service_settings
-			WHERE service_id = %d", $service_id );
+		DB::exec( "DELETE FROM taxi_service_settings" );
 		foreach( $settings as $k => $v ) {
 			DB::insertRecord( 'taxi_service_settings', array(
-				'service_id' => $service_id,
 				'name' => $k,
 				'value' => $v
 			));
@@ -77,14 +70,9 @@ class service_settings
 		DB::exec( "COMMIT" );
 	}
 
-	static function config( $sid, $name )
+	static function config( $name )
 	{
-		if( preg_match( '/[^a-z_]/', $name, $m ) ) {
-			error( "Invalid service option name: $name" );
-			return 0;
-		}
-		return DB::getValue( "SELECT $name FROM taxi_services
-			WHERE service_id = %d", $sid );
+		trigger_error("service_settings::config is a stub");
 	}
 }
 

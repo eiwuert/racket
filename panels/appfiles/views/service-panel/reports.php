@@ -3,9 +3,7 @@
 <h1>Отчёты</h1>
 
 <?php
-$service_id = sid();
-
-$reports = available_reports( $service_id );
+$reports = list_reports('all');
 ?><ul><?php
 foreach( $reports as $r )
 {
@@ -16,18 +14,6 @@ foreach( $reports as $r )
 ?>
 </ul>
 <?php
-
-function available_reports( $sid )
-{
-	$service_name = DB::getValue( "
-		SELECT inner_name FROM taxi_services
-		WHERE service_id = %d", $sid );
-
-	return array_merge(
-		list_reports( 'all' ),
-		list_reports( $service_name )
-	);
-}
 
 function list_reports( $dirname )
 {

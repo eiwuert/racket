@@ -5,11 +5,11 @@ init( function()
 	$NS = 'taxi_base_queues::';
 	create_cache( 'queue_report_time' );
 
-	listen_events( null, EV_QUEUE_CHANGE, $NS.'ev_queue_change' );
-	listen_events( null, EV_ORDER_ASSIGNED, $NS.'ev_order_assigned' );
-	listen_events( null, EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
-	listen_events( null, EV_SESSION_CLOSED, $NS.'ev_session_closed' );
-	listen_events( null, EV_TAXI_BANNED, $NS.'ev_taxi_banned' );
+	listen_events( EV_QUEUE_CHANGE, $NS.'ev_queue_change' );
+	listen_events( EV_ORDER_ASSIGNED, $NS.'ev_order_assigned' );
+	listen_events( EV_ORDER_CANCELLED, $NS.'ev_order_cancelled' );
+	listen_events( EV_SESSION_CLOSED, $NS.'ev_session_closed' );
+	listen_events( EV_TAXI_BANNED, $NS.'ev_taxi_banned' );
 	add_cmdfunc( T_TAXI, 'taxi-login', $NS.'msg_taxi_login_q' );
 	add_cmdfunc( T_TAXI, 'set-checkpoint', $NS.'msg_set_checkpoint' );
 	add_cmdfunc( T_TAXI, 'update-checkpoints', $NS.'msg_update_checkpoints' );
@@ -63,8 +63,7 @@ class taxi_base_queues
 		if( !queue_save( $taxi_id, 'order' ) ) {
 			return;
 		}
-		logmsg( "Removing #$taxi_id due to assigned order",
-			$event->sid, $taxi_id );
+		logmsg( "Removing #$taxi_id due to assigned order", $taxi_id );
 		queue_remove( $taxi_id );
 	}
 
@@ -72,7 +71,7 @@ class taxi_base_queues
 	{
 		$order = $event->data['order'];
 		$taxi_id = $order->taxi_id();
-		if( !service_setting( $event->sid, 'restore_queues' ) ) {
+		if( !service_setting( 'restore_queues' ) ) {
 			return;
 		}
 
@@ -81,10 +80,9 @@ class taxi_base_queues
 			return;
 		}
 
-		logmsg( "Restoring queue position ($reason)",
-				$event->sid, $taxi_id );
+		logmsg( "Restoring queue position ($reason)", $taxi_id );
 		if( queue_restore( $taxi_id, 'order' ) ) {
-			service_log( $event->sid, 'Позиция {t`я} в очереди восстановлена.', $taxi_id );
+			service_log( 'Позиция {t`я} в очереди восстановлена.', $taxi_id );
 		}
 	}
 
@@ -165,7 +163,7 @@ class taxi_base_queues
 
 		if( session_needed( $taxi_id ) ) {
 			logmsg( "Denied set-checkpoint for #$taxi_id: no open session.",
-				$user->sid, $taxi_id );
+				$taxi_id );
 			send_text_to_taxi( $taxi_id, "У вас не открыта смена." );
 		}
 
@@ -178,7 +176,7 @@ class taxi_base_queues
 			return false;
 		}
 
-		logmsg( "#$taxi_id pushes to q#$qid", $user->sid, $user->id );
+		logmsg( "#$taxi_id pushes to q#$qid", $user->id );
 
 		if( !queue_push( $taxi_id, $qid ) ) {
 			driver_error( $message->cid, "#$taxi_id: no access to queue #$qid" );
@@ -192,20 +190,19 @@ class taxi_base_queues
 		queue_unsave( $taxi_id );
 
 		$name = queue_name( $qid );
-		service_log( $user->sid, '{t} записывается в очередь «'.$name.'»', $taxi_id );
+		service_log( '{t} записывается в очередь «'.$name.'»', $taxi_id );
 	}
 
 	private static function queue_withdraw( $user )
 	{
 		$taxi_id = $user->id;
-		logmsg( "#$taxi_id withdraws from queues",
-			$user->sid, $user->id );
+		logmsg( "#$taxi_id withdraws from queues", $user->id );
 		queue_unsave( $taxi_id );
 
 		$pos = get_queue_position( $taxi_id );
 		if( $pos ) {
 			$name = queue_name( $pos->qid );
-			service_log( $user->sid, '{t} уходит из очереди «'.$name.'»', $taxi_id );
+			service_log( '{t} уходит из очереди «'.$name.'»', $taxi_id );
 		}
 		queue_remove( $taxi_id );
 	}
@@ -220,7 +217,6 @@ class taxi_base_queues
 	static function msg_update_checkpoints( $message, $user )
 	{
 		$taxi_id = $user->id;
-		$sid = $user->sid;
 
 		$counts = DB::getRecords("
 			SELECT

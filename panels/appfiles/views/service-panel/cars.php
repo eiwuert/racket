@@ -5,7 +5,6 @@ require_script( 'res/service/pages.js?page=cars' );
 ?>
 
 <?php
-$service_id = sid();
 $cars = DB::getRecords("
 	SELECT
 		c.car_id,
@@ -19,15 +18,14 @@ $cars = DB::getRecords("
 		acc.call_id AS driver_call_id,
 		g.name AS group_name
 	FROM taxi_cars c
-	JOIN taxi_car_groups g USING (service_id, group_id)
+	JOIN taxi_car_groups g USING (group_id)
 	LEFT JOIN taxi_drivers d ON c.car_id = d.car_id
 	LEFT JOIN taxi_accounts acc USING (acc_id)
-	WHERE c.service_id = %d
-	AND c.deleted = 0
-	ORDER BY c.name", $service_id
+	WHERE c.deleted = 0
+	ORDER BY c.name"
 );
 
-$groups = taxi::parks( $service_id );
+$groups = taxi::parks();
 foreach( $groups as $i => $group )
 {
 	$groups[$i]['table'] = new table( array(
