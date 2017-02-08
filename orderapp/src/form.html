@@ -1,0 +1,21 @@
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<h2>New Order</h2>
+	</div>
+</md-toolbar>
+
+<md-content layout-padding>
+	<md-input-container>
+		<label>Street</label>
+		<input type="text" ng-model="street" required>
+	</md-input-container>
+	<md-input-container>
+		<label>House</label>
+		<input type="text" ng-model="house" required>
+	</md-input-container>
+	<div>
+		<md-button class="md-raised md-primary"
+			ng-disabled="!valid() && !wait"
+			ng-click="order()">{{wait ? 'Sending...' : 'Order'}}</md-button>
+	</div>
+</md-content>

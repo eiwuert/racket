@@ -1,0 +1,22 @@
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<h2>Registration</h2>
+	</div>
+</md-toolbar>
+
+<md-content layout-padding>
+	<md-input-container>
+		<label>Name</label>
+		<input type="text" required ng-model="name">
+	</md-input-container>
+	<md-input-container>
+		<label>Phone</label>
+		<input type="tel" required ng-model="phone">
+	</md-input-container>
+	<p ng-show="!valid()">Both fields are required</p>
+	<div>
+		<md-button class="md-raised md-primary"
+			ng-disabled="!valid() && !wait"
+			ng-click="login()">{{wait ? 'Logging in...' : 'Log in' }}</md-button>
+	</div>
+</md-content>

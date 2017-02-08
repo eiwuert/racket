@@ -1,0 +1,21 @@
+{
+  "name": "mo",
+  "description": "Why should Bower care?",
+  "main": "index.html",
+  "license": "GPL",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.6.2",
+    "angular-material": "^1.1.3",
+    "angular-route": "^1.6.2",
+    "font-roboto": "^0.0.2"
+  }
+}

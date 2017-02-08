@@ -1,0 +1,34 @@
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<h2>Order Status</h2>
+	</div>
+</md-toolbar>
+
+<md-content layout-padding>
+	<p ng-show="!order">No current order</p>
+
+	<dl ng-show="order">
+		<dt>Status</dt>
+		<dd>{{order.status}}</dd>
+	</dl>
+	<md-progress-circular
+		ng-show="order && !order.status == order.WAITING"
+		md-mode="indeterminate"></md-progress-circular>
+	<dl ng-show="order.driver">
+		<dt>Driver</dt>
+		<dd>{{order.driver.name}}</dd>
+		<dt>Car</dt>
+		<dd>{{order.car.color}} {{order.car.name}}, {{order.car.plate}}</dd>
+	</dl>
+
+	<md-button class="md-accent md-raised"
+		ng-show="canCancel()"
+		ng-click="cancel()">
+			{{cancelling ? 'Cancelling...' : 'Cancel the Order'}}
+	</md-button>
+	<md-button
+		ng-show="!order || !order.current()"
+		ng-click="goBack()">
+			Go back
+	</md-button>
+</md-content>
