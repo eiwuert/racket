@@ -1,3 +1,5 @@
+const destinationDir = '../www/res/dispatcher';
+
 var gulp = require('gulp'),
 	rollup = require('gulp-better-rollup'),
 	babel = require('rollup-plugin-babel'),
@@ -13,5 +15,15 @@ gulp.task('default', function() {
 	gulp.src('src/main.js')
 	.pipe(comp)
 	.pipe(browserify())
-	.pipe(gulp.dest('../www/res/dispatcher'));
+	.pipe(gulp.dest(destinationDir));
+});
+
+/*
+ * Build the CSS file in the webdir
+ */
+var less = require('gulp-less');
+gulp.task('css', function() {
+	gulp.src('dispatcher.less')
+		.pipe(less())
+		.pipe(gulp.dest(destinationDir));
 });
