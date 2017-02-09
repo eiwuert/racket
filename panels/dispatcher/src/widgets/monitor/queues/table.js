@@ -1,6 +1,6 @@
-import romanNumeral from '../../../../lib/roman.js';
+import romanNumeral from '../../../lib/roman.js';
 import initDrag from './initDrag.js';
-import Listeners from '../../../../lib/listeners.js';
+import Listeners from '../../../lib/listeners.js';
 
 export default function QueuesWidgetTable( disp, items )
 {

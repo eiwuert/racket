@@ -1,4 +1,4 @@
-import {formatNumber} from '../../lib/format.js';
+import {formatNumber} from '../lib/format.js';
 import MapC from './map.js';
 import AddressInput from './address-input.js';
 

@@ -1,6 +1,6 @@
-import sounds from '../../lib/sounds.js';
-import toast from '../../lib/toast.js';
-import Dialog from '../../lib/dialog.js';
+import sounds from '../lib/sounds.js';
+import toast from '../lib/toast.js';
+import Dialog from '../lib/dialog.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');

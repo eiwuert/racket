@@ -1,4 +1,4 @@
-import geo from '../../../../lib/geo.js';
+import geo from '../../../lib/geo.js';
 var _ = require('underscore');
 
 export default function QueuesWidgetItems( disp )

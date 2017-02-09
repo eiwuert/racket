@@ -1,7 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import {formatDateTime, formatPhone} from '../../lib/format.js';
+import {formatDateTime, formatPhone} from '../lib/format.js';
 
 export default class OrdersTable extends React.Component {
 	constructor(props) {

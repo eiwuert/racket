@@ -1,7 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import sounds from '../../lib/sounds.js';
+import sounds from '../lib/sounds.js';
 import Dialog from './dialog.js';
 
 export default class SessionRequestDialog extends React.Component {

@@ -1,4 +1,4 @@
-import {fmt} from '../../../lib/fmt.js';
+import {fmt} from '../../lib/fmt.js';
 
 var React = require('react');
 var ReactDOM = require('react-dom');

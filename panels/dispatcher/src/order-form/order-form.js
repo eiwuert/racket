@@ -1,6 +1,6 @@
 export default OrderForm;
 
-import Listeners from '../../lib/listeners.js';
+import Listeners from '../lib/listeners.js';
 import Form from '../components/order-form/form.js';
 
 var React = require('react');

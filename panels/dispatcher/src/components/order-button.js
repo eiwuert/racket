@@ -2,7 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import orderForms from '../order-form/forms.js';
-import hotkeys from '../../lib/hotkeys.js';
+import hotkeys from '../lib/hotkeys.js';
 
 export default class OrderButton extends React.Component {
 	componentDidMount() {

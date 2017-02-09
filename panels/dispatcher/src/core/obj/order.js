@@ -1,4 +1,4 @@
-import {fmt} from '../../../lib/fmt.js';
+import {fmt} from '../../lib/fmt.js';
 
 export default function Order( data )
 {

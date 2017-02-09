@@ -1,9 +1,9 @@
 export default ChatDialog;
 
-import {formatTime} from '../../lib/format.js';
-import {fmt, tpl} from '../../lib/fmt.js';
-import html from '../../lib/html.js';
-import Dialog from '../../lib/dialog.js';
+import {formatTime} from '../lib/format.js';
+import {fmt, tpl} from '../lib/fmt.js';
+import html from '../lib/html.js';
+import Dialog from '../lib/dialog.js';
 
 var ChatDialog = ( function() {
 

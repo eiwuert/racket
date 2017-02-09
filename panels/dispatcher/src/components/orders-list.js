@@ -1,5 +1,5 @@
-import {formatPhone} from '../../lib/format.js';
-import {fmt} from '../../lib/fmt.js';
+import {formatPhone} from '../lib/format.js';
+import {fmt} from '../lib/fmt.js';
 import CancelOrderDialog from './cancel-order-dialog.js';
 var React = require('react');
 var ReactDOM = require('react-dom');

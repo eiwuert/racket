@@ -2,8 +2,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import Dialog from './dialog.js';
-import sounds from '../../lib/sounds.js';
-import {formatTime, formatSeconds} from '../../lib/format.js';
+import sounds from '../lib/sounds.js';
+import {formatTime, formatSeconds} from '../lib/format.js';
 import orderForms from '../order-form/forms.js';
 
 export default class OrderReminderDialog extends React.Component {

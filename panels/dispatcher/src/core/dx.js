@@ -1,4 +1,4 @@
-import http from '../../lib/http.js';
+import http from '../lib/http.js';
 
 export default function DX( baseUrl )
 {

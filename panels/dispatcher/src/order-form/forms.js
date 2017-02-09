@@ -1,9 +1,9 @@
 export default orderForms;
 
 import OrderForm from './order-form.js';
-import toast from '../../lib/toast.js';
-import Dialog from '../../lib/dialog.js';
-import Layers from '../../lib/layers.js';
+import toast from '../lib/toast.js';
+import Dialog from '../lib/dialog.js';
+import Layers from '../lib/layers.js';
 
 var orderForms = (function() {
 

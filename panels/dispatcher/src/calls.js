@@ -1,8 +1,8 @@
 import orderForms from './order-form/forms.js';
-import toast from '../lib/toast.js';
-import {formatTime} from '../lib/format.js';
-import {fmt} from '../lib/fmt.js';
-import Dialog from '../lib/dialog.js';
+import toast from './lib/toast.js';
+import {formatTime} from './lib/format.js';
+import {fmt} from './lib/fmt.js';
+import Dialog from './lib/dialog.js';
 
 export default function initCalls( disp )
 {

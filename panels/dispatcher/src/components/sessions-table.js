@@ -1,4 +1,4 @@
-import {formatDateTime} from '../../lib/format.js';
+import {formatDateTime} from '../lib/format.js';
 import Dialog from './dialog.js';
 var React = require('react');
 var ReactDOM = require('react-dom');

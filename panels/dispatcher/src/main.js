@@ -1,6 +1,6 @@
-import '../lib/autocomplete.js';
-import '../lib/mapdata.js';
-import '../lib/html5.js';
+import './lib/autocomplete.js';
+import './lib/mapdata.js';
+import './lib/html5.js';
 import DX from './dx.js';
 
 import './core/disp.js';

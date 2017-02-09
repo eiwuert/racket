@@ -1,6 +1,6 @@
-import toast from '../../../../lib/toast.js';
-import {fmt} from '../../../../lib/fmt.js';
-import Dialog from '../../../../lib/dialog.js';
+import toast from '../../../lib/toast.js';
+import {fmt} from '../../../lib/fmt.js';
+import Dialog from '../../../lib/dialog.js';
 import orderForms from '../../../order-form/forms.js';
 
 export default function initQueueClicking( disp, table, listeners )

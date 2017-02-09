@@ -1,5 +1,5 @@
-import toast from '../../../../lib/toast.js';
-import Dialog from '../../../../lib/dialog.js';
+import toast from '../../../lib/toast.js';
+import Dialog from '../../../lib/dialog.js';
 
 export default function initQueueDragging( disp, table )
 {

@@ -1,5 +1,5 @@
 import ChatDialog from './chat-dialog.js';
-import sounds from '../../lib/sounds.js';
+import sounds from '../lib/sounds.js';
 
 export default function initChat( disp, qw )
 {

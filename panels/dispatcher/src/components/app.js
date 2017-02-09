@@ -1,5 +1,5 @@
 import initCalls from '../calls.js';
-import Dialog from '../../lib/dialog.js';
+import Dialog from '../lib/dialog.js';
 
 import OrderButton from './order-button.js';
 import OrdersList from './orders-list.js';
