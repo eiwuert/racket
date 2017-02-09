@@ -1,5 +1,6 @@
 import Listeners from '../lib/listeners.js';
 import Connection from './connection.js';
+import DX from './dx.js';
 import time from './time.js';
 
 import initSettings from './settings.js';
@@ -56,10 +57,12 @@ function DispatcherClient()
 	var _this = this;
 	var data = null;
 
+	this.dx = new DX(url);
+
 	/*
 	 * Initialize the connection with the server.
 	 */
-	var conn = new Connection();
+	var conn = new Connection(this.dx);
 	conn.onMessage( 'init', init );
 	conn.onMessage( 'error', function( msg ) {
 		listeners.call( "connection-error", msg.data );
@@ -67,7 +70,7 @@ function DispatcherClient()
 	conn.onMessage( 'sync', function( msg ) {
 		listeners.call( "sync" );
 	});
-	conn.open( url );
+	conn.open();
 
 	function init( msg )
 	{

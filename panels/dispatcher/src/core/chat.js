@@ -13,7 +13,7 @@ export default function initChat( conn, listeners, data )
 
 	this.getChatMessages = function( driverId, from, to )
 	{
-		return conn.dx().get( "chat-messages", {
+		return disp.dx().get( "chat-messages", {
 			driver_id: driverId,
 			from: from,
 			to: to

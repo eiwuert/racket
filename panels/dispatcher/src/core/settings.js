@@ -2,6 +2,7 @@ import obj from '../lib/obj.js';
 
 export default function initSettings( conn, listeners, data )
 {
+	var disp = this;
 	var settings = {};
 
 	try {
@@ -22,6 +23,6 @@ export default function initSettings( conn, listeners, data )
 	};
 
 	this.saveSettings = function() {
-		return conn.dx().post( 'prefs', {prefs: JSON.stringify( settings )} );
+		return this.dx().post( 'prefs', {prefs: JSON.stringify( settings )} );
 	};
 }

@@ -1,13 +1,9 @@
 export default Connection;
 
-import DX from './dx.js';
-
-function Connection()
+function Connection(dx)
 {
 	var messageFunctions = {};
 	var ready = false;
-	var pref;
-	var dx;
 	var PERIOD = 3000;
 
 	var channel = {
@@ -20,14 +16,10 @@ function Connection()
 	this.RTT = function() { return dx.RTT(); };
 
 	/*
-	 * Open the connection. The URL argument specifies the prefix for
-	 * DX requests.
+	 * Open the connection.
 	 */
-	this.open = function( url )
+	this.open = function()
 	{
-		pref = url;
-		dx = new DX( url );
-
 		/*
 		 * Get the initial data packet that describes all current
 		 * state of the service, and emit it as an init message.
@@ -140,7 +132,7 @@ function Connection()
 			}
 			return messages;
 		})
-		.then( processMessages )
+		.then( processMessages );
 	}
 
 	function processMessages( messages )

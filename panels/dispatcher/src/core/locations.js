@@ -3,6 +3,7 @@ import obj from '../lib/obj.js';
 
 export default function initLocations( conn, listeners, data )
 {
+	var disp = this;
 	var locations = {};
 
 	data.queue_locations.forEach( function( d ) {
@@ -28,6 +29,6 @@ export default function initLocations( conn, listeners, data )
 	};
 
 	this.suggestLocations = function( term ) {
-		return conn.dx().get( "locations", {term: term} );
+		return disp.dx().get( "locations", {term: term} );
 	};
 }
