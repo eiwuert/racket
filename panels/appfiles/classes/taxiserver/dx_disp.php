@@ -279,7 +279,7 @@ class dx_disp
 		return $orders;
 	}
 
-	static function queues_snapshot( $acc_id )
+	static function queues_snapshot()
 	{
 		$q = "
 			SELECT queue_id, driver_id, pos

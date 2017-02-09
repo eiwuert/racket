@@ -3,6 +3,21 @@ lib( 'cast' );
 dx::init( function()
 {
 	$arg = argv(1);
+
+	if($arg == 'token') {
+		dx::output(q_token());
+		return;
+	}
+
+	/*
+	 * Determine the dispatcher's account from the token.
+	 */
+	$token = vars::get('token');
+	$acc_id = taxi_accounts::check_token($token, 'dispatcher');
+	if(!$acc_id) {
+		return dx::error("Missing or invalid token");
+	}
+
 	$list = array(
 		'car-position',
 		'channel-updates',
@@ -24,16 +39,24 @@ dx::init( function()
 		return dx::error( "Unknown request" );
 	}
 
-	$type = user::get_type();
-	if( $type != 'dispatcher' ) {
-		return dx::error( "Unauthorised" );
-	}
-	$arg = str_replace( '-', '_', $arg );
-	$func = "q_$arg";
-	dx::output( $func() );
+	$func = 'q_'.str_replace( '-', '_', $arg );
+	dx::output( $func($acc_id) );
 });
 
 //--
+
+/*
+ * Currently the API access is implicit based on the session
+ * data that is set after the login action. To move the API
+ * to token-based access we have to obtain the token, which is
+ * the purpose of this "temporary" query.
+ */
+function q_token()
+{
+	$acc_id = intval( user::get_id() );
+	$token = taxi_accounts::new_token($acc_id);
+	return ['token' => $token];
+}
 
 function q_chat_messages()
 {
@@ -46,15 +69,8 @@ function q_chat_messages()
 	return dx_disp::chat_messages( $driver_id, $from, $to );
 }
 
-function q_cmd()
+function q_cmd($acc_id)
 {
-	$id = user::get_id();
-	$type = user::get_type();
-
-	if( $type != 'dispatcher' ) {
-		return dx::error( 'Forbidden' );
-	}
-
 	$cmd = vars::post( 'cmd' );
 	$datastr = alt( vars::post( 'data' ), '{}' );
 	if( !$cmd ) {
@@ -62,7 +78,8 @@ function q_cmd()
 	}
 	$data = json_decode( $datastr, true );
 
-	if( !disp_cmd( $id, $cmd, $data, $err ) ) {
+	$err = null;
+	if( !disp_cmd( $acc_id, $cmd, $data, $err ) ) {
 		return dx::error( $err );
 	}
 	return null; // ok
@@ -104,20 +121,19 @@ function q_locations()
  * When starting, the dispatcher client will have to receive much data
  * to work with.
  */
-function q_init()
+function q_init($acc_id)
 {
-	$acc_id = intval( user::get_id() );
 	$init = array();
 
 	/*
 	 * Who am I
 	 */
 	$init['who'] = array(
-		'type' => user::get_type(),
-		'login' => user::get_login(),
+		'type' => 'dispatcher',
+		'login' => '',
 		'id' => $acc_id,
 		'settings' => DB::getValue( "SELECT prefs FROM taxi_accounts
-			WHERE acc_id = %d", user::get_id() )
+			WHERE acc_id = %d", $acc_id )
 	);
 
 	/*
@@ -279,22 +295,20 @@ function q_ping()
 	);
 }
 
-function q_prefs()
+function q_prefs($acc_id)
 {
 	if( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
 		return dx::error( "Must be POST" );
 	}
 
-	$id = user::get_id();
 	$prefs = vars::post( 'prefs' );
 	DB::exec( "UPDATE taxi_accounts
 		SET prefs = '%s'
-		WHERE acc_id = %d", $prefs, $id );
+		WHERE acc_id = %d", $prefs, $acc_id );
 }
 
-function q_channel_updates()
+function q_channel_updates($acc_id)
 {
-	$acc_id = user::get_id();
 	$seq = Vars::get( 'last-message-id' );
 	$messages = channels::get_messages( $acc_id, $seq );
 	return $messages;
@@ -305,8 +319,7 @@ function q_channel_updates()
  */
 function q_queues_snapshot()
 {
-	$acc_id = user::get_id();
-	return dx_disp::queues_snapshot( $acc_id );
+	return dx_disp::queues_snapshot();
 }
 
 /*

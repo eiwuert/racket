@@ -10,19 +10,20 @@ export default function DX( baseUrl )
 
 	this.RTT = function() { return rtt; }
 
-	this.get = function( path, args )
+	this.get = function( path, args = {} )
 	{
+		args.token = this.token;
 		var url = baseUrl + '/' + path;
-		if( args ) {
-			url += argString( args );
-		}
+		url += argString( args );
 		t = Date.now();
 		return http.get( url ).then( check );
 	};
 
 	this.post = function( path, data )
 	{
+		var args = {token: this.token};
 		var url = baseUrl + '/' + path;
+		url += argString(args);
 		t = Date.now();
 		return http.post( url, data ).then( check );
 	};

@@ -59,9 +59,6 @@ function DispatcherClient()
 
 	this.dx = new DX(url);
 
-	/*
-	 * Initialize the connection with the server.
-	 */
 	var conn = new Connection(this.dx);
 	conn.onMessage( 'init', init );
 	conn.onMessage( 'error', function( msg ) {
@@ -70,7 +67,18 @@ function DispatcherClient()
 	conn.onMessage( 'sync', function( msg ) {
 		listeners.call( "sync" );
 	});
-	conn.open();
+
+	/*
+	 * Get a token, then start messaging.
+	 */
+	this.dx.get('token')
+		.then(response => {
+			this.dx.token = response.token;
+			conn.open();
+		})
+		.catch(function(error) {
+			alert("Could not obtain a session token: " + error);
+		});
 
 	function init( msg )
 	{
