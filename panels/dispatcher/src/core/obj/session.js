@@ -1,4 +1,4 @@
-import {assertObj} from '../../lib/assert.js';
+import {assertObj} from '../../../lib/assert.js';
 
 export default function Session( data )
 {

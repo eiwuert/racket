@@ -1,5 +1,5 @@
 import Location from './obj/location.js';
-import obj from '../lib/obj.js';
+import obj from '../../lib/obj.js';
 
 export default function initLocations( conn, listeners, data )
 {

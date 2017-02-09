@@ -1,4 +1,4 @@
-import Listeners from '../lib/listeners.js';
+import Listeners from '../../lib/listeners.js';
 import Connection from './connection.js';
 import time from './time.js';
 

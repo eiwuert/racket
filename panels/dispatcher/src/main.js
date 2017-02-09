@@ -3,6 +3,8 @@ import '../lib/mapdata.js';
 import '../lib/html5.js';
 import DX from './dx.js';
 
+import './core/disp.js';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 

@@ -1,6 +1,6 @@
 import Queue from './obj/queue.js';
-import obj from '../lib/obj.js';
-import same from '../lib/same.js';
+import obj from '../../lib/obj.js';
+import same from '../../lib/same.js';
 
 export default function initQueues( conn, listeners, data )
 {

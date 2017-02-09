@@ -1,4 +1,4 @@
-import {assertObj} from '../../lib/assert.js';
+import {assertObj} from '../../../lib/assert.js';
 import time from '../time.js';
 
 export default function Driver( data )

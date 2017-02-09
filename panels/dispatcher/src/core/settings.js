@@ -1,4 +1,4 @@
-import obj from '../lib/obj.js';
+import obj from '../../lib/obj.js';
 
 export default function initSettings( conn, listeners, data )
 {

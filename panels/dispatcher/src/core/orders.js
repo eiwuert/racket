@@ -1,7 +1,7 @@
 import Order from './obj/order.js';
-import obj from '../lib/obj.js';
+import obj from '../../lib/obj.js';
 import time from './time.js';
-import {assertObj} from '../lib/assert.js';
+import {assertObj} from '../../lib/assert.js';
 
 export default function initOrders( conn, listeners, data )
 {
