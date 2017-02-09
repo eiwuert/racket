@@ -20,7 +20,7 @@ function main()
 		return dx::error( 'Missing token' );
 	}
 
-	$acc_id = taxi_accounts::check_token( $tok );
+	$acc_id = taxi_accounts::check_token( $tok, 'driver' );
 	if( !$acc_id ) {
 		return dx::error( 'Invalid token' );
 	}

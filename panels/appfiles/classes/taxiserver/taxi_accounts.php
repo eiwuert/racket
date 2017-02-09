@@ -91,11 +91,11 @@ class taxi_accounts
 	/*
 	 * Returns acc_id or null.
 	 */
-	static function check_token( $token )
+	static function check_token( $token, $account_type )
 	{
 		return DB::getValue( "SELECT acc_id FROM ".self::T."
-			WHERE token = '%s'
-			AND token_expires > NOW()", $token );
+			WHERE token = '%s' AND `type` = '%s'
+			AND token_expires > NOW()", $token, $account_type );
 	}
 
 	/*
