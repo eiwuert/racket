@@ -1,24 +1,23 @@
-<?php
-$CAR_ICON_WIDTH = 50;
-$CAR_ICON_HEIGHT = 20;
-$TABLE_CARS_NUMBER = 20;
-$high_blue = 'powderblue';
-$high_red = '#f66';
-$back_red = '#c66';
-$border_gray = '#bbb';
-$face_gray = '#f6f6f6';
-?>
+@CAR_ICON_WIDTH: 50px;
+@CAR_ICON_HEIGHT: 20px;
+@TABLE_CARS_NUMBER: 20;
+@high_blue: powderblue;
+@high_red: #f66;
+@back_red: #c66;
+@border_gray: #bbb;
+@face_gray: #f6f6f6;
+
 
 .queues-table {
 	border-spacing: 0;
-	border-top: thin solid <?= $border_gray ?>;
-	border-left: thin solid <?= $border_gray ?>;
-	width: <?= (5 + 180 + $TABLE_CARS_NUMBER*($CAR_ICON_WIDTH + 1) ) ?>px;
+	border-top: thin solid @border_gray;
+	border-left: thin solid @border_gray;
+	width: (5px + 180px + @TABLE_CARS_NUMBER*(@CAR_ICON_WIDTH + 1px));
 	margin-top: 5px;
 }
 
 .queues-table.dragging td + td.hover {
-	background-color: <?= $high_blue ?>;
+	background-color: @high_blue;
 }
 
 .queues-table.dragging {
@@ -31,12 +30,12 @@ $face_gray = '#f6f6f6';
 	border-bottom: 1px solid black;
 	border-right: 1px solid black;
 	height: 20px;
-	width: <?= $CAR_ICON_WIDTH ?>px;
+	width: @CAR_ICON_WIDTH;
 	text-align: center;
 }
 
 .queues-table th {
-	background-color: <?= $face_gray ?>;
+	background-color: @face_gray;
 	padding: 6px;
 	border-bottom: 1px solid black;
 }
@@ -86,20 +85,21 @@ $face_gray = '#f6f6f6';
 .queues-table .car {
 	display: block;
 	cursor: pointer;
-	width: <?= $CAR_ICON_WIDTH ?>px;
-	height: <?= $CAR_ICON_HEIGHT ?>px;
+	width: @CAR_ICON_WIDTH;
+	height: @CAR_ICON_HEIGHT;
 	padding: 0;
 	position: relative;
 }
 
-<?php
-$types = array( "sedan", "hatchback", "estate", "minivan", "bus" );
-foreach( $types as $i => $type ): ?>
-.queues-table .<?= $type ?> {
-	background-position: 0 -<?= ($CAR_ICON_HEIGHT * $i) ?>px;
+.-icon-style(@list, @i: 1) when(@i <= length(@list)) {
+	@sel: extract(@list, @i);
+	.queues-table .@{sel} {
+		background-position: 0px -(@CAR_ICON_HEIGHT * (@i - 1));
+	}
+	.-icon-style(@list, @i+1);
 }
 
-<?php endforeach; ?>
+.-icon-style(sedan hatchback estate minivan bus);
 
 
 .queues-table .car {
@@ -140,7 +140,7 @@ foreach( $types as $i => $type ): ?>
  * A car selected by the taxi_id input of an order form.
  */
 .queues-table .selected {
-	outline: 4px solid <?= $high_red ?>;
+	outline: 4px solid @high_red;
 }
 
 .queues-table tr {
@@ -148,7 +148,7 @@ foreach( $types as $i => $type ): ?>
 }
 
 .queues-table tr.forbidden {
-	background-color: <?= $back_red ?>;
+	background-color: @back_red;
 }
 
 /*

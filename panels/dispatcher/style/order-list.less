@@ -1,0 +1,49 @@
+.orders-list {
+	.order {
+		padding: 0.5em;
+		margin-bottom: 4px;
+		cursor: pointer;
+		overflow: auto;
+		transition: background-color 1s;
+		border-radius: 2px;
+	}
+
+	.postponed .list:before {
+		content: "Отложенные";
+	}
+
+	> .current .list:before {
+		content: "Текущие";
+	}
+
+	> .closed .list:before {
+		content: "Закрытые";
+	}
+
+	.list:empty:before {
+		content: "";
+	}
+
+	/*
+	 * Cancel button inside an order block.
+	 */
+	.order {
+		.time:after {
+			content: ",";
+		}
+
+		.address {
+			display: inline-block;
+			width: 200px;
+			vertical-align: text-top;
+		}
+
+		.comments {
+			font-style: italic;
+		}
+	}
+
+	a[href] {
+		color: inherit;
+	}
+}
