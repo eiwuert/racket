@@ -31,7 +31,7 @@ class service_logs
 		DB::insertRecord( 'taxi_logs', array(
 			'text' => $text
 		));
-		disp_broadcast( null, 'service-log', array(
+		disp_broadcast( 'service-log', array(
 			'text' => $text
 		));
 	}

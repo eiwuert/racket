@@ -5,8 +5,8 @@ init(function()
 	schedule( 60, 'disp_channels::clean' );
 });
 
-function disp_broadcast( $loc_id, $cmd, $data = array() ) {
-	return disp_channels::broadcast( $loc_id, $cmd, $data );
+function disp_broadcast( $cmd, $data = array() ) {
+	return disp_channels::broadcast( $cmd, $data );
 }
 
 class disp_channels
@@ -14,7 +14,7 @@ class disp_channels
 	/*
 	 * Puts a message to the channel.
 	 */
-	static function broadcast( $loc_id, $type, $data = array() )
+	static function broadcast( $type, $data = array() )
 	{
 		$message = array(
 			'type' => $type,
@@ -22,7 +22,6 @@ class disp_channels
 		);
 
 		$id = DB::insertRecord( 'taxi_channels', array(
-			'loc_id' => $loc_id,
 			'message' => json_encode( $message )
 		));
 		debmsg( "Dispatchers broadcast ($id): $type" );

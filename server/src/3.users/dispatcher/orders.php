@@ -101,17 +101,6 @@ class dispatcher_orders
 	{
 		$src = $msg->data( 'src' );
 
-		/*
-		 * If the dispatcher is local, take their location's address
-		 * and ignore the message data (which is expected to be empty
-		 * anyway).
-		 */
-		$loc_id = DB::getValue( "SELECT loc_id FROM taxi_dispatchers WHERE acc_id = %d", $user->id );
-
-		if( !$loc_id ) {
-			$loc_id = $src['loc_id'];
-		}
-
 		if( $loc_id ) {
 			$loc = new taxi_location( $loc_id, 'address, latitude, longitude' );
 			$addr = $loc->address();
@@ -311,8 +300,7 @@ class dispatcher_orders
 			'opt_terminal' => 'int'
 		));
 
-		disp_broadcast( $order->src_loc_id(),
-			'order-created', $data );
+		disp_broadcast( 'order-created', $data );
 		return true;
 	}
 
@@ -322,8 +310,7 @@ class dispatcher_orders
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $order->src_loc_id(),
-			'order-dropped', $data );
+		disp_broadcast( 'order-dropped', $data );
 	}
 
 	static function ev_order_assigned( $event )
@@ -336,8 +323,7 @@ class dispatcher_orders
 			'est_arrival_time' => $order->utc( 'est_arrival_time' )
 		);
 
-		disp_broadcast( $order->src_loc_id(),
-			'order-accepted', $data );
+		disp_broadcast( 'order-accepted', $data );
 	}
 
 	static function ev_taxi_arrived( $event )
@@ -346,8 +332,7 @@ class dispatcher_orders
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $order->src_loc_id(),
-			'taxi-arrived', $data );
+		disp_broadcast( 'taxi-arrived', $data );
 	}
 
 	static function ev_order_started( $event )
@@ -356,8 +341,7 @@ class dispatcher_orders
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $order->src_loc_id(),
-			'order-started', $data );
+		disp_broadcast( 'order-started', $data );
 	}
 
 	static function ev_order_finished( $event )
@@ -366,8 +350,7 @@ class dispatcher_orders
 		$data = array(
 			'order_uid' => $order->order_uid()
 		);
-		disp_broadcast( $order->src_loc_id(),
-			'order-finished', $data );
+		disp_broadcast( 'order-finished', $data );
 	}
 
 	static function ev_order_cancelled( $event )
@@ -377,8 +360,7 @@ class dispatcher_orders
 			'order_uid' => $order->order_uid(),
 			'reason' => $order->cancel_reason()
 		);
-		disp_broadcast( $order->src_loc_id(),
-			'order-cancelled', $data );
+		disp_broadcast( 'order-cancelled', $data );
 	}
 }
 ?>

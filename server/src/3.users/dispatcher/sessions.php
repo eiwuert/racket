@@ -14,7 +14,7 @@ class disp_sessions
 {
 	static function ev_session_opened( $event )
 	{
-		disp_broadcast( null, 'session-opened', array(
+		disp_broadcast( 'session-opened', array(
 			'driver_id' => intval( $event->data['taxi_id'] ),
 			'session_id' => intval( $event->data['session_id'] ),
 			'car_id' => intval( $event->data['car_id'] ),
@@ -24,7 +24,7 @@ class disp_sessions
 
 	static function ev_session_closed( $event )
 	{
-		disp_broadcast( null, 'session-closed', array(
+		disp_broadcast( 'session-closed', array(
 			'driver_id' => intval( $event->data['taxi_id'] ),
 			'session_id' => intval( $event->data['session_id'] )
 		));
@@ -36,7 +36,7 @@ class disp_sessions
 			'driver_id' => intval( $event->data['taxi_id'] ),
 			'odometer' => intval( $event->data['odometer'] )
 		);
-		disp_broadcast( null, 'session-requested', $data );
+		disp_broadcast( 'session-requested', $data );
 	}
 
 	static function msg_open_session( $msg, $user )

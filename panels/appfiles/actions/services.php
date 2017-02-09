@@ -239,7 +239,6 @@ function save_dispatcher()
 	$name = vars::post( 'i-name' );
 	$call_id = vars::post( 'call_id' );
 	$pass = vars::post( 'password' );
-	$loc_id = alt( vars::post( 'loc_id' ), null );
 
 	if( !$acc_id )
 	{
@@ -269,20 +268,7 @@ function save_dispatcher()
 		$acc->photo( $files[0] );
 	}
 
-	$acc_id = $acc->save();
-
-	if( !DB::exists( 'taxi_dispatchers', array( 'acc_id' => $acc_id ) ) ) {
-		DB::insertRecord( 'taxi_dispatchers', array(
-			'acc_id' => $acc_id,
-			'loc_id' => $loc_id
-		));
-	}
-	else {
-		DB::updateRecord( 'taxi_dispatchers',
-			array( 'loc_id' => $loc_id ),
-			array( 'acc_id' => $acc_id )
-		);
-	}
+	$acc->save();
 }
 
 function delete_dispatcher()

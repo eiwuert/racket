@@ -4,12 +4,6 @@
 $id = argv(1);
 $dispatcher = new taxi_account( $id );
 $login = $dispatcher->login();
-if( $id ) {
-	$loc_id = DB::getValue( "SELECT loc_id FROM taxi_dispatchers
-		WHERE acc_id = %d", $id );
-} else {
-	$loc_id = null;
-}
 $aurl = aurl( 'save_dispatcher', url_t( 'dispatchers' ), CURRENT_URL );
 ?>
 
@@ -24,19 +18,6 @@ $aurl = aurl( 'save_dispatcher', url_t( 'dispatchers' ), CURRENT_URL );
 			<table>
 			<?= template( 'templates/account-subform',
 				array( 'acc' => $dispatcher ) ) ?>
-			<tr>
-				<td>Привязка к объекту</td>
-				<td>
-					<?php
-					$locs = DB::getRecords( "SELECT
-						loc.loc_id, loc.name
-						FROM taxi_queues q
-						JOIN taxi_locations loc USING (loc_id)" );
-					$locs = array_column( $locs, 'name', 'loc_id' );
-					echo HTMLSnippets::select( 'loc_id', $locs, $loc_id );
-					?>
-				</td>
-			</tr>
 			</table>
 		</section>
 		<section>

@@ -94,7 +94,7 @@ class proto_dispatcher_queues
 		update_driver_queues( $driver_id );
 		send_text_to_taxi( $driver_id, "Вы переведены в группу «$r[name]»." );
 
-		disp_broadcast( null, 'driver-changed', array(
+		disp_broadcast( 'driver-changed', array(
 			'driver_id' => $driver_id,
 			'diff' => array(
 				'group_id' => $gid
@@ -124,7 +124,7 @@ class proto_dispatcher_queues
 
 		DB::exec( "UPDATE taxi_queues SET priority = %d, `min` = %d
 			WHERE queue_id = %d", $priority, $min, $qid );
-		disp_broadcast( $q['loc_id'], 'queue-changed', array(
+		disp_broadcast( 'queue-changed', array(
 			'queue_id' => $qid,
 			'min' => $min,
 			'priority' => $priority

@@ -205,12 +205,6 @@ class dx_disp
 	static function recent_orders( $acc_id )
 	{
 		$acc_id = intval( $acc_id );
-		$loc_id = intval( DB::getValue( "SELECT loc_id FROM taxi_dispatchers
-			WHERE acc_id = %d", $acc_id ) );
-		$add_where = '';
-		if( $loc_id ) {
-			$add_where = " AND o.src_loc_id = $loc_id";
-		}
 
 		$orders = DB::getRecords("
 			SELECT
@@ -243,7 +237,6 @@ class dx_disp
 				(o.`status` IN ('postponed', 'waiting', 'assigned', 'arrived', 'started'))
 				OR TIMESTAMPDIFF(HOUR, o.time_created, NOW()) <= 24
 			)
-			$add_where
 			ORDER BY o.time_created DESC
 			"
 		);
@@ -293,10 +286,6 @@ class dx_disp
 			FROM taxi_queues q
 			LEFT JOIN taxi_queue_drivers a
 			USING (queue_id)";
-		$loc_id = self::acc_loc_id( $acc_id );
-		if( $loc_id ) {
-			$q .= " AND q.loc_id = $loc_id";
-		}
 		$q .= " ORDER BY pos";
 		$rows = DB::getRecords( $q );
 
@@ -316,12 +305,6 @@ class dx_disp
 		}
 
 		return array_values( $Q );
-	}
-
-	private static function acc_loc_id( $acc_id )
-	{
-		return DB::getValue( "SELECT loc_id FROM taxi_dispatchers
-			WHERE acc_id = %d", $acc_id );
 	}
 
 	static function queue_locations()
@@ -396,29 +379,8 @@ class dx_disp
 		$allowed_queues = DB::getValues( "
 			SELECT q.queue_id
 			FROM taxi_accounts acc
-			LEFT JOIN taxi_dispatchers d USING (acc_id)
 			JOIN taxi_queues q
-			WHERE acc_id = $acc_id
-				AND (q.loc_id = d.loc_id OR d.loc_id IS NULL)" );
-/*
-		$allowed_queues = DB::getValues( "
-			SELECT DISTINCT q.queue_id
-			FROM (
-				-- queues for the dispatcher's location
-				SELECT q.queue_id, q.parent_id
-				FROM taxi_accounts acc
-				LEFT JOIN taxi_dispatchers d USING (acc_id)
-				JOIN taxi_queues q
-				WHERE acc_id = $acc_id
-					AND (q.loc_id = d.loc_id OR d.loc_id IS NULL)
-			) qloc
-			-- go up one level and then back down
-			-- to include queues-siblings
-			JOIN taxi_queues qup
-				ON qup.queue_id = qloc.queue_id OR qup.queue_id = qloc.parent_id
-			JOIN taxi_queues q
-				ON q.queue_id = qup.queue_id OR q.parent_id = qup.queue_id" );
-*/
+			WHERE acc_id = $acc_id" );
 		$qlist = '('.implode( ', ', $allowed_queues ).')';
 		self::$qlist[$acc_id] = $qlist;
 		return $qlist;

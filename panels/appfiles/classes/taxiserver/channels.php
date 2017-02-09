@@ -77,15 +77,9 @@ class channels
 
 	private static function filter( $acc_id )
 	{
-		$loc_id = DB::getValue( "SELECT loc_id FROM taxi_dispatchers
-			WHERE acc_id = %d", $acc_id );
-
 		$filter = array();
 		if( $acc_id ) {
 			$filter[] = "acc_id IS NULL OR acc_id = $acc_id";
-		}
-		if( $loc_id ) {
-			$filter[] = "loc_id IS NULL OR loc_id = $loc_id";
 		}
 		if( empty( $filter ) ) {
 			return '';

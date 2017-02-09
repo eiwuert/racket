@@ -34,7 +34,7 @@ class disp_proto_bans
 			'until' => $event->data['until'],
 			'reason' => $event->data['reason']
 		);
-		disp_broadcast( null, 'driver-blocked', $data );
+		disp_broadcast( 'driver-blocked', $data );
 	}
 
 	static function ev_taxi_unbanned( $event )
@@ -42,7 +42,7 @@ class disp_proto_bans
 		$data = array(
 			'driver_id' => $event->data['taxi_id']
 		);
-		disp_broadcast( null, 'driver-unblocked', $data );
+		disp_broadcast( 'driver-unblocked', $data );
 	}
 }
 

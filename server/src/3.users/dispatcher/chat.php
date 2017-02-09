@@ -18,7 +18,7 @@ class disp_proto_chat
 		$to = $event->data['to'];
 		$to = $to ? intval( $to ) : null;
 
-		disp_broadcast( null, 'chat-message', array(
+		disp_broadcast( 'chat-message', array(
 			'id' => intval( $event->data['id'] ),
 			'from' => intval( $event->data['from'] ),
 			'to' => $to,
