@@ -12,7 +12,7 @@ gulp.task('default', function() {
 		format: 'iife'
 	}, {});
 
-	gulp.src('src/main.js')
+	gulp.src('dispatcher.js')
 	.pipe(comp)
 	.pipe(browserify())
 	.pipe(gulp.dest(destinationDir));

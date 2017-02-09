@@ -1,12 +1,16 @@
+nbproject/
 *.log
 server/out/obj/
 server/out/run
 panels/cache/
-panels/appfiles/libs/phpexcel
 panels/content/
-panels/www/res/dispatcher/main.js
+
+# External packages
+node_modules/
+bower_components/
+vendor/
+panels/appfiles/libs/phpexcel
+
+# Dispatcher app build
+panels/www/res/dispatcher/dispatcher.js
 panels/www/res/dispatcher/dispatcher.css
-node_modules
-panels/appfiles/vendor/
-nbproject
-bower_components

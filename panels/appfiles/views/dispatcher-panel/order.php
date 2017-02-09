@@ -12,8 +12,9 @@ require_script( 'res/lib/fill.js' );
 //require_stylesheet( 'res/lib/admin.css' );
 
 require_stylesheet( 'res/dispatcher/main.css' );
+
 require_stylesheet( 'res/dispatcher/dispatcher.css' );
-require_script( 'res/dispatcher/main.js' );
+require_script( 'res/dispatcher/dispatcher.js' );
 
 require_stylesheet('res/lib/bootstrap/css/bootstrap.min.css');
 require_stylesheet('res/lib/bootstrap/css/bootstrap-theme.min.css');
