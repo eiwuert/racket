@@ -100,6 +100,7 @@ class dispatcher_orders
 	private static function append_order_address( $order, $msg, $user )
 	{
 		$src = $msg->data( 'src' );
+		$loc_id = $src['loc_id'];
 
 		if( $loc_id ) {
 			$loc = new taxi_location( $loc_id, 'address, latitude, longitude' );
