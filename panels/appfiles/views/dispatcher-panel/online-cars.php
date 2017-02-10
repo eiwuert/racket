@@ -3,7 +3,40 @@
 <?php require_script( 'res/dispatcher/cars.js' ); ?>
 
 <?php
-$taxis = dx_disp::get_online_service_taxis_r();
+function get_online_service_taxis_r()
+{
+	$q = "SELECT
+		acc.acc_id AS taxi_id,
+		acc.call_id,
+		t.latitude,
+		t.longitude,
+
+		(NOT EXISTS (SELECT order_id
+			FROM taxi_orders
+			WHERE taxi_id = acc.acc_id
+			AND `status` NOT IN ('cancelled', 'dropped', 'finished')
+		)) AND accept_new_orders AS is_free,
+
+		( IFNULL(
+			TIMESTAMPDIFF( MINUTE, last_order_time, NOW() ),
+			480)
+		) AS idle_time,
+
+		(block_until > NOW()) AS is_blocked,
+		c.name AS car_name,
+		c.plate AS car_plate
+
+		FROM taxi_drivers t
+		JOIN taxi_cars c USING (car_id)
+		JOIN taxi_accounts acc USING (acc_id)
+		WHERE is_fake = 0
+		AND (TIMESTAMPDIFF( SECOND, last_ping_time, NOW() ) < 60 )
+		AND t.deleted = 0";
+
+	return DB::getRecords( $q );
+}
+
+$taxis = get_online_service_taxis_r();
 
 $t = new Table( array(
 	'call_id' => 'Позывной',

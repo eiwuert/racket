@@ -27,8 +27,24 @@ set_page_title( 'Архив журнала' );
 </form>
 
 <?php
-$messages = service_logs::get_messages( $t1, $t2 );
+$messages = get_messages( $t1, $t2 );
 echo '<p>', implode( '</p><p>', array_column( $messages, 'text' ) ), '</p>';
+?>
+
+<?php
+function get_messages( $from, $to = null )
+{
+	if( !$to ) $to = time();
+	return DB::getRecords( "
+		SELECT
+			message_id,
+			UNIX_TIMESTAMP(t) AS t,
+			text
+		FROM taxi_logs L
+		WHERE L.t BETWEEN FROM_UNIXTIME(%d) AND FROM_UNIXTIME(%d)
+		ORDER BY t", $from, $to
+	);
+}
 ?>
 
 <?php _footer(); ?>
