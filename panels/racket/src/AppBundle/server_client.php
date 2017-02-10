@@ -1,4 +1,5 @@
 <?php
+namespace AppBundle;
 /*
  * Client base to be extended.
  */
@@ -8,14 +9,20 @@ class server_client
 	 * Connection with the server.
 	 */
 	private $socket;
+	private $addr;
+
+	function __construct($addr) {
+		$this->addr = $addr;
+	}
 
 	/*
 	 * Connect to the server. $addr is a string in form "ip:port".
 	 */
-	function connect( $addr )
+	function connect()
 	{
-		@$this->socket = stream_socket_client(
-			$addr, $errno, $errstr, 10 );
+		$errno = $errstr = null;
+		$this->socket = stream_socket_client(
+			$this->addr, $errno, $errstr, 10 );
 		return (bool) $this->socket;
 	}
 

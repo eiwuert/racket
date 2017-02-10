@@ -1,4 +1,5 @@
 <?php
+namespace AppBundle;
 /*
  * Dispatcher protocol client.
  */

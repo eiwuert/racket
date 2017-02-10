@@ -2,8 +2,16 @@
 # http://symfony.com/doc/current/service_container.html
 parameters:
 #    parameter_name: value
+        osrm_url: http://router.project-osrm.org/
+        server_addr: 127.0.0.1:12345
 
 services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+        osrm_client:
+                class: AppBundle\OSRMClient
+                arguments: ["%osrm_url%"]
+        dispatcher_client:
+                class: AppBundle\dispatcher_client
+                arguments: ["%server_addr%"]

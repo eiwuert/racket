@@ -12,6 +12,7 @@ import initLocations from './locations.js';
 import initQueues from './queues.js';
 import initSessions from './sessions.js';
 import initImitations from './imitations.js';
+import http from '../lib/http.js';
 
 import Fare from './obj/fare.js';
 import Address from './obj/address.js';
@@ -71,7 +72,7 @@ function DispatcherClient()
 	/*
 	 * Get a token, then start messaging.
 	 */
-	this.dx.get('token')
+	http.get('/dx/token')
 		.then(response => {
 			this.dx.token = response.token;
 			conn.open();

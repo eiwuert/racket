@@ -26,10 +26,6 @@ function Connection(dx)
 		 */
 		dx.get( 'init' ).then( function( data )
 		{
-			if( data.who.type != 'dispatcher' ) {
-				throw "Wrong identity";
-			}
-
 			/*
 			 * Start updates before dispatching init so that both
 			 * directions work when the application is called.

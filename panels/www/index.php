@@ -6,11 +6,25 @@
  * dispatch the requests from here.
  */
 
-if(strpos($_SERVER['REQUEST_URI'], '/sym/') === 0) {
-	require 'app.php';
-}
-else {
-	require 'hall.php';
+function serve_sym()
+{
+	$sym = ['/sym/', '/dx/dispatcher/', '/_wdt/', '/_profiler/'];
+
+	$url = $_SERVER['REQUEST_URI'];
+	if (substr($url, -1) != '/') {
+		$url .= '/';
+	}
+
+	foreach ($sym as $pref) {
+		if (strpos($url, $pref) === 0) {
+			require 'app.php';
+			return true;
+		}
+	}
+	return false;
 }
 
+if (!serve_sym()) {
+	require 'hall.php';
+}
 ?>
