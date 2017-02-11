@@ -248,8 +248,8 @@ class DispatcherAPIController extends Controller
 		if (!$acc_id) {
 			return $this->error_response('Unauthorized');
 		}
-		$n = $req->query->get('n');
-		return $this->response($this->api()->getLastServiceMessages($n));
+		$timeRange = $req->query->get('timeRange');
+		return $this->response($this->api()->getLastServiceMessages($timeRange));
 	}
 
 	/**

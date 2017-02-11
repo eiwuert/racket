@@ -28,10 +28,11 @@ class service_logs
 
 		$text = date( 'H:i:s' ).': '.$str;
 
-		DB::insertRecord( 'taxi_logs', array(
+		$message_id = DB::insertRecord( 'taxi_logs', array(
 			'text' => $text
 		));
 		disp_broadcast( 'service-log', array(
+			'message_id' => $message_id,
 			'text' => $text
 		));
 	}

@@ -563,27 +563,17 @@ class DispatcherAPI
 	}
 
 	/*
-	 * Returns last $n messages for the given service.
+	 * Returns service log messages for last `timeRange` seconds
 	 */
-	function getLastServiceMessages($n = 100)
+	function getLastServiceMessages($timeRange)
 	{
-		/*
-		 * No matter what, this wonderful "state of the art"
-		 * DBAL library doesn't handle "LIMIT ?" substitution
-		 * properly. So we have to take three steps back into
-		 * the past and stuff the limit manually.
-		 */
-		$limit = intval($n);
-		$m = $this->db->fetchAll("
-			SELECT * FROM (
-				SELECT message_id,
-					UNIX_TIMESTAMP(t) AS t,
-					`text`
-				FROM taxi_logs L
-				ORDER BY L.t DESC
-				LIMIT $limit) rev
-			ORDER BY t");
-		return $m;
+		return $this->db->fetchAll("
+			SELECT
+				message_id, `text`,
+				UNIX_TIMESTAMP(t) AS t
+			FROM taxi_logs
+			WHERE TIMESTAMPDIFF(SECOND, t, NOW()) <= ?
+			ORDER BY message_id", [$timeRange]);
 	}
 
 	function getQueuesSnapshot()
