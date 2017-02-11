@@ -612,4 +612,13 @@ class DispatcherAPI
 
 		return array_values($Q);
 	}
+
+	function getCustomers($nameFilter, $phoneFilter)
+	{
+		return $this->db->fetchAll("SELECT name, phone
+			FROM taxi_customers
+			WHERE name LIKE ?
+			AND phone LIKE ?
+			LIMIT 10", ['%'.$nameFilter.'%', '%'.$phoneFilter.'%']);
+	}
 }

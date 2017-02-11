@@ -40,6 +40,21 @@ class DispatcherAPIController extends Controller
 	}
 
 	/**
+	 * @Route("/dx/dispatcher/customers")
+	 * @Method("GET")
+	 */
+	function getCustomers(Request $req)
+	{
+		if (!$this->accId($req)) {
+			return $this->error_response('Unauthorized');
+		}
+
+		$nameFilter = $req->query->get('nameFilter');
+		$phoneFilter = $req->query->get('phoneFilter');
+		return $this->response($this->api()->getCustomers($nameFilter, $phoneFilter));
+	}
+
+	/**
 	 * @Route("/dx/dispatcher/car-position")
 	 * @Method("GET")
 	 * 

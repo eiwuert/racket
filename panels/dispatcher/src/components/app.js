@@ -13,6 +13,7 @@ import OrdersTable from './orders-table.js';
 import Calculator from './calculator.js';
 import SessionsTable from './sessions-table.js';
 import ServiceLog from './service-log.js';
+import CustomersTable from './customers-table.js';
 
 import OpenSessionDialog from './open-session-dialog.js';
 import SessionRequestDialog from './session-request-dialog.js';
@@ -161,6 +162,7 @@ export default class App extends React.Component {
 						<Tab>Карта</Tab>
 						<Tab>Водители</Tab>
 						<Tab>Заказы</Tab>
+						<Tab>Клиенты</Tab>
 						<Tab>Калькулятор</Tab>
 						<Tab>Смены</Tab>
 						<Tab>Журнал</Tab>
@@ -175,6 +177,7 @@ export default class App extends React.Component {
 					</TabPanel>
 					<TabPanel><DriversTable client={this.props.client} /></TabPanel>
 					<TabPanel><OrdersTable client={this.props.client} /></TabPanel>
+					<TabPanel><CustomersTable client={this.props.client} /></TabPanel>
 					<TabPanel><Calculator client={this.props.client} /></TabPanel>
 					<TabPanel>
 						<SessionsTable
