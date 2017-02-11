@@ -31,13 +31,13 @@ export default class DispatcherMap extends React.Component {
 	}
 
 	componentDidMount() {
-		disp.events.on('driver-online-changed', this.refreshDrivers);
-		disp.events.on('driver-moved', this.refreshDrivers);
+		disp.on('driver-online-changed', this.refreshDrivers);
+		disp.on('driver-moved', this.refreshDrivers);
 	}
 
 	componentWillUnmount() {
-		disp.events.off('driver-online-changed', this.refreshDrivers);
-		disp.events.off('driver-moved', this.refreshDrivers);
+		disp.off('driver-online-changed', this.refreshDrivers);
+		disp.off('driver-moved', this.refreshDrivers);
 	}
 
 	render() {

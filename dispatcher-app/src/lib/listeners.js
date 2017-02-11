@@ -73,6 +73,19 @@ export default function Listeners( events, statefulEvents )
 		}
 	};
 
+	/*
+	 * Removes the listener
+	 */
+	this.remove = function(type, func) {
+		if(!(type in listeners)) {
+			throw new Error("Unknown event type: " + type);
+		}
+		var pos = listeners[type].indexOf(func);
+		if(pos >= 0) {
+			listeners[type].splice(pos, 1);
+		}
+	};
+
 	this.call = function( type, data, context )
 	{
 		if( !(type in listeners) ) {

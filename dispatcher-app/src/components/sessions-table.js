@@ -20,11 +20,11 @@ export default class SessionsTable extends React.Component {
 	}
 
 	componentDidMount() {
-		this.props.client.events.on('sessions-changed', this.refresh);
+		this.props.client.on('sessions-changed', this.refresh);
 	}
 
 	componentWillUnmount() {
-		this.props.client.events.off('sessions-changed', this.refresh);
+		this.props.client.off('sessions-changed', this.refresh);
 	}
 
 	onCloseClick(s) {

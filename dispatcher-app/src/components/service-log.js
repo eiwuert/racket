@@ -87,11 +87,11 @@ export default class ServiceLog extends React.Component {
 
 	componentWillMount() {
 		this.load(this.state.range);
-		this.props.client.events.on('service-log', this.pushMessage);
+		this.props.client.on('service-log', this.pushMessage);
 	}
 
 	componentWillUnmount() {
-		this.props.client.events.off('service-log', this.pushMessage);
+		this.props.client.off('service-log', this.pushMessage);
 	}
 
 	render() {

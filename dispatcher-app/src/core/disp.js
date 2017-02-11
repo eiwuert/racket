@@ -54,6 +54,7 @@ function DispatcherClient()
 	] );
 
 	this.on = listeners.add.bind( listeners );
+	this.off = listeners.remove.bind(listeners);
 
 	var _this = this;
 	var data = null;
