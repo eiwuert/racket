@@ -2,23 +2,17 @@ export default Connection;
 
 function Connection(dx)
 {
+	this.RTT = function() { return dx.RTT(); };
+
 	var messageFunctions = {};
-	var ready = false;
 	var PERIOD = 3000;
 
-	var channel = {
-		seq: undefined, // current sequence number
-		urgent: false, // urgent flag
-		progress: false, // a request is in progress
-		tid: null // timeout id for next scheduled request
-	};
-
-	this.RTT = function() { return dx.RTT(); };
+	var socket;
 
 	/*
 	 * Open the connection.
 	 */
-	this.open = function()
+	this.open = function(addr)
 	{
 		/*
 		 * Get the initial data packet that describes all current
@@ -26,17 +20,9 @@ function Connection(dx)
 		 */
 		dx.get( 'init' ).then( function( data )
 		{
-			/*
-			 * Start updates before dispatching init so that both
-			 * directions work when the application is called.
-			 */
-			if( typeof data.seq == "undefined" ) {
-				throw "Undefined sequence number in startUpdates";
-			}
-			channel.seq = data.seq;
-			channel.tid = setTimeout( receive, PERIOD );
-			setTimeout( checkQueues, PERIOD );
-			ready = true;
+			checkQueues();
+			socket = new WebSocket(addr);
+			socket.onmessage = receive;
 
 			/*
 			 * Send the init message to the application.
@@ -52,97 +38,19 @@ function Connection(dx)
 	/*
 	 * Sends a message to the server.
 	 */
-	this.send = function( cmd, data )
+	this.send = function(command, data = {} )
 	{
-		if( !ready ) {
-			throw "Can't send " + cmd + ", not ready yet";
-		}
-		if( typeof data == "undefined" ) {
-			data = {};
-		}
-
-		var p = dx.post( 'cmd', {
-			cmd: cmd,
-			data: JSON.stringify( data )
-		});
-
-		/*
-		 * The application may start waiting for a response to this
-		 * message we are sending. Since this is a polling emulation,
-		 * that response may be delayed by the period, so we would
-		 * signal the receiving loop to get new data now.
-		 */
-		p.then( function( value ) {
-			receive();
-			return value;
-		});
-
-		return p;
+		var pack = {command, data};
+		socket.send(JSON.stringify(pack));
 	};
 
-	//--
-
-	/*
-	 * Schedule next channel update.
-	 */
-	function receive()
-	{
-		/*
-		 * If a request is already in progress, set the urgent flag so
-		 * that the next iteration will start right away.
-		 */
-		if( channel.progress ) {
-			channel.urgent = true;
-			return;
-		}
-
-		/*
-		 * If we are idle, cancel the timer and go now.
-		 */
-		if( channel.tid ) {
-			clearTimeout( channel.tid );
-		}
-		channel.progress = true;
-		dx.get( "channel-updates", {"last-message-id": channel.seq} )
-		.catch( function( error ) {
-			channel.progress = false;
-			/*
-			 * If something happens with the request, consume the
-			 * error and keep the loop running.
-			 */
-			console.warn( "Channel error:", error );
-			return [];
-		})
-		.then( function( messages ) {
-			channel.progress = false;
-			/*
-			 * Reschedule the next update before processing
-			 * the messages just to shave off few milliseconds.
-			 */
-			if( channel.urgent ) {
-				channel.urgent = false;
-				channel.tid = setTimeout( receive, 1 );
-			}
-			else {
-				channel.tid = setTimeout( receive, PERIOD );
-			}
-			return messages;
-		})
-		.then( processMessages );
-	}
-
-	function processMessages( messages )
-	{
-		messages.forEach( function( m ) {
-			channel.seq = m.message_id;
-			var msg = {name: m.type, data: m.data};
-			try {
-				dispatchMessage( msg );
-			} catch( error ) {
-				console.warn( "Message error:", error );
-				dispatchMessage( {name: "error", data: {error: error}} );
-			}
-		});
+	function receive(event) {
+		var data = JSON.parse(event.data);
+		var msg = {
+			name: data.command,
+			data: data.data
+		};
+		dispatchMessage(msg);
 	}
 
 	/*
@@ -177,8 +85,6 @@ function Connection(dx)
 			f( msg );
 		});
 	}
-
-
 
 	/*
 	 * Add a function to listen to given type of messages.

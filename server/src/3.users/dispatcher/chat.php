@@ -3,8 +3,6 @@
 init( function() {
 	$ns = 'disp_proto_chat::';
 	listen_events( EV_CHAT_MESSAGE, $ns.'ev_chat_message' );
-	add_cmdfunc( T_DISPATCHER, 'send-chat-message', $ns.'msg_send_chat_message' );
-	add_cmdfunc( T_DISPATCHER, 'broadcast-chat', $ns.'msg_broadcast_chat' );
 });
 
 class disp_proto_chat

@@ -5,10 +5,6 @@
 init( function()
 {
 	$NS = 'dispatcher_orders::';
-
-	add_cmdfunc( T_DISPATCHER, 'save-order', $NS.'msg_save_order' );
-	add_cmdfunc( T_DISPATCHER, 'send-order', $NS.'msg_send_order' );
-	add_cmdfunc( T_DISPATCHER, 'cancel-order', $NS.'msg_cancel_order' );
 	listen_events( EV_ORDER_SAVED, $NS.'ev_order_saved' );
 	listen_events( EV_ORDER_DROPPED, $NS.'ev_order_dropped' );
 	listen_events( EV_ORDER_ASSIGNED, $NS.'ev_order_assigned' );

@@ -30,7 +30,7 @@ add_auth_func( function( $cid, $str )
 });
 
 add_cmdfunc( T_PHONE, 'phone-auth', function( $msg, $user ) {
-	disp_channels::send( $user->id, 'line-connected', array(
+	disp_send( $user->id, 'line-connected', array(
 		'line_id' => $user->data( 'line_id' )
 	));
 });
@@ -40,7 +40,7 @@ listen_events( EV_LOGOUT, function( $event ) {
 	if( $user->type != T_PHONE ) {
 		return;
 	}
-	disp_channels::send( $user->id, 'line-disconnected', array(
+	disp_send( $user->id, 'line-disconnected', array(
 		'line_id' => $user->data( 'line_id' )
 	));
 });
@@ -90,7 +90,7 @@ add_cmdfunc( T_PHONE, 'call', function( $msg, $user )
 		);
 
 		if( $dir == 'in' ) {
-			disp_channels::send( $user->id, 'call-accepted', array(
+			disp_send( $user->id, 'call-accepted', array(
 				'call_id' => $call_id,
 				'line_id' => $user->data( 'line_id' ),
 				'city' => $user->data( 'city' ),
@@ -107,7 +107,7 @@ add_cmdfunc( T_PHONE, 'call', function( $msg, $user )
 			array( 'call_id' => $call_id )
 		);
 		if( $dir == 'in' ) {
-			disp_channels::send( $user->id, 'call-ended', array(
+			disp_send( $user->id, 'call-ended', array(
 				'call_id' => $call_id
 			));
 		}

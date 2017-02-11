@@ -7,8 +7,10 @@ export default function initOrders( conn, listeners, data )
 {
 	var _this = this;
 	var orders = {};
-	var orderPromises = {};
 	var MAX_AGE = 12 * 3600 * 1000;
+
+	var orderCreationPromises = {};
+	var orderDispatchPromises = {};
 
 	initLists();
 	setInterval( cleanOrders, 10000 );
@@ -95,7 +97,16 @@ export default function initOrders( conn, listeners, data )
 			'opt_terminal',
 			'call_id'
 		]);
-		return conn.send( 'save-order', data );
+
+		/*
+		 * The saveOrder function has to return a promise
+		 * that will resolve to success or failure depending
+		 * on what the server will reply to this command.
+		 */
+		var defer = createPromise();
+		orderCreationPromises[order.order_uid] = defer;
+		conn.send('save-order', data);
+		return defer.promise;
 	};
 
 	/*
@@ -108,34 +119,41 @@ export default function initOrders( conn, listeners, data )
 			driver_id = null;
 		}
 
-		var p = conn.send( "send-order", {
+		var defer = createPromise();
+		orderDispatchPromises[order_uid] = defer;
+
+		conn.send( "send-order", {
 			order_uid: order_uid,
 			driver_id: driver_id
 		});
-		/*
-		 * If the command succeeds, create a new promise that will be
-		 * resolved later and return it.
-		 */
-		p = p.then( function( val )
-		{
-			var h = {};
-			h.promise = new Promise( function( ok, fail ) {
-				h.ok = ok;
-				h.fail = fail;
-			});
-			orderPromises[order_uid] = h;
-			return h.promise;
-		});
 
-		return p;
+		return defer.promise;
 	};
 
 	this.cancelOrder = function( uid, reason ) {
-		return conn.send( "cancel-order", {
+		var r = conn.send( "cancel-order", {
 			order_uid: uid,
 			reason: reason
 		});
+		/*
+		 * Fake promise for code that expects it
+		 */
+		return Promise.resolve(r);
 	};
+
+	function createPromise() {
+		var obj = {};
+		var p = new Promise(function(ok, fail) {
+			obj.ok = ok;
+			obj.fail = fail;
+		});
+		obj.promise = p;
+
+		setTimeout(function() {
+			obj.fail("Client-side timeout");
+		}, 5000);
+		return obj;
+	}
 
 	conn.onMessage( "order-created", function( msg )
 	{
@@ -157,6 +175,10 @@ export default function initOrders( conn, listeners, data )
 		{
 			orders[uid] = o;
 			listeners.call( "order-added", {order: o} );
+		}
+		if(uid in orderCreationPromises) {
+			orderCreationPromises[uid].ok(o);
+			delete orderCreationPromises[uid];
 		}
 	});
 
@@ -206,20 +228,20 @@ export default function initOrders( conn, listeners, data )
 
 	function failOrderPromise( uid, reason )
 	{
-		if( !(uid in orderPromises) ) {
+		if( !(uid in orderDispatchPromises) ) {
 			return;
 		}
-		orderPromises[uid].fail( reason );
-		delete orderPromises[uid];
+		orderDispatchPromises[uid].fail( reason );
+		delete orderDispatchPromises[uid];
 	}
 
 	function fulfilOrderPromise( uid, driver )
 	{
-		if( !(uid in orderPromises) ) {
+		if( !(uid in orderDispatchPromises) ) {
 			return;
 		}
-		orderPromises[uid].ok( driver );
-		delete orderPromises[uid];
+		orderDispatchPromises[uid].ok( driver );
+		delete orderDispatchPromises[uid];
 	}
 
 	this.getDriverOrders = function( driverId )

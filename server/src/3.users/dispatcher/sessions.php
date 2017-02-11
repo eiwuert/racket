@@ -6,8 +6,6 @@ init( function()
 	listen_events( EV_SESSION_OPENED, $ns.'ev_session_opened' );
 	listen_events( EV_SESSION_CLOSED, $ns.'ev_session_closed' );
 	listen_events( EV_SESSION_REQUEST, $ns.'ev_session_request' );
-	add_cmdfunc( T_DISPATCHER, 'open-session', $ns.'msg_open_session' );
-	add_cmdfunc( T_DISPATCHER, 'close-session', $ns.'msg_close_session' );
 });
 
 class disp_sessions

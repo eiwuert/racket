@@ -2,9 +2,6 @@
 init( function()
 {
 	$NS = 'proto_dispatcher::';
-	add_auth_func( $NS.'auth' );
-	add_cmdfunc( T_DISPATCHER, 'auth-dispatcher', $NS.'msg_auth_dispatcher' );
-	add_cmdfunc( T_DISPATCHER, 'send-text', $NS.'msg_send_text' );
 	listen_events( EV_TAXI_POSITION, $NS.'ev_taxi_position' );
 	listen_events( EV_TAXI_ALARM_ON, $NS.'ev_taxi_alarm_on' );
 	listen_events( EV_TAXI_ALARM_OFF, $NS.'ev_taxi_alarm_off' );
@@ -17,33 +14,6 @@ init( function()
 
 class proto_dispatcher
 {
-	static function auth( $cid, $str )
-	{
-		if( strpos( $cid, '127.0.0.1' ) !== 0 ) {
-			return null;
-		}
-
-		$m = message::parse_from_json( $str );
-		if( !$m ) {
-			return null;
-		}
-
-		if( $m->command != 'auth-dispatcher' ) {
-			return null;
-		}
-
-		// TODO: do authorisation by name and password
-		$id = $m->data( 'id' );
-		$u = new conn_user( T_DISPATCHER, $id );
-
-		disp_result( $cid, true );
-		return $u;
-	}
-
-	static function msg_auth_dispatcher( $cmd, $user ) {
-		// nothing
-	}
-
 	static function msg_send_text( $msg, $user )
 	{
 		$cid = $msg->cid;

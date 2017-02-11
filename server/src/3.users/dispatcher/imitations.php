@@ -1,11 +1,4 @@
 <?php
-init( function()
-{
-	$ns = 'proto_disp_imitations::';
-	add_cmdfunc( T_DISPATCHER, 'set-imitation-online',
-		$ns.'msg_set_imitation_online' );
-});
-
 class proto_disp_imitations
 {
 	static function msg_set_imitation_online( $msg, $user )

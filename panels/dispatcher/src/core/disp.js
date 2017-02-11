@@ -75,7 +75,7 @@ function DispatcherClient()
 	http.get('/dx/token')
 		.then(response => {
 			this.dx.token = response.token;
-			conn.open();
+			conn.open("ws://taxi.loc:8080/conn?token=" + response.token);
 		})
 		.catch(function(error) {
 			alert("Could not obtain a session token: " + error);

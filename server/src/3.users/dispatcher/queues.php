@@ -1,15 +1,4 @@
 <?php
-init( function()
-{
-	$NS = 'proto_dispatcher_queues::';
-	add_cmdfunc( T_DISPATCHER, 'put-into-queue', $NS.'msg_put_into_queue' );
-	add_cmdfunc( T_DISPATCHER, 'remove-from-queue', $NS.'msg_remove_from_queue' );
-	add_cmdfunc( T_DISPATCHER, 'restore-queue', $NS.'msg_restore_queue' );
-	add_cmdfunc( T_DISPATCHER, 'change-driver-group', $NS.'msg_change_driver_group' );
-	add_cmdfunc( T_DISPATCHER, 'suggest-queue', $NS.'msg_suggest_queue' );
-	add_cmdfunc( T_DISPATCHER, 'change-queue', $NS.'msg_change_queue' );
-});
-
 class proto_dispatcher_queues
 {
 	/*

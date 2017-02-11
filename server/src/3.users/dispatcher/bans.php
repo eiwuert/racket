@@ -2,8 +2,6 @@
 init( function()
 {
 	$NS = 'disp_proto_bans::';
-	add_cmdfunc( T_DISPATCHER, 'ban-taxi', $NS.'msg_ban_taxi' );
-	add_cmdfunc( T_DISPATCHER, 'unban-taxi', $NS.'msg_unban_taxi' );
 	listen_events( EV_TAXI_BANNED, $NS.'ev_taxi_banned' );
 	listen_events( EV_TAXI_UNBANNED, $NS.'ev_taxi_unbanned' );
 });
