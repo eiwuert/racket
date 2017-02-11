@@ -1,4 +1,4 @@
-const destinationDir = '../www/res/dispatcher';
+const destinationDir = '../panels/www/res/dispatcher';
 
 var gulp = require('gulp'),
 	rollup = require('gulp-better-rollup'),
