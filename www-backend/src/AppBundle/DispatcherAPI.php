@@ -458,6 +458,64 @@ class DispatcherAPI
 		return $locations;
 	}
 
+	function orders($since, $until)
+	{
+		$rows = $this->db->fetchAll("
+			SELECT
+				o.order_uid,
+				o.order_id,
+				o.comments,
+				o.status,
+				o.src_addr,
+				UNIX_TIMESTAMP( o.time_created ) AS time_created,
+				-- owner
+				cr.type AS creator_type,
+				cr.acc_id AS creator_id,
+				-- customer
+				c.name AS customer_name,
+				c.phone AS customer_phone,
+				-- driver
+				d.name AS driver_name,
+				-- car
+				car.name AS car_name
+			FROM taxi_orders o
+			LEFT JOIN taxi_customers c ON c.customer_id = o.customer_id
+			LEFT JOIN taxi_accounts cr ON o.owner_id = cr.acc_id
+			LEFT JOIN taxi_accounts d ON d.acc_id = o.taxi_id
+			LEFT JOIN taxi_cars car ON car.car_id = o.car_id
+			WHERE o.deleted = 0
+				AND o.time_created BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)
+			ORDER BY o.order_id", [$since, $until]);
+		$list = [];
+		foreach($rows as $row) {
+			$list[] = [
+				'id' => $row['order_uid'],
+				'num' => $row['order_id'],
+				'comments' => $row['comments'],
+				'status' => $row['status'],
+				'timeCreated' => $row['time_created'],
+				'sourceLocation' => [
+					'address' => $row['src_addr'],
+				],
+				'creator' => [
+					'type' => $row['creator_type'],
+					'id' => $row['creator_id']
+				],
+				'customer' => [
+					'name' => $row['customer_name'],
+					'phone' => $row['customer_phone'],
+				],
+				'driver' => [
+					'name' => $row['driver_name']
+				],
+				'car' => [
+					'name' => $row['car_name']
+				]
+			];
+		}
+		return $list;
+	}
+
 	private function recentOrders($acc_id)
 	{
 		$orders = $this->db->fetchAll("

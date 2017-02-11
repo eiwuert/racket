@@ -264,4 +264,27 @@ class DispatcherAPIController extends Controller
 		}
 		return $this->response($this->api()->getQueuesSnapshot());
 	}
+
+	/**
+	 * @Route("/dx/dispatcher/orders")
+	 * @Method("GET")
+	 */
+	function orders(Request $req)
+	{
+		$acc_id = $this->accId($req);
+		if (!$acc_id) {
+			return $this->error_response('Unauthorized');
+		}
+
+		$since = $req->query->get('since');
+		$until = $req->query->get('until');
+		if(!$since) {
+			return $this->error_response("Missing `since` parameter");
+		}
+		if(!$until) {
+			$until = time();
+		}
+
+		return $this->response($this->api()->orders($since, $until));
+	}
 }

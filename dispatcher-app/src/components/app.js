@@ -9,7 +9,7 @@ import Toolbar from './toolbar.js';
 import DispatcherMap from './dispatcher-map.js';
 import Monitor from './monitor.js';
 import DriversTable from './drivers-table.js';
-import OrdersTable from './orders-table.js';
+import OrdersArchive from './orders-table.js';
 import Calculator from './calculator.js';
 import SessionsTable from './sessions-table.js';
 import ServiceLog from './service-log.js';
@@ -176,7 +176,7 @@ export default class App extends React.Component {
 						<DispatcherMap client={this.props.client} />
 					</TabPanel>
 					<TabPanel><DriversTable client={this.props.client} /></TabPanel>
-					<TabPanel><OrdersTable client={this.props.client} /></TabPanel>
+					<TabPanel><OrdersArchive client={this.props.client} /></TabPanel>
 					<TabPanel><CustomersTable client={this.props.client} /></TabPanel>
 					<TabPanel><Calculator client={this.props.client} /></TabPanel>
 					<TabPanel>
