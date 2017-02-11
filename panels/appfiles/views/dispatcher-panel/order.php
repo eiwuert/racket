@@ -30,11 +30,7 @@ require_stylesheet('res/lib/jquery-ui/jquery-ui.min.css');
 	<nav>
 		<h1>Диспетчер <?= user::get_login() ?></h1>
 		<ul>
-			<li><a href="<?= url( 'order' ) ?>">Отправка заказов</a></li>
-			<li><a href="<?= url( 'online-cars' ) ?>">Водители на связи</a></li>
 			<li><a href="<?= url( 'orders' ) ?>">Архив заказов</a></li>
-			<li><a href="<?= url( 'log' ) ?>">Архив журнала</a></li>
-			<li><a href="<?= url( 'clients' ) ?>">Клиенты</a></li>
 			<li><a href="<?= aurl( 'logout' ) ?>">Выход</a></li>
 		</ul>
 	</nav>
