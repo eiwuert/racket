@@ -76,37 +76,6 @@ class DispatcherAPIController extends Controller
 	}
 
 	/**
-	 * @Route("/dx/dispatcher/car-position")
-	 * @Method("GET")
-	 * 
-	 * Returns current position of the driver.
-	 */
-	function carPosition(Request $req)
-	{
-		if (!$this->accId($req)) {
-			return $this->error_response('Unauthorized');
-		}
-
-		$driver_id = $req->query->get('car_id');
-		return $this->response($this->api()->driverPosition($driver_id));
-	}
-
-	/**
-	 * @Route("/dx/dispatcher/channel-updates")
-	 * @Method("GET")
-	 */
-	function channelUpdates(Request $req)
-	{
-		$acc_id = $this->accId($req);
-		if (!$acc_id) {
-			return $this->error_response('Unauthorized');
-		}
-
-		$seq = $req->query->get('last-message-id');
-		return $this->response($this->api()->getChannelMessages($acc_id, $seq));
-	}
-
-	/**
 	 * @Route("/dx/dispatcher/chat-messages")
 	 * @Method("GET")
 	 */
