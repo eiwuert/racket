@@ -40,6 +40,15 @@ class DispatcherAPIController extends Controller
 	}
 
 	/**
+	 * @Route("/dispatcher")
+	 * @Method("GET")
+	 */
+	function app()
+	{
+		return $this->render('dispatcher.html.twig');
+	}
+
+	/**
 	 * @Route("/dx/dispatcher/customers")
 	 * @Method("GET")
 	 */
