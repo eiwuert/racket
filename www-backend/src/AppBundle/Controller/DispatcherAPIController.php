@@ -53,7 +53,6 @@ class DispatcherAPIController extends Controller
 	/**
 	 * @Route("/dx/dispatcher/customers")
 	 * @Method("GET")
-	 *
 	 * Returns list of customers matching the given phone-name filter
 	 * given as query variables.
 	 */
@@ -103,6 +102,7 @@ class DispatcherAPIController extends Controller
 		if (!$acc_id) {
 			return $this->error_response('Unauthorized');
 		}
+
 		$phone = $req->query->get('phone');
 		return $this->response($this->api()->customerInfo($phone));
 	}
@@ -214,7 +214,7 @@ class DispatcherAPIController extends Controller
 		$list = $qb->getQuery()->getResult();
 
 		$result = [];
-		foreach($list as $msg) {
+		foreach ($list as $msg) {
 			$result[] = [
 				'message_id' => $msg->getId(),
 				'text' => $msg->getText(),
@@ -240,6 +240,9 @@ class DispatcherAPIController extends Controller
 	/**
 	 * @Route("/dx/dispatcher/orders")
 	 * @Method("GET")
+	 *
+	 * Returns array of orders create between `since` and `until` - the
+	 * parameters provided as query variables.
 	 */
 	function orders(Request $req)
 	{
@@ -249,12 +252,9 @@ class DispatcherAPIController extends Controller
 		}
 
 		$since = $req->query->get('since');
-		$until = $req->query->get('until');
-		if(!$since) {
+		$until = $req->query->get('until', time());
+		if (!$since) {
 			return $this->error_response("Missing `since` parameter");
-		}
-		if(!$until) {
-			$until = time();
 		}
 
 		return $this->response($this->api()->orders($since, $until));
@@ -269,7 +269,7 @@ class DispatcherAPIController extends Controller
 		$name = $req->request->get('name');
 		$pass = $req->request->get('password');
 		$token = $this->api()->getToken($name, $pass);
-		if(!$token) {
+		if (!$token) {
 			return $this->error_response('Wrong login/password');
 		}
 		return $this->response([
