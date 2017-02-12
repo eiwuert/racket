@@ -620,20 +620,6 @@ class DispatcherAPI
 		);
 	}
 
-	/*
-	 * Returns service log messages for last `timeRange` seconds
-	 */
-	function getLastServiceMessages($timeRange)
-	{
-		return $this->db->fetchAll("
-			SELECT
-				message_id, `text`,
-				UNIX_TIMESTAMP(t) AS t
-			FROM taxi_logs
-			WHERE TIMESTAMPDIFF(SECOND, t, NOW()) <= ?
-			ORDER BY message_id", [$timeRange]);
-	}
-
 	function getQueuesSnapshot()
 	{
 		$q = "

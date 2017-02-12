@@ -239,7 +239,25 @@ class DispatcherAPIController extends Controller
 			return $this->error_response('Unauthorized');
 		}
 		$timeRange = $req->query->get('timeRange');
-		return $this->response($this->api()->getLastServiceMessages($timeRange));
+		$cutoff = new \DateTime();
+		$cutoff->setTimestamp(time() - $timeRange);
+
+		$qb = $this->getDoctrine()->getEntityManager()->createQueryBuilder();
+		$qb->select('msg')
+			->from('AppBundle:ServiceMessage', 'msg')
+			->where('msg.datetime >= :cutoff')
+			->setParameter('cutoff', $cutoff);
+		$list = $qb->getQuery()->getResult();
+
+		$result = [];
+		foreach($list as $msg) {
+			$result[] = [
+				'message_id' => $msg->getId(),
+				'text' => $msg->getText(),
+				't' => $msg->getDatetime()->getTimestamp()
+			];
+		}
+		return $this->response($result);
 	}
 
 	/**
