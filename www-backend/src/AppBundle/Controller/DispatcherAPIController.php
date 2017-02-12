@@ -287,4 +287,21 @@ class DispatcherAPIController extends Controller
 
 		return $this->response($this->api()->orders($since, $until));
 	}
+
+	/**
+	 * @Route("/dx/dispatcher/login")
+	 * @Method("POST")
+	 */
+	function login(Request $req)
+	{
+		$name = $req->request->get('name');
+		$pass = $req->request->get('password');
+		$token = $this->api()->getToken($name, $pass);
+		if(!$token) {
+			return $this->error_response('Wrong login/password');
+		}
+		return $this->response([
+			'token' => $token
+		]);
+	}
 }

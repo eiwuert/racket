@@ -17,9 +17,10 @@ import http from '../lib/http.js';
 import Fare from './obj/fare.js';
 import Address from './obj/address.js';
 
-function DispatcherClient()
+function DispatcherClient(params)
 {
 	var url = "/dx/dispatcher";
+	var {token} = params;
 
 	/*
 	 * Dispatcher events.
@@ -70,17 +71,8 @@ function DispatcherClient()
 		listeners.call( "sync" );
 	});
 
-	/*
-	 * Get a token, then start messaging.
-	 */
-	http.get('/dx/token')
-		.then(response => {
-			this.dx.token = response.token;
-			conn.open("ws://taxi.loc:8080/conn?token=" + response.token);
-		})
-		.catch(function(error) {
-			alert("Could not obtain a session token: " + error);
-		});
+	this.dx.token = token;
+	conn.open("ws://taxi.loc:8080/conn?token=" + token);
 
 	function init( msg )
 	{

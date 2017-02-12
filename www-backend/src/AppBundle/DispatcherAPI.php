@@ -669,4 +669,32 @@ class DispatcherAPI
 			AND phone LIKE ?
 			LIMIT 10", ['%'.$nameFilter.'%', '%'.$phoneFilter.'%']);
 	}
+
+	function getToken($name, $password)
+	{
+		$row = $this->db->fetchAssoc("
+			SELECT acc_id, password_hash
+			FROM taxi_accounts
+			WHERE `type` = 'dispatcher'
+			AND deleted = 0
+			AND login = ?", [$name]);
+		if(!$row) return null;
+		if(!password_verify($password, $row['password_hash'])) {
+			return null;
+		}
+		$acc_id = $row['acc_id'];
+		return $this->token($acc_id);
+	}
+
+	private function token($acc_id)
+	{
+		$token = md5(uniqid( true ));
+		$this->db->executeUpdate("
+			UPDATE taxi_accounts
+			SET
+				token = ?,
+				token_expires = DATE_ADD(NOW(), INTERVAL 10 HOUR)
+			WHERE acc_id = ?", [$token, $acc_id]);
+		return $token;
+	}
 }
