@@ -13,7 +13,9 @@ class DispatcherAPIController extends Controller
 {
 	private function api()
 	{
-		return new DispatcherAPI($this->get('database_connection'));
+		return new DispatcherAPI(
+			$this->get('database_connection'),
+			$this->getDoctrine());
 	}
 
 	private function accId(Request $req)
@@ -60,19 +62,12 @@ class DispatcherAPIController extends Controller
 		if (!$this->accId($req)) {
 			return $this->error_response('Unauthorized');
 		}
+
 		$nameFilter = $req->query->get('nameFilter');
 		$phoneFilter = $req->query->get('phoneFilter');
 
-		$qb = $this->getDoctrine()->getEntityManager()->createQueryBuilder();
-		$qb->select('c')
-			->from('AppBundle:Customer', 'c')
-			->where('c.name LIKE :nameFilter')
-			->andWhere('c.phone LIKE :phoneFilter')
-			->setParameter('nameFilter', '%'.$nameFilter.'%')
-			->setParameter('phoneFilter', '%'.$phoneFilter.'%')
-			->setMaxResults(10);
-		$list = $qb->getQuery()->getArrayResult();
-		return $this->response($list);
+		$q = $this->api()->findCustomers($nameFilter, $phoneFilter);
+		return $this->response($q->getArrayResult());
 	}
 
 	/**
@@ -98,6 +93,9 @@ class DispatcherAPIController extends Controller
 	/**
 	 * @Route("/dx/dispatcher/customer-info")
 	 * @Method("GET")
+	 *
+	 * Given a phone, returns customer record with a list of addresses
+	 * from their orders.
 	 */
 	function customerInfo(Request $req)
 	{

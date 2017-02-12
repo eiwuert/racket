@@ -4,9 +4,14 @@ namespace AppBundle;
 
 class DispatcherAPI
 {
-	function __construct($db)
+	function __construct($db, $doctrine)
 	{
 		$this->db = $db;
+		$this->doctrine = $doctrine;
+	}
+	
+	private function getDoctrine() {
+		return $this->doctrine;
 	}
 
 	function checkToken($token)
@@ -21,6 +26,19 @@ class DispatcherAPI
 				'type' => 'dispatcher'
 				]
 		);
+	}
+
+	function findCustomers($nameFilter, $phoneFilter)
+	{
+		$qb = $this->getDoctrine()->getEntityManager()->createQueryBuilder();
+		$qb->select('c')
+			->from('AppBundle:Customer', 'c')
+			->where('c.name LIKE :nameFilter')
+			->andWhere('c.phone LIKE :phoneFilter')
+			->setParameter('nameFilter', '%'.$nameFilter.'%')
+			->setParameter('phoneFilter', '%'.$phoneFilter.'%')
+			->setMaxResults(10);
+		return $qb->getQuery();
 	}
 
 	function driverPosition($driver_id)
@@ -107,24 +125,28 @@ class DispatcherAPI
 
 	function customerInfo($phone)
 	{
-		$info = $this->db->fetchAssoc("
-			SELECT customer_id, name, blacklist
-			FROM taxi_customers
-			WHERE phone = ?", [$phone]);
+		$db = $this->doctrine;
 
-		if (isset($info['customer_id'])) {
-			$orders = $this->db->fetchAll("
-				SELECT DISTINCT o.src_addr
-				FROM taxi_orders o
-				WHERE customer_id = ?
-				ORDER BY o.time_created DESC
-				LIMIT 5", [$info['customer_id']]
-			);
-			$info['addresses'] = array();
-			foreach ($orders as $r) {
-				$info['addresses'][] = $this->parse_address($r['src_addr']);
-			}
+		$customer = $db->getRepository('AppBundle:Customer')->findOneBy(['phone' => $phone]);
+		if (!$customer) {
+			return null;
 		}
+
+		$em = $db->getEntityManager();
+		$q = $em->createQuery('
+			SELECT DISTINCT o.address
+			FROM AppBundle:Order o
+			WHERE o.customer = :customer')
+			->setParameter('customer', $customer);
+
+		$r = $q->getResult();
+		$addrs = array_map([$this, 'parse_address'], array_column($r, 'address'));
+
+		$info = [
+			'customer_id' => $customer->getId(),
+			'name' => $customer->getName(),
+			'addresses' => $addrs
+		];
 		return $info;
 	}
 
