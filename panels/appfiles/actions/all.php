@@ -17,21 +17,6 @@ function service_login()
 	redirect( url_t( "service-panel:" ) );
 }
 
-function dispatcher_login()
-{
-	$login = Vars::post( 'login' );
-	$pass = Vars::post( 'password' );
-
-	$acc_id = taxi_accounts::check( 'dispatcher', $login, $pass );
-	if( !$acc_id ) {
-		return false;
-	}
-
-	taxi_logs::log_in( $acc_id, $_SERVER['REMOTE_ADDR'] );
-	user::set( 'dispatcher', $acc_id, $login );
-	return true;
-}
-
 // TODO: separate service_login and admin_login.
 function login()
 {
