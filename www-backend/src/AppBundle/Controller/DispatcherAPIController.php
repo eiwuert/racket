@@ -51,16 +51,28 @@ class DispatcherAPIController extends Controller
 	/**
 	 * @Route("/dx/dispatcher/customers")
 	 * @Method("GET")
+	 *
+	 * Returns list of customers matching the given phone-name filter
+	 * given as query variables.
 	 */
 	function getCustomers(Request $req)
 	{
 		if (!$this->accId($req)) {
 			return $this->error_response('Unauthorized');
 		}
-
 		$nameFilter = $req->query->get('nameFilter');
 		$phoneFilter = $req->query->get('phoneFilter');
-		return $this->response($this->api()->getCustomers($nameFilter, $phoneFilter));
+
+		$qb = $this->getDoctrine()->getEntityManager()->createQueryBuilder();
+		$qb->select('c')
+			->from('AppBundle:Customer', 'c')
+			->where('c.name LIKE :nameFilter')
+			->andWhere('c.phone LIKE :phoneFilter')
+			->setParameter('nameFilter', '%'.$nameFilter.'%')
+			->setParameter('phoneFilter', '%'.$phoneFilter.'%')
+			->setMaxResults(10);
+		$list = $qb->getQuery()->getArrayResult();
+		return $this->response($list);
 	}
 
 	/**
