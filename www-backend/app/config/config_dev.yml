@@ -4,7 +4,7 @@ imports:
 doctrine:
         dbal:
                 driver: pdo_mysql
-                dbname: ontax
+                dbname: racket
                 user: root
                 password: root
                 charset: UTF8
