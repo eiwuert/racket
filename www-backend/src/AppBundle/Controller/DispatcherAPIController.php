@@ -96,40 +96,6 @@ class DispatcherAPIController extends Controller
 	}
 
 	/**
-	 * @Route("/dx/dispatcher/cmd")
-	 * @Method("POST")
-	 */
-	function cmd(Request $req)
-	{
-		$acc_id = $this->accId($req);
-		if (!$acc_id) {
-			return $this->error_response('Unauthorized');
-		}
-
-		$cmd = $req->request->get('cmd');
-		$datastr = $req->request->get('data');
-		if (!$datastr)
-			$datastr = '{}';
-		if (!$cmd) {
-			return $this->error_response("Missing cmd");
-		}
-		$data = json_decode($datastr, true);
-
-		$client = $this->get('dispatcher_client');
-		$ok = $client->connect();
-		if (!$ok) {
-			return $this->error_response('Could not connect');
-		}
-		if (!$client->login($acc_id)) {
-			return $this->error_response('Could not login');
-		}
-		if (!$client->cmd($cmd, $data)) {
-			return $this->error_response($client->error());
-		}
-		return $this->response(null);
-	}
-
-	/**
 	 * @Route("/dx/dispatcher/customer-info")
 	 * @Method("GET")
 	 */
