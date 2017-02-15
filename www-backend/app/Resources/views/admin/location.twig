@@ -1,0 +1,52 @@
+{% extends 'admin.html.twig' %}
+
+{% block assets %}
+	<script src="{{asset('res/service/pages.js?page=location')}}"></script>
+{% endblock %}
+
+{% block body %}
+	
+<h1>Объект</h1>
+
+<div class="columns">
+	<div class="stdcol">
+		<form method="post">
+			<div>
+				<label>Название</label>
+				<input name="name" value="{{location.name}}" required>
+			</div>
+			<fieldset>
+				<legend>Адрес</legend>
+
+				<div><small>(Левый щелчок на карте)</small></div>
+
+				<label>Координаты</label>
+				<input name="a-latitude" value="{{location.latitude}}" size="10">
+				<input name="a-longitude" value="{{location.longitude}}" size="10">
+
+				<label>Город</label>
+				<input name="a-place" value="{{address.place}}">
+
+				<label>Улица</label>
+				<input name="a-street" value="{{address.format_street}}">
+
+				<div class="columns compact">
+					<div>
+						<label>Дом</label>
+						<input name="a-house" value="{{address.house_number}}" size="3">
+					</div>
+					<div>
+						<label>Корпус</label>
+						<input name="a-building" value="{{address.house_building}}" size="3">
+					</div>
+				</div>
+			</fieldset>
+			<button type="submit">Сохранить</button>
+		</form>
+	</div>
+	<div>
+		<div id="map"></div>
+	</div>
+</div>
+
+{% endblock %}

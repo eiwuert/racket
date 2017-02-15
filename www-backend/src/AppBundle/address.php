@@ -41,6 +41,30 @@ class address
 		}
 		return $addr;
 	}
+	
+	/*
+	 * Takes address parts (a map with keys 'place', 'street', 'house',
+	 * 'building', 'entrance') and returns the address as string in the
+	 * standard form.
+	 */
+	static function write($arr)
+	{
+		$keys = array('house', 'building', 'entrance', 'apartment');
+		foreach ($keys as $key) {
+			if (!array_key_exists($key, $arr)) {
+				$arr[$key] = '';
+			}
+		}
+
+		$addr = new address();
+		$addr->set_place($arr['place']);
+		$addr->set_street($arr['street']);
+		$addr->set_house($arr['house']);
+		$addr->set_building($arr['building']);
+		$addr->house_entrance = $arr['entrance'];
+		$addr->apartment = $arr['apartment'];
+		return $addr->format_std();
+	}
 
 	public static $street_types = array(
 		'улица' => 'ул.',

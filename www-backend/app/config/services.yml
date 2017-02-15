@@ -15,3 +15,8 @@ services:
         dispatcher_client:
                 class: AppBundle\dispatcher_client
                 arguments: ["%server_addr%"]
+
+        controller_listener:
+                class: AppBundle\ControllerListener
+                tags:
+                        - { name: kernel.event_listener, event: kernel.controller, method: event }

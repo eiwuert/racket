@@ -1,0 +1,26 @@
+{% if group %}
+	<h1>Автопарк &laquo;{{group.name}}&raquo;</h1>
+{% else %}
+	<h1>Новый автопарк</h1>
+{% endif %}
+
+<form method="post" action="{{path('carGroupsList')}}">
+	<div>
+		<label>Название</label>
+		<input name="group-name" value="{{group.name|default('')}}" required>
+	</div>
+	<fieldset>
+		<legend>Доступные тарифы</legend>
+		{% for fare in fares %}
+			<label>
+				{% if group and (fare in group.fares) %}
+					<input type="checkbox" name="fare-id[]" value="{{fare.id}}" checked>
+				{% else %}
+					<input type="checkbox" name="fare-id[]" value="{{fare.id}}">
+				{% endif %}
+				{{fare.name}}
+			</label>
+		{% endfor %}
+	</fieldset>
+	<button type="submit">Сохранить</button>
+</form>

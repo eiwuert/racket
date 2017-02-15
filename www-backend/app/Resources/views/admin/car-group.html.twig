@@ -1,0 +1,5 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+	{{include('admin/car-group-form.html.twig', {'group': group, 'fares': fares})}}
+{% endblock %}

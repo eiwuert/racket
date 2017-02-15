@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Fare
 {
 	/**
-	 * @ORM\Column(type="integer", name="acc_id")
+	 * @ORM\Column(type="integer", name="fare_id")
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
@@ -29,13 +29,13 @@ class Fare
 	private $startPrice;
 
 	/**
-	 * @ORM\Column(type="integer")
+	 * @ORM\Column(type="integer", name="minimal_price")
 	 * @var type int
 	 */
 	private $minPrice;
 
 	/**
-	 * @ORM\Column(type="integer")
+	 * @ORM\Column(type="integer", name="kilometer_price")
 	 * @var type int
 	 */
 	private $kmPrice;
@@ -45,6 +45,16 @@ class Fare
 	 * @var type int
 	 */
 	private $hourPrice;
+	
+	/**
+	 * @ORM\Column(type="boolean")
+	 */
+	private $deleted = false;
+
+	/**
+	 * @ORM\ManyToMany(targetEntity="CarGroup", mappedBy="fares")
+	 */
+	private $carGroups;
 
 	/**
 	 * Get id
@@ -175,4 +185,69 @@ class Fare
 	{
 		return $this->hourPrice;
 	}
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->carGroups = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add carGroup
+     *
+     * @param \AppBundle\Entity\CarGroup $carGroup
+     *
+     * @return Fare
+     */
+    public function addCarGroup(\AppBundle\Entity\CarGroup $carGroup)
+    {
+        $this->carGroups[] = $carGroup;
+
+        return $this;
+    }
+
+    /**
+     * Remove carGroup
+     *
+     * @param \AppBundle\Entity\CarGroup $carGroup
+     */
+    public function removeCarGroup(\AppBundle\Entity\CarGroup $carGroup)
+    {
+        $this->carGroups->removeElement($carGroup);
+    }
+
+    /**
+     * Get carGroups
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCarGroups()
+    {
+        return $this->carGroups;
+    }
+
+    /**
+     * Set deleted
+     *
+     * @param boolean $deleted
+     *
+     * @return Fare
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return boolean
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
 }

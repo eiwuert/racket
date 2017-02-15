@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="{{asset('res/lib/admin.css')}}">
+<title>Вход</title>
+<style>
+body {
+	text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>Вход</h1>
+
+<form method="post" id="login-form">
+	<div>
+		<label for="i-login">Имя пользователя</label>
+		<input name="_username" id="i-login" required value="{{name}}" autofocus>
+	</div>
+	<div>
+		<label for="i-password">Пароль</label>
+		<input name="_password" id="i-password" type="password">
+	</div>
+	<button type="submit">Войти</button>
+</form>
+
+</body>
+</html>

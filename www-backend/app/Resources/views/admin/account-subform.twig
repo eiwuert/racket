@@ -1,0 +1,31 @@
+<tr>
+	<td>Имя пользователя</td>
+	<td>
+		<input name="login" value="{{account.login}}" required>
+	</td>
+</tr>
+<tr>
+	<td>Позывной</td>
+	<td><input name="call_id" value="{{account.callId}}" required></td>
+</tr>
+<tr>
+	<td>
+		{% if account.id %}
+			<input type="checkbox" id="cb-change-password"
+				name="set-password" value="1"
+				class="ui" data-switch="password-container">
+			<label for="cb-change-password">Сменить пароль</label>
+		{% else %}
+			<label>Пароль</label>
+			<input type="hidden" name="set-password" value="1">
+		{% endif %}
+	</td>
+	<td id="password-container">
+		<input name="password" value="" placeholder="Новый пароль">
+	</td>
+</tr>
+<tr>
+	<td>Имя</td>
+	<td><input name="acc-name" value="{{driver.account.name}}">
+		<small>Пример: Агафонов В. А.</small></td>
+</tr>

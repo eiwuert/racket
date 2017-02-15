@@ -1,0 +1,25 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+
+<h1>Диспетчер {{dispatcher.name}}</h1>
+
+<form method="post">
+	<input type="hidden" name="id" value="{{dispatcher.id}}">
+
+	<table>
+		{{ include('admin/account-subform.twig', {'account': dispatcher}) }}
+		<tr>
+			<td><label>Имя</label></td>
+			<td>
+				<input name="i-name" value="{{dispatcher.name}}">
+				{% if not dispatcher.id %}
+					<small>Пример: Агафонов В. А.</small>
+				{% endif %}
+			</td>
+		</tr>
+	</table>
+	<button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

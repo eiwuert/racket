@@ -1,0 +1,58 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+<h1>Редактирование автомобиля</h1>
+
+<form method="post">
+	<table>
+		<tr>
+			<td><label>Марка</label></td>
+			<td><input name="car-name" value="{{car.name}}" required></td>
+		</tr>
+		<tr>
+			<td><label>Тип кузова</label></td>
+			<td><input name="car-body_type" value="{{car.bodyType}}" required></td>
+		</tr>
+		<tr>
+			<td><label>Цвет</label></td>
+			<td><input name="car-color" value="{{car.color}}"></td>
+		</tr>
+		<tr>
+			<td><label>Гос. номер</label></td>
+			<td><input name="car-plate" value="{{car.plate}}"
+			pattern="[A-z\- \d]*">
+		<small>Цифры, пробел, дефис и латинские буквы. Пример: 7TBX1234</small></td>
+		</tr>
+		<tr>
+			<td><label>Класс</label></td>
+			<td><input name="class" value="{{car.class}}"></td>
+		</tr>
+		<tr>
+			<td><label>Водитель</label></td>
+			<td>
+				<select name="driver-id">
+					<option value="">нет</option>
+					{% if car.driver %}
+						<option selected value="{{car.driver.id}}">{{car.driver.account.callId}}</option>
+					{% endif %}
+					{% for d in freeDrivers %}
+						<option value="{{d.id}}">{{d.account.callId}}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><label>Группа</label></td>
+			<td>
+				<select name="group-id">
+					{% for g in groups %}
+						<option value="{{g.id}}" {{car.id and (g.id == car.group.id) ? 'selected' : ''}}>{{g.name}}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+	</table>
+	<button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

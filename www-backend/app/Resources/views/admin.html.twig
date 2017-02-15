@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Панель управления</title>
+
+<link rel="stylesheet" href="{{ asset('res/lib/admin.css') }}">
+<link rel="stylesheet" href="{{ asset('res/service/main.css') }}">
+
+<script src="{{ asset('res/lib/jquery.js') }}"></script>
+<script src="{{ asset('res/lib/leaflet/leaflet.js') }}"></script>
+<script src="{{ asset('res/lib/html5-forms.js') }}"></script>
+<script src="{{ asset('res/lib/tabs.js') }}"></script>
+<script src="{{ asset('res/service/ui.js') }}"></script>
+{% block assets %}{% endblock %}
+</head>
+<body>
+
+<header>
+	<nav>
+		<h1>Панель управления</h1>
+		<ul>
+			<li><a href="{{path('carsList')}}">Автомобили</a></li>
+			<li><a href="{{path('driversList')}}">Водители</a></li>
+			<li><a href="{{path('faresList')}}">Тарифы</a></li>
+			<li><a href="{{path('dispatchersList')}}">Диспетчеры</a></li>
+			<li><a href="{{path('queuesList')}}">Очереди</a></li>
+			<li><a href="{{path('locationsList')}}">Объекты</a></li>
+			<li><a href="{{path('reportsList')}}">Отчёты</a></li>
+			<li><a href="{{path('settings')}}">Настройки</a></li>
+			<li><a href="{{path('changePassword')}}">Смена пароля</a></li>
+			<li><a href="/service/logout">Выход</a></li>
+		</ul>
+	</nav>
+</header>
+
+<div id="content" class="ui-onload">
+	{% if errors|default('') %}
+		{% for e in errors %}
+			{{e}}
+		{% endfor %}
+	{% endif %}
+
+	{% block body %}{% endblock %}
+</div>
+</body>
+</html>
+

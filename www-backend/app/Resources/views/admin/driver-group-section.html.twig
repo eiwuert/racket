@@ -1,0 +1,36 @@
+<section>
+	<h1>{{group.name}} ({{group.drivers|length}})</h1>
+
+	<a class="button edit" href="{{ path('driver-group', {id: group.id}) }}">Редактировать бригаду &laquo;{{group.name}}</a>
+		<?php if( $num == 0 ) {
+			$aurl = aurl( 'delete_driver_group '.$g['group_id'] );
+			?>
+			<a class="button delete" href="<?= $aurl ?>">Удалить бригаду &laquo;<?= $g['name'] ?>&raquo;</a>
+
+	<table class="items ui-compactable">
+		<tr>
+			<th>Системное имя</th>
+			<th>Версия приложения</th>
+			<th>Позывной</th>
+			<th>Блокировка</th>
+			<th>Имя</th>
+			<th>Автомобиль</th>
+			<th>Номерной знак</th>
+			<th></th>
+			<th></th>
+		</tr>
+		{% for driver in group.getDrivers %}
+			<tr>
+				<td>{{driver.account.login}}</td>
+				<td>{{driver.clientVersion}}</td>
+				<td>{{driver.account.callId}}</td>
+				<td>{{driver.isBlocked? driver.blockUntil.format('d.m.Y H:i') : ''}}</td>
+				<td>{{driver.account.name}}</td>
+				<td>{{driver.car.name}}</td>
+				<td>{{driver.car.plate}}</td>
+				<td><a href="{{path('driver', {'id': driver.id})}}" class="edit">редактировать</a></td>
+				<td><a href="%s" class="delete">удалить</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+</section>

@@ -1,0 +1,64 @@
+{% extends 'admin.html.twig' %}
+
+{% block assets %}
+	<script src="{{asset('res/service/pages.js?page=settings')}}"></script>
+{% endblock %}
+
+{% block body %}
+<h1>Настройки</h1>
+
+<form method="post" action="<?= aurl( 'save_service_settings' ) ?>">
+<div class="ui-tabs">
+<section>
+	<h1>Служба</h1>
+
+	<table>
+	<tr><td>Город по умолчанию</td>
+		<td><input name="s-default_city" value="<?= $S['default_city'] ?>"></td></tr>
+	</table>
+</section>
+<section>
+	<h1>Раздача заказов</h1>
+	<table>
+		<tr><td>Количество опрашиваемых водителей в очереди</td>
+			<td><input type="number" min="1" step="1"
+				name="s-queue_drivers"
+				value="<?= $S['queue_drivers'] ?>"></td></tr>
+		<tr><td>Радиус поиска свободных водителей</td>
+			<td><input type="number" min="0" step="100"
+				name="s-search_radius" value="<?= $S['search_radius'] ?>"> м</td></tr>
+		<tr><td>Количество опрашиваемых свободных водителей</td>
+			<td><input type="number" min="0" step="1"
+				name="s-search_number" value="<?= $S['search_number'] ?>"></td></tr>
+		<tr><td>Время принятия заказа при прямой рассылке</td>
+			<td><input size="2" name="s-accept_timeout"
+				value="<?= $S['accept_timeout'] ?>"> с</td></tr>
+		<tr><td>Использовать &laquo;эфир&raquo; для заказов без очереди</td>
+			<td><?= HTMLSnippets::checkbox( 's-pool_enabled_city',
+				$S['pool_enabled_city'], '1' ) ?></td></tr>
+		<tr><td>Использовать &laquo;эфир&raquo; после опроса очередей</td>
+			<td><?= HTMLSnippets::checkbox( 's-pool_enabled_queues',
+				$S['pool_enabled_queues'], '1' ) ?></td></tr>
+		<tr><td>Длительность нахождения заказа в &laquo;эфире&raquo;</td>
+			<td><input size="2" name="s-publish_duration"
+				value="<?= $S['publish_duration'] ?>"> с</td></tr>
+	</table>
+</section>
+<section>
+	<h1>Работа с очередями</h1>
+
+	<table>
+		<tr><td>Отправлять водителю диалог при переназначении его диспетчером в другую очередь</td>
+			<td><input type="checkbox" name="s-queue_dialogs" value="1"
+					<?= $S['queue_dialogs'] ? 'checked' : '' ?>
+					class="ui" data-switch="queue-dialog-settings"></td></tr>
+		<tr id="queue-dialog-settings"><td>Время диалога о смене очереди</td>
+			<td><input size="2" name="s-queue_dialog_time"
+				value="<?= $S['queue_dialog_time'] ?>"> с</td></tr>
+	</table>
+</section>
+</div>
+<button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

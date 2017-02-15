@@ -1,0 +1,18 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+	<p>
+		<a class="button" href="<?= url( 'driver' ) ?>">Добавить водителя</a>
+		<a class="button" href="<?= url( 'driver-types' ) ?>">Типы водителей</a>
+	</p>
+
+	<div class="ui-tabs">
+		{% for group in driverGroups %}
+			{{ include('admin/driver-group-section.html.twig', {'group': group}) }}
+		{% endfor %}
+		<section>
+			<h1>+ новая бригада</h1>
+			<?= template( '_brigade-edit', array( 'group_id' => null ) ) ?>
+		</section>
+	</div>
+{% endblock %}

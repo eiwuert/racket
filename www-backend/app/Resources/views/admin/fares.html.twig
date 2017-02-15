@@ -1,0 +1,38 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+<h1>Тарифы</h1>
+
+<p><a class="button" href="<?= url( 'fare' ) ?>">Добавить тариф</a></p>
+
+<form method="post">
+	<table class="items">
+		<tr>
+			<th></th>
+			<th>Название</th>
+			<th>Посадка</th>
+			<th>Минимум</th>
+			<th>Километр</th>
+			<th>Час простоя</th>
+			<th></th>
+		</tr>
+		{% for fare in fares %}
+			<tr>
+				<td><input type="checkbox" name="selection[]" value="{{fare.id}}"></td>
+				<td>{{fare.name}}</td>
+				<td>{{fare.startPrice}}</td>
+				<td>{{fare.minPrice}}</td>
+				<td>{{fare.kmPrice}}</td>
+				<td>{{fare.hourPrice}}</td>
+				<td><a href="{{path('fare', {'id': fare.id})}}" class="edit">Редактировать</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+	<label>Операция над выбранными тарифами:</label>
+	<select name="operation" required>
+		<option value=""></option>
+		<option value="delete">Удалить</option>
+	</select>
+	<button type="submit">Выполнить</button>
+</form>
+{% endblock %}

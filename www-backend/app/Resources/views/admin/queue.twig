@@ -1,0 +1,86 @@
+{% extends 'admin.html.twig' %}
+
+{% block assets %}
+	<script src="{{asset('res/service/pages.js?page=queue')}}"></script>
+{% endblock %}
+
+{% block body %}
+
+<h1>Очередь</h1>
+
+<div class="columns">
+	<div class="stdcol">
+<form method="post">
+	<div class="ui-tabs">
+		<section>
+			<h1>Параметры</h1>
+			<div>
+				<label>Название</label>
+				<input name="name" value="{{queue.name}}" required>
+			</div>
+			<div>
+				<label>Порядковый номер</label>
+				<input type="number" min="0" step="1" size="2"
+					name="order" value="{{queue.order}}">
+			</div>
+			<fieldset>
+				<legend>Доступ водителей</legend>
+				<div>
+					<label>Группы</label>
+					{% for g in driverGroups %}
+						<div>
+							<label>
+								<input type="checkbox"
+								       name="driver_groups[]"
+								       value="{{g.id}}"
+								       {{g in queue.driverGroups? 'checked' : ''}}>
+								{{g.name}}
+							</label>
+						</div>
+					{% endfor %}
+				</div>
+			</fieldset>
+		</section>
+		<section>
+			<h1>Район действия</h1>
+
+			<fieldset>
+				<legend>Адрес стоянки машин</legend>
+
+				<div><small>(Левый щелчок на карте)</small></div>
+
+				<input name="latitude" value="{{queue.latitude}}">
+				<input name="longitude" value="{{queue.longitude}}">
+
+				<label>Город</label>
+				<input name="place" value="{{addr.place}}">
+				<label>Улица</label>
+				<input name="street" value="{{addr.format_street}}">
+				<div class="columns compact">
+					<div>
+						<label>Дом</label>
+						<input name="house" value="{{addr.house_number}}" size="3">
+					</div>
+					<div>
+						<label>Корпус</label>
+						<input name="building" value="{{addr.house_building}}" size="3">
+					</div>
+				</div>
+				<div>
+					<label>Радиус действия очереди при поиске по координатам</label>
+					<input type="number" min="0" step="100" size="4"
+						name="radius" value="{{queue.radius}}"> м
+				</div>
+			</fieldset>
+		</section>
+	</div>
+
+	<button type="submit">Сохранить</button>
+</form>
+	</div>
+	<div>
+		<div id="map"></div>
+	</div>
+</div>
+
+{% endblock %}

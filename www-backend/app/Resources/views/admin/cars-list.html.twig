@@ -1,0 +1,67 @@
+{% extends 'admin.html.twig' %}
+
+{% block assets %}
+	<script src="{{asset('res/service/pages.js?page=cars')}}"></script>
+{% endblock %}
+
+{% block body %}
+<h1>Автомобили</h1>
+
+<p><a class="button" href="{{path('newCar')}}">Добавить автомобиль</a></p>
+
+<div class="ui-tabs">
+	{% for group in groups %}
+		<section>
+			<h1>{{group.name}} ({{group.cars|length}})</h1>
+
+			<a class="button" href="{{path('carGroup', {'id': group.id})}}">
+				Редактировать автопарк &laquo;{{group.name}}&raquo;</a>
+
+			{% if group.cars is empty %}
+				<form method="post" action="{{path('deleteCarGroup', {'id': group.id})}}">
+					<button type="submit" class="delete">Удалить группу &laquo;{{group.name}}&raquo;</button>
+				</form>
+			{% else %}
+				<form method="post">
+					<table class="items">
+						<tr>
+							<th></th>
+							<th>Марка</th>
+							<th>Водитель</th>
+							<th>Номер</th>
+							<th>Цвет</th>
+							<th>Класс</th>
+							<th>Тип кузова</th>
+							<th></th>
+						</tr>
+						{% for car in group.cars %}
+						<tr>
+							<td><input type="checkbox" name="selection[]" value="{{car.id}}"></td>
+							<td>{{car.name}}</td>
+							<td>{{car.driver and car.driver.account ? car.driver.account.callId : ''}}</td>
+							<td>{{car.plate}}</td>
+							<td>{{car.color}}</td>
+							<td>{{car.class}}</td>
+							<td>{{car.bodyType}}</td>
+							<td><a href="{{path('carEdit', {'id': car.id})}}" class="edit">редактировать</a></td>
+						</tr>
+						{% endfor %}
+					</table>
+
+					<label>Операция над выбранными автомобилями:</label>
+					<select name="operation" required>
+						<option value=""></option>
+						<option value="delete">Удалить</option>
+					</select>
+					<button type="submit">Выполнить</button>
+				</form>
+			{% endif %}
+		</section>
+	{% endfor %}
+	<section>
+		<h1>+ Новая группа</h1>
+		{{include('admin/car-group-form.html.twig', {'group': null, 'fares': fares})}}
+	</section>
+</div>
+
+{% endblock %}

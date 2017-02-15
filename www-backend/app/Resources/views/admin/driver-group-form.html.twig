@@ -1,0 +1,28 @@
+{% if group.id %}
+	<h1>Группа &laquo;{{group.name}}&raquo;</h1>
+{% else %}
+	<h1>Новая группа</h1>
+{% endif %}
+
+<form method="post">
+	<div>
+		<label>Название</label>
+		<input name="group-name" value="{{group.name}}" required>
+	</div>
+	<fieldset>
+		<legend>Доступные очереди</legend>
+		{% for queue in queues %}
+		<div>
+			<label>
+				{% if group.queues.contains(queue) %}
+					<input type="checkbox" checked name="queues[]" value="{{queue.id}}">
+				{% else %}
+					<input type="checkbox" name="queues[]" value="{{queue.id}}">
+				{% endif %}
+				{{queue.name}}
+			</label>
+		</div>
+		{% endfor %}
+	</fieldset>
+	<button type="submit">Сохранить</button>
+</form>

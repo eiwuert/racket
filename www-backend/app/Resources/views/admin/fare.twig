@@ -1,0 +1,44 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+
+{% if fare.id %}
+	<h1>Тариф &laquo;{{fare.name}}&raquo;</h1>
+{% else %}
+	<h1>Новый тариф</h1>
+{% endif %}
+
+<form method="post">
+	<input type="hidden" name="id" value="{{fare.id}}">
+	<div>
+		<label>Название</label>
+		<input name="name" value="{{fare.name}}" required>
+	</div>
+	<div>
+		<label>Посадка</label>
+		<input type="number" size="6" min="0" step="100"
+			name="start_price"
+			value="{{fare.startPrice}}">
+	</div>
+	<div>
+		<label>Абонирование</label>
+		<input type="number" size="6" min="0" step="100"
+			name="minimal_price"
+			value="{{fare.minPrice}}">
+	</div>
+	<div>
+		<label>За километр пути</label>
+		<input type="number" size="6" min="0" step="100"
+			name="kilometer_price"
+			value="{{fare.kmPrice}}">
+	</div>
+	<div>
+		<label>За час простоя</label>
+		<input type="number" size="6" min="0" step="100"
+			name="slow_hour_price"
+			value="{{fare.hourPrice}}">
+	</div>
+	<button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

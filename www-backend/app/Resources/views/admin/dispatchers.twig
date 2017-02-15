@@ -1,0 +1,26 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+<h1>Диспетчеры</h1>
+
+<a href="<?= url( 'dispatcher' ) ?>" class="button">Добавить диспетчера</a>
+
+<table class="items">
+	<tr>
+		<th>Позывной</th>
+		<th>Системное имя</th>
+		<th>Имя</th>
+		<th></th>
+		<th></th>
+	</tr>
+	{% for d in dispatchers %}
+		<tr>
+			<td>{{d.callId}}</td>
+			<td>{{d.login}}</td>
+			<td>{{d.name}}</td>
+			<td><a href="{{path('dispatcher', {'id': d.id})}}" class="edit">Редактировать</a></td>
+			<td><a href="%s" class="delete">Удалить</a></td>
+		</tr>
+	{% endfor %}
+</table>
+{% endblock %}

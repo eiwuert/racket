@@ -8,7 +8,7 @@
 
 function serve_sym()
 {
-	$sym = ['/sym/', '/dx/dispatcher/', '/_wdt/', '/_profiler/', '/dispatcher'];
+	$sym = ['/sym/', '/dx/dispatcher/', '/_wdt/', '/_profiler/', '/dispatcher', '/service'];
 
 	$url = $_SERVER['REQUEST_URI'];
 	if (substr($url, -1) != '/') {

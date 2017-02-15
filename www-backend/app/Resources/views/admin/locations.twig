@@ -1,0 +1,40 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+	
+<h1>Объекты</h1>
+
+<p><a class="button" href="<?= url( 'location' ) ?>">Добавить объект</a>
+<a class="button" href="<?= url( 'checkpoint' ) ?>">Добавить контрольный объект</a></p>
+
+<table class="items">
+	<tr>
+		<th>Название</th>
+		<th>Адрес</th>
+		<th>Контакт</th>
+		<th>Комментарии</th>
+		<th></th>
+		<th></th>
+	</tr>
+{% for loc in locations %}
+	{#
+	if( $loc['is_cp'] ) {
+		$name .= ' (контрольный)';
+		$edit = url( 'checkpoint '.$id );
+	}
+	else {
+		$edit = url( 'location '.$id );
+	}
+	#}
+	<tr>
+		<td>{{loc.name}} {{loc.getQueue? '(контрольный)' : ''}}</td>
+		<td>{{loc.address}}</td>
+		<td>{{loc.contactPhone}}</td>
+		<td>{{loc.comments}}</td>
+		<td><a href="{{path('location', {'id': loc.id})}}" class="edit">Редактировать</a></td>
+		<td><a href="'.aurl( 'delete_location '.$id ).'" class="delete">Удалить</a></td>
+	</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

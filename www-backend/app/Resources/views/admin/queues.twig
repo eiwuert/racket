@@ -1,0 +1,26 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+	
+<h1>Очереди</h1>
+
+<p><a class="button" href="<?= url( 'queue' ) ?>">Создать очередь</a></p>
+
+<table class="items">
+	<tr>
+		<th>Порядок</th>
+		<th>Название</th>
+		<th>Стоянка</th>
+		<th></th>
+		<th></th>
+	</tr>
+	{% for q in queues %}
+		<tr>
+			<td>{{q.order}}</td>
+			<td>{{q.name}}</td>
+			<td>{{q.address}}</td>
+			<td><a href="{{path('queue', {'id': q.id})}}" class="edit">Редактировать</a></td>
+			<td><a href="%s" class="delete">Удалить</a></td>
+		</tr>
+	{% endfor %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+
+<h1>Водитель</h1>
+
+<form method="post">
+	<table>
+		{{ include('admin/account-subform.twig', {'account': driver.account}) }}
+		<tr>
+			<td>Бригада</td>
+			<td>
+				<select name="group_id">
+					{% for g in groups %}
+						<option value="{{g.id}}" {{g == driver.group? 'selected' : ''}}>{{g.name}}</option>
+					{% endfor %}
+				</select>
+				<label>
+					<input type="checkbox" name="driver-brig" value="1"
+					       {{driver.isBrig? 'checked' : ''}}>
+					Бригадир
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>Автомобиль</td>
+			<td>
+				<select name="car_id">
+					<option value="">Нет</option>
+					{% if driver.car %}
+						<option selected value="{{driver.car.id}}">{{driver.car.name}} [{{driver.car.plate}}]</option>
+					{% endif %}
+					{% for car in freeCars %}
+						<option value="{{car.id}}">{{car.name}} [{{car.plate}}]</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><label for="cb-fake">Без смартфона (имитация)</label></td>
+			<td><input type="checkbox" name="driver-fake"
+				   id="cb-fake" {{driver.isFake ? 'checked' : ''}}></td>
+		</tr>
+	</table>
+	<button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

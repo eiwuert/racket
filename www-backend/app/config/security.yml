@@ -4,8 +4,16 @@ security:
 
     # http://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
-        in_memory:
-            memory: ~
+        app_accounts:
+                entity:
+                        class: AppBundle:Account
+                        property: login
+#        in_memory: ~
+#            memory:
+#                    users:
+#                            walk:
+#                                    password: 1234
+#                                    roles: 'ROLE_ADMIN'
 
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
@@ -16,9 +24,27 @@ security:
         main:
             anonymous: ~
             # activate different ways to authenticate
+            
+            form_login:
+                    login_path: /service/login
+                    check_path: /service/login
+            logout:
+                    path: /service/logout
+                    target: /service
 
-            # http_basic: ~
+            #http_basic: ~
             # http://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
 
             # form_login: ~
             # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            
+            provider: app_accounts
+
+    access_control:
+            - { path: ^/service/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/service, roles: ROLE_ADMIN }
+            
+    encoders:
+        #Symfony\Component\Security\Core\User\User: plaintext
+        AppBundle\Entity\Account:
+                algorithm: bcrypt
