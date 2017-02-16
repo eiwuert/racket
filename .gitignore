@@ -11,6 +11,7 @@ bower_components/
 vendor/
 panels/appfiles/libs/phpexcel
 
-# Dispatcher app build
-panels/www/res/dispatcher/dispatcher.js
-panels/www/res/dispatcher/dispatcher.css
+# Generated assets
+www/res/dispatcher/dispatcher.js
+www/res/dispatcher/dispatcher.css
+www/res/service/*.js

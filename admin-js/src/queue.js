@@ -1,4 +1,9 @@
-pageFunc( "queue", function()
+import './lib/autocomplete.js';
+import './lib/http.js';
+import './lib/mapdata.js';
+import {AddressInput, CoordsInput, initMap} from './lib/lib.js';
+
+$(document).ready(function()
 {
 	var address = new AddressInput( '' );
 	var pos = new CoordsInput( '' );

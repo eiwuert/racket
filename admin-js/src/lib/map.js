@@ -1,9 +1,8 @@
-"use strict";
 //
 // Map widget.
 // mapContainer should be a link to DOMElement
 //
-function Map( mapContainer )
+export default function Map( mapContainer )
 {
 	this.container = mapContainer;
 

@@ -1,3 +1,6 @@
+import Map from './map.js';
+export {initMap, CoordsInput, AddressInput, LocPicker};
+
 function initMap()
 {
 	var map = new Map( $( "#map" ).get(0) );

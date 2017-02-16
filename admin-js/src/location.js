@@ -1,5 +1,9 @@
-pageFunc( "location", function()
-{
+import {initMap, LocPicker} from './lib/lib.js';
+import './lib/autocomplete.js';
+import './lib/http.js';
+import './lib/mapdata.js';
+
+$(document).ready(function() {
 	var map = initMap();
 	var pointPicker = new LocPicker( 'a-' );
 	pointPicker.onChange( showLoc );
@@ -23,6 +27,4 @@ pageFunc( "location", function()
 		map.setMarker( 'loc', coords[0], coords[1] );
 		map.panTo( coords[0], coords[1] );
 	};
-
-	initLocationDispatch();
 });

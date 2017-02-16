@@ -1,6 +1,3 @@
-(function () {
-'use strict';
-
 $( '.ui-onload' ).css( 'opacity', '0.0' );
 
 $(document).ready( function()
@@ -44,7 +41,7 @@ $(document).ready( function()
 						$div.addClass( 'disabled' );
 						$div.find( 'input, textarea, button, select' ).prop( 'disabled', true );
 					}
-				};
+				}
 				fix();
 				$t.on( 'change', fix );
 			}
@@ -153,5 +150,3 @@ $(document).ready( function()
 
 	$( '.ui-onload' ).css( 'opacity', '1.0' );
 });
-
-}());
