@@ -2,7 +2,6 @@ package taxibot
 
 type Config struct {
 	ServerAddr string
-	WebPrefix  string
 	Login      string
 	Password   string
 
@@ -30,9 +29,6 @@ func MergeConfigs(opt *Config, defaults *Config) *Config {
 	}
 	if opt.CustomOrdersFreq == 0.0 {
 		opt.CustomOrdersFreq = defaults.CustomOrdersFreq
-	}
-	if opt.WebPrefix == "" {
-		opt.WebPrefix = defaults.WebPrefix
 	}
 	result := new(Config)
 	*result = *opt
