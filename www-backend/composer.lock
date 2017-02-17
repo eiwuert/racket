@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ded14bcbb9803ec893453847662d9bd5",
-    "content-hash": "fff22ae2cc200e9eca576529f85f730a",
+    "hash": "1c67a83da54d31ca13c6428df40a6b29",
+    "content-hash": "8185d9cb785c649c5c0e7c24c9c7da9a",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2011,6 +2011,51 @@
                 "templating"
             ],
             "time": "2017-01-11 19:36:15"
+        },
+        {
+            "name": "yandex/geo",
+            "version": "v1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yandex-php/php-yandex-geo.git",
+                "reference": "4b6e0279a4b0cb255116cdd34f9b77c4fd52b2e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yandex-php/php-yandex-geo/zipball/4b6e0279a4b0cb255116cdd34f9b77c4fd52b2e2",
+                "reference": "4b6e0279a4b0cb255116cdd34f9b77c4fd52b2e2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Yandex\\Geo": "source/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "The MIT License (MIT)"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Kuznetsov",
+                    "email": "kuznetsov2d@gmail.com",
+                    "homepage": "http://kuznetsov.io"
+                }
+            ],
+            "description": "PHP-library for interactions with geo-coding Yandex.Maps",
+            "keywords": [
+                "api",
+                "geo",
+                "geocode",
+                "geocoder",
+                "maps",
+                "yandex"
+            ],
+            "time": "2016-04-12 12:02:55"
         }
     ],
     "packages-dev": [
